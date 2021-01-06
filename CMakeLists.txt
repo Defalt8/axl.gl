@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.4 )
 
-project( axl.gl VERSION 0.1.0 DESCRIPTION "A simple and multiplatform C++ game library." LANGUAGES CXX )
+project( axl.gl VERSION 0.2.1 DESCRIPTION "A simple and multiplatform C++ game library." )
 
 if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
 	set( AXLGL_STANDALONE TRUE )
@@ -14,17 +14,21 @@ set( AXLGL_RUNTIME_DIR "${PROJECT_BINARY_DIR}/bin" CACHE PATH "Path to build rui
 set( AXLGL_ARCHIVE_DIR "${PROJECT_BINARY_DIR}/lib" CACHE PATH "Path to build ruintime objects like shared library." )
 set( AXLGL_BUILD_TESTS ${AXLGL_STANDALONE} CACHE BOOL "" )
 set( AXLGL_INSTALL_HEADERS ${AXLGL_STANDALONE} CACHE BOOL "" )
-set( AXLGL_INSTALL_LIBRARY ${AXLGL_STANDALONE} CACHE BOOL "" )
+set( AXLGL_INSTALL_ARCHIVES ${AXLGL_STANDALONE} CACHE BOOL "" )
+set( AXLGL_INSTALL_RUNTIMES ${AXLGL_STANDALONE} CACHE BOOL "" )
 set( BUILD_TESTS FALSE CACHE BOOL "" )
 set( BUILD_SHARED_LIBS OFF CACHE BOOL "" )
+#set( BUILD_SHARED_LIBS ON )
 
 if( BUILD_SHARED_LIBS )
 	set( AXLGL_TYPE SHARED )
 endif()
 
-include_directories( ${AXLGL_INCLUDE_DIR} )
-
-add_subdirectory( src )
+set( AXLMATH_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.math" CACHE PATH "Path to axl.math library source." )
+set( AXLMATH_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
+set( AXLMATH_RUNTIME_DIR "${AXLGL_RUNTIME_DIR}" )
+add_subdirectory( "${AXLMATH_SOURCE_DIR}" axl.math )
+add_subdirectory( src "axl.gl" )
 if( BUILD_TESTS AND AXLGL_BUILD_TESTS )
-	add_subdirectory( tests )
+	add_subdirectory( tests "axl.gl.tests" )
 endif()

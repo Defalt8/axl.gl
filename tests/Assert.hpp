@@ -15,7 +15,11 @@ void assertionFailed(bool exit_after, const char* e, const char* file, int line)
 {
 	fprintf(stderr, "* Fail - %s | %s:%d\n", e, file, line);
 	++NUM_FAILED_ASSERTIONS;
-	if(exit_after) exit(1);
+	if(exit_after)
+	{
+		printf("Exiting...\n");
+		exit(1);
+	}
 }
 
 void assertionSucceeded(const char* e)

@@ -1,7 +1,9 @@
 
-add_executable( axl.gl.lib "lib.cpp" )
+link_libraries( axl.gl gdi32.lib user32.lib )
 
-set_target_properties( axl.gl.lib
+add_executable( axl.gl.lib "lib.cpp")
+add_executable( axl.gl.display "Display.cpp")
+
+set_target_properties( axl.gl.lib axl.gl.display
 	PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${AXLGL_RUNTIME_DIR}"
 )
-target_link_libraries( axl.gl.lib PRIVATE axl.gl )
