@@ -5,6 +5,7 @@
 #include <cstring>
 #include <axl.gl/lib.hpp>
 #include <axl.gl/Display.hpp>
+#include <axl.math/float.hpp>
 #include "Assert.hpp"
 
 int main(int argc, char* argv[])
@@ -26,6 +27,7 @@ int main(int argc, char* argv[])
 			Display display(i);
 			Assertv(display.isOpen(), verbose);
 			if(!display.isOpen()) continue;
+			printf("Display: %s\n", display.name);
 			Assertv(display.size.x > 0 && display.size.y > 0, verbose);
 			Assertv((display.physical_size * display.ppmm).equals((float)display.size.x, (float)display.size.y, 0.0001f), verbose);
 			if(verbose)
@@ -36,9 +38,18 @@ int main(int argc, char* argv[])
 				printf(".. Display_physical_size: %.3fx%.3f\n", display.physical_size.x, display.physical_size.y);
 				printf(".. Display_ppmm: %.3f,%.3f\n", display.ppmm.x, display.ppmm.y);
 				printf(".. Display_ppi: %.3f,%.3f\n", display.ppi.x, display.ppi.y);
-				printf(".. recalulated size in millimeters: %.3f,%.3f\n", display.physical_size.x * display.ppmm.x, display.physical_size.y * display.ppmm.y);
+				printf(".. recalulated size in pixles: %.3f,%.3f\n", display.physical_size.x * display.ppmm.x, display.physical_size.y * display.ppmm.y);
 				printf(".. recalulated size in inches: %.3f,%.3f\n", display.size.x / display.ppi.x, display.size.y / display.ppi.y);
+				printf(".. Display_settings_orientation: %s\n", display.settings.orientation == Display::Settings::OR_PORTRAIT ? "Portrait" : "Landscape");
+				printf(".. Display_settings_bits_per_pixel: %d\n", display.settings.bits_per_pixel);
 				printf("..\n");
+				Display::Settings settings;
+				int index = 0;
+				puts("Available Resoulutions: ");
+				while(display.enumSettings(&settings, index++))
+				{
+					printf("%d-{ (%d,%d) %dbits %dHz\n", index, settings.width, settings.height, settings.bits_per_pixel, settings.frequency);
+				}
 			}
 		}
 	}

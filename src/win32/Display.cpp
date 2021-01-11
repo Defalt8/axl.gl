@@ -32,11 +32,18 @@ BOOL CALLBACK _AXLGL_InfoEnumProc(HMONITOR hmon, HDC hdc, LPRECT lprc, LPARAM lp
 			display_data->mil_size_y = GetDeviceCaps(hdc, VERTSIZE);
 			display_data->color_bits = GetDeviceCaps(hdc, BITSPIXEL);
 			display_data->refresh_rate = GetDeviceCaps(hdc, VREFRESH);
+			display_data->device_name[0] = '\0';
 			display_data->set = true;
 			display_enum_counter = 0;
 			_display_enum_index = -1;
 			_display_enum_count = 0;
 			ReleaseDC(desktop, hdc);
+			DISPLAY_DEVICEA dev;
+			dev.cb = sizeof(DISPLAY_DEVICEA);
+			if (FALSE != EnumDisplayDevicesA(NULL, 0, &dev, 0))
+			{
+				strncpy(display_data->device_name, dev.DeviceString, 128);
+			}
 			return FALSE;
 		}
 	}
@@ -44,6 +51,22 @@ BOOL CALLBACK _AXLGL_InfoEnumProc(HMONITOR hmon, HDC hdc, LPRECT lprc, LPARAM lp
 	ReleaseDC(desktop, hdc);
 	return TRUE;
 }
+
+Display::Settings::Settings(int bits_per_pixel, int width, int height, int frequency, Display::Settings::Rotation rotation) :
+	bits_per_pixel(bits_per_pixel), width(width), height(height), frequency(frequency), rotation(rotation), orientation(width >= height ? OR_LANDSCAPE : OR_PORTRAIT)
+{}
+
+Display::Settings& Display::Settings::operator=(const Display::Settings& settings)
+{
+	bits_per_pixel = settings.bits_per_pixel;
+	width = settings.width;
+	height = settings.height;
+	frequency = settings.frequency;
+	rotation = settings.rotation;
+	orientation = width >= height ? OR_LANDSCAPE : OR_PORTRAIT;
+	return *this;
+}
+
 Display::Display(int p_index) :
 	index(m_index),
 	position(m_position),
@@ -51,12 +74,16 @@ Display::Display(int p_index) :
 	physical_size(m_physical_size),
 	ppmm(m_ppmm),
 	ppi(m_ppi),
+	name(m_name),
+	settings(m_settings),
 	m_index(-1),
 	m_position(0,0),
 	m_size(0,0),
 	m_physical_size(0.0f,0.0f),
 	m_ppmm(0.0f,0.0f),
 	m_ppi(0.0f,0.0f),
+	m_name(""),
+	m_settings(),
 	m_reserved(new DisplayData())
 {
 	if(p_index >= 0 && p_index < Display::count())
@@ -89,9 +116,18 @@ bool Display::reopen(int p_index)
 		m_index  = p_index;
 		m_position.set(display_data->rect.left, display_data->rect.top);
 		m_size.set(display_data->rect.right, display_data->rect.bottom);
-		m_physical_size.set(display_data->mil_size_x, display_data->mil_size_y);
+		m_physical_size.set((float)display_data->mil_size_x, (float)display_data->mil_size_y);
 		m_ppmm.set((float)display_data->rect.right / display_data->mil_size_x, (float)display_data->rect.bottom / display_data->mil_size_y);
 		m_ppi = m_ppmm * 25.4f;
+		strncpy(m_name, display_data->device_name, 128);
+		Settings current_settings;
+		if(enumSettings(&current_settings, Settings::DI_CURRENT))
+			setSettings(current_settings, false);
+		else
+		{
+			for(int i = 0; enumSettings(&current_settings, i); ++i);
+			setSettings(current_settings, false);
+		}
 	}
 	return true;
 }
@@ -108,6 +144,111 @@ bool Display::close()
 bool Display::isConfigurable() const
 {
 	return true;
+}
+axl::math::Vec2i Display::getDefaultSize() const
+{
+	return axl::math::Vec2i(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+}
+bool Display::enumSettings(Display::Settings* display_settings, int i)
+{
+	if(!display_settings || i < -1) return false;
+	DEVMODEA devmode, prev_devmode;
+	ZeroMemory(&devmode, sizeof(DEVMODEA));
+	devmode.dmSize = sizeof(DEVMODEA);
+	prev_devmode = devmode;
+	if(i == Settings::DI_CURRENT || i == Settings::DI_DEFAULT)
+	{
+		if(FALSE != EnumDisplaySettingsA(NULL, (i == Settings::DI_DEFAULT ? ENUM_REGISTRY_SETTINGS : ENUM_CURRENT_SETTINGS), &devmode))
+		{
+			display_settings->bits_per_pixel = (int)devmode.dmBitsPerPel;
+			display_settings->width = (int)devmode.dmPelsWidth;
+			display_settings->height = (int)devmode.dmPelsHeight;
+			display_settings->frequency = (int)devmode.dmDisplayFrequency;
+			switch(devmode.dmDisplayOrientation)
+			{
+				default:
+				case DMDO_DEFAULT: display_settings->rotation = Settings::ROT_DEFAULT; break;
+				case DMDO_90: display_settings->rotation = Settings::ROT_CCW_90; break;
+				case DMDO_180: display_settings->rotation = Settings::ROT_CCW_180; break;
+				case DMDO_270: display_settings->rotation = Settings::ROT_CCW_270; break;
+			}
+			display_settings->orientation = display_settings->width >= display_settings->height ? Settings::OR_LANDSCAPE : Settings::OR_PORTRAIT;
+			return true;
+		}
+		return false;
+	}
+	DWORD index = 0, true_index = 0;
+	while(FALSE != EnumDisplaySettingsA(NULL, index, &devmode))
+	{
+		if(	devmode.dmBitsPerPel != prev_devmode.dmBitsPerPel ||
+			devmode.dmPelsWidth != prev_devmode.dmPelsWidth ||
+			devmode.dmPelsHeight != prev_devmode.dmPelsHeight ||
+			devmode.dmDisplayFrequency != prev_devmode.dmDisplayFrequency ||
+			devmode.dmDisplayOrientation != prev_devmode.dmDisplayOrientation )
+		{
+			if(i == true_index)
+			{
+				display_settings->bits_per_pixel = (int)devmode.dmBitsPerPel;
+				display_settings->width = (int)devmode.dmPelsWidth;
+				display_settings->height = (int)devmode.dmPelsHeight;
+				display_settings->frequency = (int)devmode.dmDisplayFrequency;
+				switch(devmode.dmDisplayOrientation)
+				{
+					default:
+					case DMDO_DEFAULT: display_settings->rotation = Settings::ROT_DEFAULT; break;
+					case DMDO_90: display_settings->rotation = Settings::ROT_CCW_90; break;
+					case DMDO_180: display_settings->rotation = Settings::ROT_CCW_180; break;
+					case DMDO_270: display_settings->rotation = Settings::ROT_CCW_270; break;
+				}
+				display_settings->orientation = display_settings->width >= display_settings->height ? Settings::OR_LANDSCAPE : Settings::OR_PORTRAIT;
+				return true;
+			}
+			++true_index;
+		}
+		++index;
+		prev_devmode = devmode;
+	}
+	return false;
+}
+bool Display::setSettings(const Display::Settings& display_settings, bool test)
+{
+	DEVMODEA devmode;
+	ZeroMemory(&devmode, sizeof(DEVMODEA));
+	devmode.dmSize = sizeof(DEVMODEW);
+	devmode.dmBitsPerPel = (DWORD)display_settings.bits_per_pixel;
+	devmode.dmPelsWidth = (DWORD)display_settings.width;
+	devmode.dmPelsHeight = (DWORD)display_settings.height;
+	devmode.dmDisplayFrequency = (DWORD)display_settings.frequency;
+	switch (display_settings.rotation)
+	{
+		default:
+		case Settings::ROT_DEFAULT: devmode.dmDisplayOrientation = DMDO_DEFAULT; break;
+		case Settings::ROT_CCW_90: devmode.dmDisplayOrientation = DMDO_90; break;
+		case Settings::ROT_CCW_180: devmode.dmDisplayOrientation = DMDO_180; break;
+		case Settings::ROT_CCW_270: devmode.dmDisplayOrientation = DMDO_270; break;
+	}
+	devmode.dmFields = (display_settings.bits_per_pixel >= 0 ? DM_BITSPERPEL : 0) |
+		(display_settings.width >= 0 ? DM_PELSWIDTH : 0) |
+		(display_settings.height >= 0 ? DM_PELSHEIGHT : 0) |
+		(display_settings.frequency >= 0 ? DM_DISPLAYFREQUENCY : 0) |
+		(display_settings.rotation >= 0 ? DM_DISPLAYORIENTATION : 0);
+	if(DISP_CHANGE_SUCCESSFUL == ChangeDisplaySettingsA(&devmode, (test ? CDS_TEST : 0)))
+	{
+		this->m_settings = display_settings;
+		return true;
+	}
+	return false;
+}
+bool Display::restoreSettings()
+{
+	Settings Default;
+	if(enumSettings(&Default, Settings::DI_DEFAULT) && setSettings(Default))
+		return true;
+	// last resort display size restore
+	axl::math::Vec2i display_size = getDefaultSize();
+	Default.width = display_size.x;
+	Default.height = display_size.y;
+	return setSettings(Default, false);
 }
 
 int Display::count()
