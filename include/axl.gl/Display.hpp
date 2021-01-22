@@ -29,16 +29,16 @@ public:
 	bool reopen(int index);
 	bool close();
 	bool isConfigurable() const;
-	axl::math::Vec2i getDefaultSize() const;
+public:
+	static axl::math::Vec2i getDefaultSize();
 	// Enumerate and return the <i>th supported display setting.
 	// Pass i=DI_DEFAULT for the default settings and i=DI_CURRENT for the current settings.
-	bool enumSettings(Settings* display_setting, int i = 0);
+	static bool enumSettings(Settings* display_setting, int i = 0);
 	// Sets the display settings.
 	// Set Display::Setting member values to -1 to ignore them.
-	bool setSettings(const Settings& display_setting, bool test = false);
+	static bool setSettings(const Settings& display_setting, bool test = false);
 	// Restores the default display settings
-	bool restoreSettings();
-public:
+	static bool restoreSettings();
 	static int count();
 public:
 	const int& index;
@@ -48,7 +48,6 @@ public:
 	const axl::math::Vec2f& ppmm; // pixels per millimeter
 	const axl::math::Vec2f& ppi; // pixels per inch
 	const char*const name;
-	const Settings& settings;
 private:
 	void* m_reserved;
 	int m_index;
@@ -58,7 +57,6 @@ private:
 	axl::math::Vec2f m_physical_size;
 	axl::math::Vec2f m_ppmm;
 	axl::math::Vec2f m_ppi;
-	Settings m_settings;
 };
 
 } // axl::gl

@@ -40,8 +40,6 @@ int main(int argc, char* argv[])
 				printf(".. Display_ppi: %.3f,%.3f\n", display.ppi.x, display.ppi.y);
 				printf(".. recalulated size in pixles: %.3f,%.3f\n", display.physical_size.x * display.ppmm.x, display.physical_size.y * display.ppmm.y);
 				printf(".. recalulated size in inches: %.3f,%.3f\n", display.size.x / display.ppi.x, display.size.y / display.ppi.y);
-				printf(".. Display_settings_orientation: %s\n", display.settings.orientation == Display::Settings::OR_PORTRAIT ? "Portrait" : "Landscape");
-				printf(".. Display_settings_bits_per_pixel: %d\n", display.settings.bits_per_pixel);
 				printf("..\n");
 				Display::Settings settings;
 				int index = 0;

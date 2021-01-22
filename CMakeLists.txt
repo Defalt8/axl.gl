@@ -28,7 +28,19 @@ set( AXLMATH_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.math" CACHE PATH "Path to ax
 set( AXLMATH_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
 set( AXLMATH_RUNTIME_DIR "${AXLGL_RUNTIME_DIR}" )
 add_subdirectory( "${AXLMATH_SOURCE_DIR}" axl.math )
+
+set( AXLUTIL_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.util" CACHE PATH "Path to axl.util library source." )
+set( AXLUTIL_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
+set( AXLUTIL_RUNTIME_DIR "${AXLGL_RUNTIME_DIR}" )
+add_subdirectory( "${AXLUTIL_SOURCE_DIR}" axl.util )
+
+set( AXLGLFL_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.glfl" CACHE PATH "Path to axl.glfl library source." )
+set( AXLGLFL_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
+set( AXLGLFL_RUNTIME_DIR "${AXLGL_RUNTIME_DIR}" )
+add_subdirectory( "${AXLGLFL_SOURCE_DIR}" axl.glfl )
+
 add_subdirectory( src "axl.gl" )
-if( BUILD_TESTS AND AXLGL_BUILD_TESTS )
+
+if( AXLGL_BUILD_TESTS )
 	add_subdirectory( tests "axl.gl.tests" )
 endif()

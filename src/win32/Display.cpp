@@ -75,7 +75,6 @@ Display::Display(int p_index) :
 	ppmm(m_ppmm),
 	ppi(m_ppi),
 	name(m_name),
-	settings(m_settings),
 	m_index(-1),
 	m_position(0,0),
 	m_size(0,0),
@@ -83,7 +82,6 @@ Display::Display(int p_index) :
 	m_ppmm(0.0f,0.0f),
 	m_ppi(0.0f,0.0f),
 	m_name(""),
-	m_settings(),
 	m_reserved(new DisplayData())
 {
 	if(p_index >= 0 && p_index < Display::count())
@@ -120,14 +118,6 @@ bool Display::reopen(int p_index)
 		m_ppmm.set((float)display_data->rect.right / display_data->mil_size_x, (float)display_data->rect.bottom / display_data->mil_size_y);
 		m_ppi = m_ppmm * 25.4f;
 		strncpy(m_name, display_data->device_name, 128);
-		Settings current_settings;
-		if(enumSettings(&current_settings, Settings::DI_CURRENT))
-			setSettings(current_settings, false);
-		else
-		{
-			for(int i = 0; enumSettings(&current_settings, i); ++i);
-			setSettings(current_settings, false);
-		}
 	}
 	return true;
 }
@@ -145,7 +135,7 @@ bool Display::isConfigurable() const
 {
 	return true;
 }
-axl::math::Vec2i Display::getDefaultSize() const
+axl::math::Vec2i Display::getDefaultSize()
 {
 	return axl::math::Vec2i(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
 }
@@ -232,12 +222,7 @@ bool Display::setSettings(const Display::Settings& display_settings, bool test)
 		(display_settings.height >= 0 ? DM_PELSHEIGHT : 0) |
 		(display_settings.frequency >= 0 ? DM_DISPLAYFREQUENCY : 0) |
 		(display_settings.rotation >= 0 ? DM_DISPLAYORIENTATION : 0);
-	if(DISP_CHANGE_SUCCESSFUL == ChangeDisplaySettingsA(&devmode, (test ? CDS_TEST : 0)))
-	{
-		this->m_settings = display_settings;
-		return true;
-	}
-	return false;
+	return DISP_CHANGE_SUCCESSFUL == ChangeDisplaySettingsA(&devmode, (test ? CDS_TEST : 0));
 }
 bool Display::restoreSettings()
 {

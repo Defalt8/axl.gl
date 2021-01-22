@@ -16,12 +16,24 @@ endif()
 add_library( axl.gl ${AXLGL_TYPE}
 	"lib.cpp"
 	"Display.cpp"
+	"Application.cpp"
+	"View.cpp"
+	"Context.cpp"
+	"input/Mouse.cpp"
+	"input/Keyboard.cpp"
+	"input/Touch.cpp"
 
 	"${AXLGL_INCLUDE_DIR}/axl.gl/lib.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/Display.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/Application.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/View.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/Context.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/input/Mouse.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/input/Keyboard.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/input/Touch.hpp"
 )
 target_include_directories( axl.gl PUBLIC "${AXLGL_INCLUDE_DIR}" )
-target_link_libraries( axl.gl PUBLIC axl.math )
+target_link_libraries( axl.gl PUBLIC axl.math axl.util axl.glfl )
 set_target_properties( axl.gl PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${AXLGL_RUNTIME_DIR}"
 	ARCHIVE_OUTPUT_DIRECTORY "${AXLGL_ARCHIVE_DIR}"
@@ -64,6 +76,12 @@ if( AXLGL_INSTALL_HEADERS )
 	INSTALL( FILES
 		"${AXLGL_INCLUDE_DIR}/axl.gl/lib.hpp"
 		"${AXLGL_INCLUDE_DIR}/axl.gl/Display.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/Application.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/View.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/Context.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/input/Mouse.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/input/Keyboard.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/input/Touch.hpp"
 		DESTINATION "include/axl.gl"
 	)
 endif()
