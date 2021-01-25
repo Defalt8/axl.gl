@@ -5,8 +5,8 @@ A simple and multiplatform C++ game library.
 
 ## Version and supported platforms
 
-- **Latest version**: 0.3.2 alpha
-- **Supported platforms**: Windows, Linux
+- **Latest version**: 0.6.9 alpha
+- **Supported platforms**: Windows
 
 ## Requirements and Dependencies
 
@@ -78,3 +78,11 @@ A simple and multiplatform C++ game library.
 
 - [axl.gl/platform.h]("include/axl.gl/platform.h") - Defines PLATFORM and ABI macros based on the building platform.
 - [axl.gl/lib.hpp]("include/axl.gl/lib.hpp") - Library base header. Declares VERSION and BUILD.
+- [include/axl.gl/Display.hpp]("include/axl.gl/Display.hpp") - Display class.
+- [include/axl.gl/Application.hpp]("include/axl.gl/Application.hpp") - Application functions.
+- [include/axl.gl/View.hpp]("include/axl.gl/View.hpp") - View class.
+- [include/axl.gl/Context.hpp]("include/axl.gl/Context.hpp") - OpenGL Context class.
+- [include/axl.gl/input/KeyCodes.hpp]("include/axl.gl/input/KeyCodes.hpp") - Key code enumerations and functions.
+- [include/axl.gl/input/Keyboard.hpp]("include/axl.gl/input/Keyboard.hpp") - static Keyboard class methods and event listener.
+- [include/axl.gl/input/Mouse.hpp]("include/axl.gl/input/Mouse.hpp") - static Mouse class methods and event listener.
+- [include/axl.gl/input/Touch.hpp]("include/axl.gl/input/Touch.hpp") - static Touch class methods and event listener.

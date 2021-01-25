@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.4 )
 
-project( axl.gl VERSION 0.3.2 DESCRIPTION "A simple and multiplatform C++ game library." )
+project( axl.gl VERSION 0.6.9 DESCRIPTION "A simple and multiplatform C++ game library." )
 
 if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
 	set( AXLGL_STANDALONE TRUE )
