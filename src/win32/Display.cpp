@@ -1,5 +1,6 @@
 #include "common.hpp"
 #include <axl.gl/Display.hpp>
+#include <axl.gl/View.hpp>
 #include "DisplayData.hpp"
 
 namespace axl {
@@ -75,6 +76,7 @@ Display::Display(int p_index) :
 	ppmm(m_ppmm),
 	ppi(m_ppi),
 	name(m_name),
+	views(m_views),
 	m_index(-1),
 	m_position(0,0),
 	m_size(0,0),
@@ -82,6 +84,7 @@ Display::Display(int p_index) :
 	m_ppmm(0.0f,0.0f),
 	m_ppi(0.0f,0.0f),
 	m_name(""),
+	m_views(),
 	m_reserved(new DisplayData())
 {
 	if(p_index >= 0 && p_index < Display::count())
@@ -125,6 +128,11 @@ bool Display::close()
 {
 	if(m_reserved)
 	{
+		for(axl::util::ds::UniList<axl::gl::View*>::Iterator it = this->m_views.first(); it != this->m_views.end(); ++it)
+		{
+			if(*it) (*it)->destroy();
+		}
+		this->m_views.removeAll();
 		m_index = -1;
 		((DisplayData*)this->m_reserved)->set = true;
 		return true;
@@ -239,6 +247,22 @@ bool Display::restoreSettings()
 int Display::count()
 {
 	return GetSystemMetrics(SM_CMONITORS);
+}
+
+bool Display::addView(View* view)
+{
+	if(!view || !this->isOpen()) return false;
+	for(axl::util::ds::UniList<axl::gl::View*>::Iterator it = this->m_views.first(); it != this->m_views.end(); ++it)
+	{
+		if(*it && *it == view) return true;
+	}
+	return this->m_views.insertLast(view);
+}
+
+bool Display::removeView(View* view)
+{
+	if(!this->isOpen()) return false;
+	return this->m_views.remove(view);
 }
 
 } // axl::gl

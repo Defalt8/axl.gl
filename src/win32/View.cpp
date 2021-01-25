@@ -7,6 +7,7 @@
 #include <axl.gl/Display.hpp>
 #include <axl.gl/Application.hpp>
 #include <axl.gl/View.hpp>
+#include <axl.gl/Context.hpp>
 #include <axl.gl/input/Mouse.hpp>
 #include <axl.gl/input/Keyboard.hpp>
 #include <axl.gl/input/Touch.hpp>
@@ -36,6 +37,7 @@ static HBRUSH _hbrush_black = NULL;
 LRESULT CALLBACK MWindowProc(HWND, UINT, WPARAM, LPARAM);
 
 View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, const axl::math::Vec2i& size_, const Cursor& cursor_) :
+	display(&m_display),
 	position(m_position),
 	size(m_size),
 	title(m_title),
@@ -44,7 +46,9 @@ View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, 
 	visiblity(m_visiblity),
 	is_paused(m_is_paused),
 	pointers(m_pointers),
+	contexts(m_contexts),
 	reserved(m_reserved),
+	m_display(),
 	m_position(position_),
 	m_size(size_),
 	m_title(title_),
@@ -52,6 +56,7 @@ View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, 
 	m_cursor(cursor_),
 	m_visiblity(View::VS_HIDDEN),
 	m_is_paused(false),
+	m_contexts(),
 	m_reserved((void*)calloc(1, sizeof(ViewData)))
 {
 	for(int i=0; i<MAX_POINTERS; ++i) m_pointers[i] = false;
@@ -77,7 +82,7 @@ bool View::isValid() const
 	return (m_reserved && ((ViewData*)m_reserved)->hwnd && ((ViewData*)m_reserved)->hdc);
 }
 
-bool View::create(bool recreate, const Config* configs_, int configs_count_, Flags view_flags)
+bool View::create(Display& display, bool recreate, const Config* configs_, int configs_count_, Flags view_flags)
 {
 	if(!_cursors_loaded) // load cursors
 	{
@@ -95,6 +100,8 @@ bool View::create(bool recreate, const Config* configs_, int configs_count_, Fla
 	if(!m_reserved) m_reserved = (void*)calloc(1, sizeof(ViewData));
 	if(m_reserved)
 	{
+		m_display = &display;
+		m_display->addView(this);
 		((ViewData*)m_reserved)->is_recreating = recreate;
 		if(!recreate)
 		{
@@ -279,6 +286,12 @@ void View::destroy()
 		((ViewData*)m_reserved)->is_recreating = false;
 		ReleaseDC(((ViewData*)m_reserved)->hwnd, ((ViewData*)m_reserved)->hdc);
 		DestroyWindow(((ViewData*)m_reserved)->hwnd);
+		this->m_display->removeView(this);
+		for(axl::util::ds::UniList<axl::gl::Context*>::Iterator it = this->m_contexts.first(); it !=this->m_contexts.end(); ++it)
+		{
+			if(*it) (*it)->destroy();
+		}
+		this->m_contexts.removeAll();
 	}
 }
 
@@ -517,6 +530,23 @@ bool View::swap() const
 {
 	if(!m_reserved) return false;
 	return SwapBuffers(((ViewData*)m_reserved)->hdc) != FALSE;
+}
+///////////
+// protected
+
+bool View::addContext(Context* context)
+{
+	if(!context || !this->isValid()) return false;
+	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator it = this->m_contexts.first(); it != this->m_contexts.end(); ++it)
+	{
+		if(*it && *it == context) return true;
+	}
+	return this->m_contexts.insertLast(context);
+}
+bool View::removeContext(Context* context)
+{
+	if(!context || !this->isValid()) return false;
+	return this->m_contexts.remove(context);
 }
 
 ///////////

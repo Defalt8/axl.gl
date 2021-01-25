@@ -49,7 +49,7 @@ bool Context::isValid() const
 	return (((ContextData*)m_reserved)->hdc && ((ContextData*)m_reserved)->hglrc);
 }
 
-bool Context::create(bool recreate, const View* view_, const Context::Config* configs_, int num_configs_)
+bool Context::create(bool recreate, View* view_, const Context::Config* configs_, int num_configs_)
 {
 	if(!m_reserved) m_reserved = new ContextData();
 	if(!view_->isValid() || !m_reserved) return false;
@@ -57,6 +57,7 @@ bool Context::create(bool recreate, const View* view_, const Context::Config* co
 		return false;
 	if(recreate)
 		this->destroy();
+	this->m_view = view_;
 	((ViewData*)this->m_reserved)->hwnd = ((ViewData*)(view_->m_reserved))->hwnd;
 	HDC hdc = ((ContextData*)m_reserved)->hdc = GetDC(((ViewData*)(view_->m_reserved))->hwnd);
 	HGLRC hglrc = NULL;
@@ -143,7 +144,12 @@ bool Context::create(bool recreate, const View* view_, const Context::Config* co
 			}
 		}
 	}
-	return ((ContextData*)m_reserved)->hglrc != NULL;
+	if(((ContextData*)m_reserved)->hglrc != NULL)
+	{
+		if(this->m_view) this->m_view->addContext(this);
+		return true;
+	}
+	return false;
 }
 
 void Context::destroy()
@@ -161,6 +167,7 @@ void Context::destroy()
 				((ContextData*)m_reserved)->hdc = NULL;
 			}
 		}
+		if(this->m_view) this->m_view->removeContext(this);
 	}
 }
 

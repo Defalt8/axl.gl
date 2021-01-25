@@ -9,6 +9,11 @@
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
 #include <axl.glfl/glCoreARB.hpp>
+#include <axl.util/uc/Clock.hpp>
+#include <axl.util/uc/Time.hpp>
+#include <axl.math/constants.hpp>
+#include <axl.math/basic.hpp>
+#include <axl.math/util.hpp>
 #include "Assert.hpp"
 
 class GameView : public axl::gl::View
@@ -33,11 +38,26 @@ public:
 		case KeyCode::KEY_ESCAPE:
 			axl::gl::Application::quit(0);
 			break;
+		case KeyCode::KEY_C:
+			if(this->display && *this->display) (*this->display)->close();
+			break;
 		default:
 			axl::gl::View::onKey(key, down);
 		}
 	}
 };
+
+
+/*****
+ * 
+ *****/
+
+axl::gl::Display display;
+
+void onQuit(int quit_code)
+{
+	display.close();
+}
 
 void onExit(int exit_code)
 {
@@ -54,6 +74,7 @@ int main(int argc, char* argv[])
 	puts("----------------------------------------");
 	{
 		Application::onExit = onExit;
+		Application::onQuit = onQuit;
 		Assertve(Application::init(), verbose);
 
 		axl::math::Vec2i size(640, 480);
@@ -62,12 +83,11 @@ int main(int argc, char* argv[])
 		// if(Display::setSettings(display_settings, true))
 		// 	Display::setSettings(display_settings);
 
-		Display display;
 		Assertve(display.isOpen(), verbose);
 
 		axl::math::Vec2i position = (display.size - size) / 2;
 		GameView view(L"axl.gl.View", position, size);
-		Assertv(view.create(), verbose);
+		Assertv(view.create(display), verbose);
 		Assertv(view.isValid(), verbose);
 		GameView::Config view_configs[] = {
 			GameView::Config(1, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 16, true, false),
@@ -80,9 +100,9 @@ int main(int argc, char* argv[])
 			GameView::Config(8, GameView::Config::PT_RGBA, 32,8,8,8,8, 0,0, 0, false, false),
 			GameView::Config(9, GameView::Config::PT_RGB, 24,8,8,8,0, 0,0, 0, false, false),
 		};
-		Assertv(view.create(true, view_configs, sizeof(view_configs)/sizeof(GameView::Config), GameView::VF_RESIZABLE), verbose);
+		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(GameView::Config), GameView::VF_RESIZABLE), verbose);
 		Assertv(view.isValid(), verbose);
-		printf(".. VIew.Config %d selected.\n", view.config.id);
+		printf(".. View.Config %d selected.\n", view.config.id);
 		if(view.isValid())
 		{
 			Context::Config context_configs[] = {
@@ -91,23 +111,30 @@ int main(int argc, char* argv[])
 				Context::Config(3, 1, 5, Context::Config::GLP_COMPATIBLITY),	
 			};
 			Context context;
-			Assertv(context.create(false, &view, context_configs, 0*sizeof(context_configs)/sizeof(Context::Config)), verbose);
+			Assertv(context.create(false, &view, context_configs, sizeof(context_configs)/sizeof(Context::Config)), verbose);
 			printf(".. Context.Config %d selected. %d.%d\n", context.config.id, context.config.major_version, context.config.minor_version);
 			Assertv(context.makeCurrent(), verbose);
 			Assertv(context.isCurrent(), verbose);
 			Assertve(view.show(GameView::SM_SHOW), verbose);
-			if(context.makeCurrent())
+			axl::util::uc::Time time;
+			float R = 0.0f, G = 0.0f, B = 0.5f;
+			while(!Application::IS_QUITTING)
 			{
-				using namespace axl::glfl::core::GL;
-				glClearColor(0.1f, 0.3f, 0.9f, 1.0f);
-				glClear(GL_COLOR_BUFFER_BIT);
-				Assertv(view.swap(), verbose);
+				Application::pollEvents(display);
+				// update
+				R = axl::math::Util::map(axl::math::sin(time.deltaTime() * axl::math::Constants::F_PI), -1.0f, 1.0f, 0.0f, 1.0f);
+				G = axl::math::Util::map(axl::math::sin(time.deltaTime() * axl::math::Constants::F_PI * 0.31f), -1.0f, 1.0f, 0.0f, 0.5f);
+				B = axl::math::Util::map(axl::math::sin(time.deltaTime() * axl::math::Constants::F_PI * 1.31f), -1.0f, 1.0f, 0.5f, 1.0f);
+				// render
+				if(context.makeCurrent())
+				{
+					using namespace axl::glfl::core::GL;
+					glClearColor(R, G, B, 1.0f);
+					glClear(GL_COLOR_BUFFER_BIT);
+					Assertv(view.swap(), verbose);
+				}
 			}
-			// while(!Application::IS_QUITTING)
-			// {
-			// 	Application::pollEvents(display);
-			// }
-			Application::loopEvents(display);
+			// Application::loopEvents(display);
 		}
 	}
 	if (axl::Assert::NUM_FAILED_ASSERTIONS) puts("----------------------------------------");

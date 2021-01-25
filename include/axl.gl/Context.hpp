@@ -39,18 +39,18 @@ class AXLGLCXXAPI Context
 		virtual ~Context();
 		virtual bool isCurrent() const;
 		virtual bool isValid() const;
-		virtual bool create(bool recreate, const View* view, const Context::Config* configs, int num_configs);
+		virtual bool create(bool recreate, View* view, const Context::Config* configs, int num_configs);
 		virtual void destroy();
 		virtual bool makeCurrent() const;
 		virtual bool clearCurrent() const;
 		bool getVSync() const;
 		bool setVSync(bool v_sync) const;
 	public:
-		const View*const& view;
+		View*const& view;
 		const Context::Config& config;
 		const void*const& reserved;
 	private:
-		const View* m_view;
+		View* m_view;
 		Context::Config m_config;
 		void *m_reserved;
 	private:

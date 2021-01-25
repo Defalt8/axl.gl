@@ -65,7 +65,8 @@ class AXLGLCXXAPI View
 		View(const axl::util::WString& title, const axl::math::Vec2i& position, const axl::math::Vec2i& size, const Cursor& cursor = View::DefaultCursor);
 		virtual ~View();
 		bool isValid() const;
-		virtual bool create(bool recreate = false, const Config* configs = (const Config*)0, int configs_count = 0, Flags flags = VF_FIXED);
+		//virtual bool create(bool recreate = false, const Config* configs = (const Config*)0, int configs_count = 0, Flags flags = VF_FIXED);
+		virtual bool create(Display& display, bool recreate = false, const Config* configs = (const Config*)0, int configs_count = 0, Flags flags = VF_FIXED);
 		virtual void destroy();
 		const void* getReserved() const;
 		static void cleanup();
@@ -81,6 +82,10 @@ class AXLGLCXXAPI View
 		virtual bool show(ShowMode show_mode = SM_SHOW);
 		virtual bool setCursorPosition(const axl::math::Vec2i& cursor_position);
 		virtual bool swap() const;
+	protected:
+		bool addContext(Context* view);
+		bool removeContext(Context* view);
+		friend class AXLGLCXXAPI axl::gl::Context;
 	public: // Event callback methods
 		virtual bool onCreate(bool recreating = false);
 		virtual void onDestroy(bool recreating = false);
@@ -94,6 +99,7 @@ class AXLGLCXXAPI View
 		virtual void onPointerMove(int index, int x, int y);
 		virtual void onScroll(bool is_vertical, int delta, int x, int y);
 	public:
+		Display**const display;
 		const axl::math::Vec2i& position;
 		const axl::math::Vec2i& size;
 		const axl::util::WString& title;
@@ -102,8 +108,10 @@ class AXLGLCXXAPI View
 		const VisiblityState& visiblity;
 		const bool& is_paused;
 		const bool*const pointers;
+		const axl::util::ds::UniList<axl::gl::Context*>& contexts;
 		void *const& reserved;
 	private:
+		Display* m_display;
 		axl::math::Vec2i m_position;
 		axl::math::Vec2i m_size;
 		axl::util::WString m_title;
@@ -112,13 +120,13 @@ class AXLGLCXXAPI View
 		VisiblityState m_visiblity;
 		bool m_is_paused;
 		bool m_pointers[MAX_POINTERS];
+		axl::util::ds::UniList<axl::gl::Context*> m_contexts;
 		void *m_reserved;
 	public:
 		static View::Cursor DefaultCursor;
 	private:
 		View(const View& view);
 		View& operator=(const View& view);
-		friend class AXLGLCXXAPI axl::gl::Context;
 };
 
 } // axl::gl
