@@ -8,13 +8,16 @@
 #include <axl.gl/Application.hpp>
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
+#include <axl.gl/gfx/Texture2D.hpp>
 #include <axl.glfl/glCoreARB.hpp>
 #include <axl.util/uc/Clock.hpp>
 #include <axl.util/uc/Time.hpp>
 #include <axl.math/constants.hpp>
 #include <axl.math/basic.hpp>
 #include <axl.math/util.hpp>
+#include <gl/GL.h>
 #include "Assert.hpp"
+#include "GLC.h"
 
 class GameView : public axl::gl::View
 {
@@ -106,9 +109,9 @@ int main(int argc, char* argv[])
 		if(view.isValid())
 		{
 			Context::Config context_configs[] = {
-				Context::Config(1, 3, 3, Context::Config::GLP_CORE),	
-				Context::Config(2, 2, 2, Context::Config::GLP_COMPATIBLITY),	
 				Context::Config(3, 1, 5, Context::Config::GLP_COMPATIBLITY),	
+				Context::Config(2, 2, 1, Context::Config::GLP_COMPATIBLITY),	
+				Context::Config(1, 3, 3, Context::Config::GLP_CORE),	
 			};
 			Context context;
 			Assertv(context.create(false, &view, context_configs, sizeof(context_configs)/sizeof(Context::Config)), verbose);
@@ -116,6 +119,41 @@ int main(int argc, char* argv[])
 			Assertv(context.makeCurrent(), verbose);
 			Assertv(context.isCurrent(), verbose);
 			Assertve(view.show(GameView::SM_SHOW), verbose);
+			///
+			Assertv(context.makeCurrent(), verbose);
+			if(context.isCurrent())
+			{
+				// using namespace axl::glfl;
+				// using namespace axl::glfl::core;
+				axl::gl::gfx::Texture2D texture;
+				Assertv(!texture.create(0, GL_LUMINANCE8, axl::math::Vec2i(16, 16)), verbose);
+				Assertv(texture.create(&context, GL_LUMINANCE8, axl::math::Vec2i(5, 5), axl::gl::gfx::TextureParams(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT)), verbose);
+				GLubyte image[25] = {
+					 0,0,0,0,0,
+					0,200,250,200,0,
+					0,250,0,250,0,
+					0,200,250,200,0,
+					 0,0,0,0,0
+				};
+				Assertv(texture.setImage(0, axl::math::Vec2i(0,0), axl::math::Vec2i(5,5), GL_RED, GL_UNSIGNED_BYTE, image, 1), verbose);
+				glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT);
+				glEnable(GL_TEXTURE_2D);
+				Assertv(texture.bind(), verbose);
+				glBegin(GL_QUADS);
+				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+					float min = -1.0f, max = 1.0f;
+					glTexCoord2f( min, min); glVertex2f(-1.0f, -1.0f);
+					glTexCoord2f( max, min); glVertex2f( 1.0f, -1.0f);
+					glTexCoord2f( max, max); glVertex2f( 1.0f,  1.0f);
+					glTexCoord2f( min, max); glVertex2f(-1.0f,  1.0f);
+				glEnd();
+				glDisable(GL_TEXTURE_2D);
+				Assertv(texture.unbind(), verbose);
+				Assertv(texture.destroy(), verbose);
+				Assertv(view.swap(), verbose);
+			}
+			///
 			axl::util::uc::Time time;
 			float R = 0.0f, G = 0.0f, B = 0.5f;
 			while(!Application::IS_QUITTING)
@@ -126,13 +164,13 @@ int main(int argc, char* argv[])
 				G = axl::math::Util::map(axl::math::sin(time.deltaTime() * axl::math::Constants::F_PI * 0.31f), -1.0f, 1.0f, 0.0f, 0.5f);
 				B = axl::math::Util::map(axl::math::sin(time.deltaTime() * axl::math::Constants::F_PI * 1.31f), -1.0f, 1.0f, 0.5f, 1.0f);
 				// render
-				if(context.makeCurrent())
-				{
-					using namespace axl::glfl::core::GL;
-					glClearColor(R, G, B, 1.0f);
-					glClear(GL_COLOR_BUFFER_BIT);
-					Assertv(view.swap(), verbose);
-				}
+				// if(context.makeCurrent())
+				// {
+				// 	using namespace axl::glfl::core;
+				// 	GL::glClearColor(R, G, B, 1.0f);
+				// 	GL::glClear(GL_COLOR_BUFFER_BIT);
+				// 	Assertv(view.swap(), verbose);
+				// }
 			}
 			// Application::loopEvents(display);
 		}

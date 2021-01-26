@@ -22,6 +22,9 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"input/Mouse.cpp"
 	"input/Keyboard.cpp"
 	"input/Touch.cpp"
+	"gfx/Camera.cpp"
+	"gfx/RenderTarget.cpp"
+	"gfx/Texture2D.cpp"
 
 	"${AXLGL_INCLUDE_DIR}/axl.gl/lib.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/Display.hpp"
@@ -31,6 +34,9 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"${AXLGL_INCLUDE_DIR}/axl.gl/input/Mouse.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/input/Keyboard.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/input/Touch.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/Camera.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/RenderTarget.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/Texture2D.hpp"
 )
 target_include_directories( axl.gl PUBLIC "${AXLGL_INCLUDE_DIR}" )
 target_link_libraries( axl.gl PUBLIC axl.math axl.util axl.glfl )
@@ -82,6 +88,9 @@ if( AXLGL_INSTALL_HEADERS )
 		"${AXLGL_INCLUDE_DIR}/axl.gl/input/Mouse.hpp"
 		"${AXLGL_INCLUDE_DIR}/axl.gl/input/Keyboard.hpp"
 		"${AXLGL_INCLUDE_DIR}/axl.gl/input/Touch.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/Camera.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/RenderTarget.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/Texture2D.hpp"
 		DESTINATION "include/axl.gl"
 	)
 endif()
