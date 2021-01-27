@@ -106,7 +106,6 @@ bool Display::isOpen() const
 bool Display::reopen(int p_index)
 {
 	if(!m_reserved) return false;
-	if(p_index == m_index) return true;
 	int display_count = Display::count();
 	if(p_index < 0 || p_index >= display_count) return false;
 	_display_enum_index = p_index;
@@ -209,6 +208,9 @@ bool Display::enumSettings(Display::Settings* display_settings, int i)
 }
 bool Display::setSettings(const Display::Settings& display_settings, bool test)
 {
+	Settings Default;
+	if(!enumSettings(&Default, Settings::DI_DEFAULT) && setSettings(Default))
+		return false;
 	DEVMODEA devmode;
 	ZeroMemory(&devmode, sizeof(DEVMODEA));
 	devmode.dmSize = sizeof(DEVMODEW);
