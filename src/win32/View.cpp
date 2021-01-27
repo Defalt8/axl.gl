@@ -496,11 +496,13 @@ bool View::show(ShowMode show_mode)
 				case View::VS_SHOWN:
 					//save the rect data
 					GetWindowRect(((ViewData*)m_reserved)->hwnd, &((ViewData*)m_reserved)->prev_rect);
+				case View::VS_FULLSCREEN:
+					if(this->m_display->size ==  this->size) return true;
 				case View::VS_HIDDEN:
 					{
 						// get the screen's size
-						int screen_width = GetSystemMetrics(SM_CXSCREEN);
-						int screen_height = GetSystemMetrics(SM_CYSCREEN);
+						int screen_width = this->m_display->size.x;
+						int screen_height = this->m_display->size.y;
 						// set the window style and size
 						SetWindowLongW(((ViewData*)m_reserved)->hwnd, GWL_STYLE, ((ViewData*)m_reserved)->style & ~(WS_CAPTION|WS_THICKFRAME|WS_SYSMENU));
 						if(SetWindowPos(((ViewData*)m_reserved)->hwnd, NULL, 0, 0, screen_width, screen_height, SWP_SHOWWINDOW))
@@ -511,8 +513,6 @@ bool View::show(ShowMode show_mode)
 						else return false;
 					}
 					break;
-				case View::VS_FULLSCREEN:
-					return true;
 			}
 			m_visiblity = View::VS_FULLSCREEN;
 			break;
@@ -551,6 +551,14 @@ bool View::removeContext(Context* context)
 
 ///////////
 /// Events
+
+void View::onDisplayConfig(const Display& display)
+{
+	if(this->m_visiblity == VS_FULLSCREEN)
+	{
+		this->show(SM_FULLSCREEN);
+	}
+}
 
 bool View::onCreate(bool recreating)
 {

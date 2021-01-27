@@ -43,7 +43,11 @@ BOOL CALLBACK _AXLGL_InfoEnumProc(HMONITOR hmon, HDC hdc, LPRECT lprc, LPARAM lp
 			dev.cb = sizeof(DISPLAY_DEVICEA);
 			if (FALSE != EnumDisplayDevicesA(NULL, 0, &dev, 0))
 			{
-				strncpy(display_data->device_name, dev.DeviceString, 128);
+#				if defined(_MSC_VER)
+					strncpy_s(display_data->device_name, 128, dev.DeviceString, 128);
+#				else
+					strncpy(display_data->device_name, dev.DeviceString, 128);
+#				endif
 			}
 			return FALSE;
 		}
@@ -76,6 +80,7 @@ Display::Display(int p_index) :
 	ppmm(m_ppmm),
 	ppi(m_ppi),
 	name(m_name),
+	settings(m_settings),
 	views(m_views),
 	m_index(-1),
 	m_position(0,0),
@@ -84,6 +89,7 @@ Display::Display(int p_index) :
 	m_ppmm(0.0f,0.0f),
 	m_ppi(0.0f,0.0f),
 	m_name(""),
+	m_settings(),
 	m_views(),
 	m_reserved(new DisplayData())
 {
@@ -120,7 +126,21 @@ bool Display::reopen(int p_index)
 		m_physical_size.set((float)display_data->mil_size_x, (float)display_data->mil_size_y);
 		m_ppmm.set((float)display_data->rect.right / display_data->mil_size_x, (float)display_data->rect.bottom / display_data->mil_size_y);
 		m_ppi = m_ppmm * 25.4f;
-		strncpy(m_name, display_data->device_name, 128);
+#		if defined(_MSC_VER)
+			strncpy_s(m_name, 128, display_data->device_name, 128);
+#		else
+			strncpy(m_name, display_data->device_name, 128);
+#		endif
+	}
+	this->m_settings.bits_per_pixel = display_data->color_bits;
+	this->m_settings.width = display_data->rect.right;
+	this->m_settings.height = display_data->rect.bottom;
+	this->m_settings.frequency = display_data->refresh_rate;
+	this->m_settings.rotation = Settings::ROT_DEFAULT;
+	this->m_settings.orientation = this->m_settings.width >= this->m_settings.height ? Settings::OR_LANDSCAPE : Settings::OR_PORTRAIT;
+	for(axl::util::ds::UniList<axl::gl::View*>::Iterator it =  this->m_views.first(); it != this->m_views.end(); ++it)
+	{
+		if(*it) (*it)->onDisplayConfig(*this);
 	}
 	return true;
 }

@@ -55,11 +55,13 @@ class AXLGLCXXAPI Display {
 		const axl::math::Vec2f& ppmm; // pixels per millimeter
 		const axl::math::Vec2f& ppi; // pixels per inch
 		const char*const name;
+		const Settings& settings;
 		const axl::util::ds::UniList<axl::gl::View*>& views;
 	private:
 		void* m_reserved;
 		int m_index;
 		char m_name[128];
+		Settings m_settings;
 		axl::math::Vec2i m_position;
 		axl::math::Vec2i m_size;
 		axl::math::Vec2f m_physical_size;

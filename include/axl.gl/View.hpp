@@ -87,6 +87,7 @@ class AXLGLCXXAPI View
 		bool removeContext(Context* view);
 		friend class AXLGLCXXAPI axl::gl::Context;
 	public: // Event callback methods
+		virtual void onDisplayConfig(const Display& display);
 		virtual bool onCreate(bool recreating = false);
 		virtual void onDestroy(bool recreating = false);
 		virtual void onMove(int x, int y);
