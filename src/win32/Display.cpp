@@ -92,6 +92,8 @@ Display::Display(int p_index) :
 }
 Display::~Display()
 {
+	this->close();
+	this->m_views.removeAll();
 	if(m_reserved)
 	{
 		delete (DisplayData*)m_reserved;
@@ -132,7 +134,6 @@ bool Display::close()
 		{
 			if(*it) (*it)->destroy();
 		}
-		this->m_views.removeAll();
 		m_index = -1;
 		((DisplayData*)this->m_reserved)->set = true;
 		return true;

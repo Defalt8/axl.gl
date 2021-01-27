@@ -70,6 +70,7 @@ View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, 
 View::~View()
 {
 	this->destroy();
+	this->m_contexts.removeAll();
 	if(m_reserved)
 	{
 		free(m_reserved);
@@ -283,15 +284,14 @@ void View::destroy()
 {
 	if(m_reserved && ((ViewData*)m_reserved)->hwnd)
 	{
-		((ViewData*)m_reserved)->is_recreating = false;
-		ReleaseDC(((ViewData*)m_reserved)->hwnd, ((ViewData*)m_reserved)->hdc);
-		DestroyWindow(((ViewData*)m_reserved)->hwnd);
-		this->m_display->removeView(this);
 		for(axl::util::ds::UniList<axl::gl::Context*>::Iterator it = this->m_contexts.first(); it !=this->m_contexts.end(); ++it)
 		{
 			if(*it) (*it)->destroy();
 		}
-		this->m_contexts.removeAll();
+		((ViewData*)m_reserved)->is_recreating = false;
+		ReleaseDC(((ViewData*)m_reserved)->hwnd, ((ViewData*)m_reserved)->hdc);
+		DestroyWindow(((ViewData*)m_reserved)->hwnd);
+		this->m_display->removeView(this);
 	}
 }
 
