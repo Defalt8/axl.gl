@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <axl.gl/Context.hpp>
 #include <axl.gl/ContextObject.hpp>
 

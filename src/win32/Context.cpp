@@ -32,7 +32,7 @@ Context::Context() :
 Context::~Context()
 {
 	this->destroy();
-	this->m_context_objects.removeAll();
+	if(this->m_view) this->m_view->removeContext(this);
 	if(m_reserved)
 	{
 		delete((ContextData*)m_reserved);
@@ -157,10 +157,10 @@ void Context::destroy()
 {
 	if(m_reserved)
 	{
-		for(axl::util::ds::UniList<ContextObject*>::Iterator it = this->m_context_objects.first(); it != this->m_context_objects.end(); ++it)
-		{
-			if(!it.isNull() && (*it)) (*it)->destroy();
-		}
+		ContextObject* context_object;
+		while((context_object = this->m_context_objects.removeFirst()))
+			context_object->destroy();
+		
 		if(((ContextData*)m_reserved)->hglrc)
 		{
 			if(((ContextData*)m_reserved)->hdc)
@@ -172,7 +172,6 @@ void Context::destroy()
 				((ContextData*)m_reserved)->hdc = NULL;
 			}
 		}
-		if(this->m_view) this->m_view->removeContext(this);
 	}
 }
 

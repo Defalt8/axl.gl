@@ -93,7 +93,6 @@ Display::Display(int p_index) :
 Display::~Display()
 {
 	this->close();
-	this->m_views.removeAll();
 	if(m_reserved)
 	{
 		delete (DisplayData*)m_reserved;
@@ -130,10 +129,9 @@ bool Display::close()
 {
 	if(m_reserved)
 	{
-		for(axl::util::ds::UniList<axl::gl::View*>::Iterator it = this->m_views.first(); it != this->m_views.end(); ++it)
-		{
-			if(*it) (*it)->destroy();
-		}
+		View* view;
+		while((view = this->m_views.removeFirst()))
+			view->destroy();
 		m_index = -1;
 		((DisplayData*)this->m_reserved)->set = true;
 		return true;

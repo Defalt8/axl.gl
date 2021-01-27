@@ -70,7 +70,7 @@ View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, 
 View::~View()
 {
 	this->destroy();
-	this->m_contexts.removeAll();
+	if(this->m_display) this->m_display->removeView(this);
 	if(m_reserved)
 	{
 		free(m_reserved);
@@ -284,14 +284,14 @@ void View::destroy()
 {
 	if(m_reserved && ((ViewData*)m_reserved)->hwnd)
 	{
-		for(axl::util::ds::UniList<axl::gl::Context*>::Iterator it = this->m_contexts.first(); it !=this->m_contexts.end(); ++it)
-		{
-			if(*it) (*it)->destroy();
-		}
+		Context* context;
+		while((context = this->m_contexts.removeFirst()))
+			context->destroy();
 		((ViewData*)m_reserved)->is_recreating = false;
 		ReleaseDC(((ViewData*)m_reserved)->hwnd, ((ViewData*)m_reserved)->hdc);
+		((ViewData*)m_reserved)->hdc = NULL;
 		DestroyWindow(((ViewData*)m_reserved)->hwnd);
-		this->m_display->removeView(this);
+		((ViewData*)m_reserved)->hwnd = NULL;
 	}
 }
 
@@ -807,7 +807,7 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 		case WM_DESTROY:
 			if(view && view->isValid())
 			{
-				view->onDestroy(((ViewData*)view->getReserved())->is_recreating);
+				if(((ViewData*)view->reserved)->hdc) view->onDestroy(((ViewData*)view->getReserved())->is_recreating);
 			}
 			break;
 		default:
