@@ -32,6 +32,7 @@ Context::Context() :
 Context::~Context()
 {
 	this->destroy();
+	this->m_context_objects.removeAll();
 	if(m_reserved)
 	{
 		delete((ContextData*)m_reserved);
@@ -156,6 +157,10 @@ void Context::destroy()
 {
 	if(m_reserved)
 	{
+		for(axl::util::ds::UniList<ContextObject*>::Iterator it = this->m_context_objects.first(); it != this->m_context_objects.end(); ++it)
+		{
+			if(!it.isNull() && (*it)) (*it)->destroy();
+		}
 		if(((ContextData*)m_reserved)->hglrc)
 		{
 			if(((ContextData*)m_reserved)->hdc)
