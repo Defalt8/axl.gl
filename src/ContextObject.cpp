@@ -4,18 +4,16 @@
 namespace axl {
 namespace gl {
 
-ContextObject::ContextObject(axl::gl::Context* context, bool create) :
+ContextObject::ContextObject(axl::gl::Context* ptr_context) :
 	ctx_context(),
 	ctx_created(false),
 	ctx_destroyed(false)
 {
-	this->setContext(context);
-	if(create) this->create();
+	this->setContext(ptr_context);
 }
 
 ContextObject::~ContextObject()
 {
-	this->destroy();
 	if(this->ctx_context)
 		this->ctx_context->m_context_objects.remove(this);
 }
@@ -41,9 +39,9 @@ axl::gl::Context* ContextObject::getContext()
 	return this->ctx_context;
 }
 
-void ContextObject::setContext(axl::gl::Context* context)
+void ContextObject::setContext(axl::gl::Context* ptr_context)
 {
-	this->ctx_context = context;
+	this->ctx_context = ptr_context;
 	if(this->ctx_context)
 	{
 		this->ctx_context->m_context_objects.insertLast(this);

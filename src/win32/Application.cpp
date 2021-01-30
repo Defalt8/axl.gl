@@ -10,7 +10,7 @@ void __cdecl _on_exit()
 }
 void __cdecl _sig_handler(int signal)
 {
-	_on_exit();
+	axl::gl::Application::exit(signal);
 }
 
 namespace axl {

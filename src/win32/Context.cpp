@@ -160,7 +160,6 @@ void Context::destroy()
 		ContextObject* context_object;
 		while((context_object = this->m_context_objects.removeFirst()))
 			context_object->destroy();
-		
 		if(((ContextData*)m_reserved)->hglrc)
 		{
 			if(((ContextData*)m_reserved)->hdc)
