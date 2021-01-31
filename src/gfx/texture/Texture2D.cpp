@@ -14,9 +14,9 @@ namespace gfx {
 // Texture2D
 //
 
-Texture::Dimensions Texture2D::dimensions() const
+Texture::Type Texture2D::type() const
 {
-	return Texture::D_2D;
+	return Texture::TT_2D;
 }
 
 Texture2D::Texture2D(axl::gl::Context* ptr_context) :

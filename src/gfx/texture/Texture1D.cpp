@@ -14,9 +14,9 @@ namespace gfx {
 // Texture1D
 //
 
-Texture::Dimensions Texture1D::dimensions() const
+Texture::Type Texture1D::type() const
 {
-	return Texture::D_1D;
+	return Texture::TT_1D;
 }
 
 Texture1D::Texture1D(axl::gl::Context* ptr_context) :
@@ -54,6 +54,7 @@ bool Texture1D::icreate()
 	}
 	glBindTexture(GL_TEXTURE_1D, 0);
 	this->txr_id = tmp_id;
+	return glGetError() == GL_NO_ERROR;
 }
 bool Texture1D::idestroy()
 {

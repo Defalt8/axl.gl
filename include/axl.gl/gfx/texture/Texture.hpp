@@ -13,11 +13,11 @@ namespace gfx {
 class AXLGLCXXAPI Texture : public ContextObject
 {
 	public:
-		AXLGL_ENUM_CLASS Dimensions { D_1D = 1, D_2D = 2, D_3D = 3 };
+		AXLGL_ENUM_CLASS Type { TT_1D = 1, TT_2D = 2, TT_3D = 3 };
 	public:
 		Texture(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Texture();
-		virtual Dimensions dimensions() const = 0;
+		virtual Type dimensions() const = 0;
 		virtual bool icreate() = 0;
 		virtual bool idestroy() = 0;
 		virtual bool isValid() const = 0;
