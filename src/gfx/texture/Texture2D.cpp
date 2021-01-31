@@ -76,7 +76,7 @@ bool Texture2D::isValid() const
 bool Texture2D::bind() const
 {
 	using namespace axl::glfl::core::GL1;
-	if(this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
 	GLCLEARERROR();
 	glBindTexture(GL_TEXTURE_2D, this->txr_id);
 	return glGetError() == GL_NO_ERROR;
@@ -84,7 +84,7 @@ bool Texture2D::bind() const
 bool Texture2D::unbind() const
 {
 	using namespace axl::glfl::core::GL1;
-	if(this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return true;
 }

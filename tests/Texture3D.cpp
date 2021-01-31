@@ -10,9 +10,6 @@
 #include <axl.gl/input/Key.hpp>
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
-#include <axl.gl/ContextObject.hpp>
-#include <axl.gl/gfx/texture/Texture1D.hpp>
-#include <axl.gl/gfx/texture/Texture2D.hpp>
 #include <axl.gl/gfx/texture/Texture3D.hpp>
 #include <axl.glfl/glCoreARB.hpp>
 #include <axl.util/uc/Clock.hpp>
@@ -31,6 +28,7 @@ class GameView : public axl::gl::View
 		axl::gl::Context main_context;
 		axl::gl::gfx::Texture3D texture;
 		float theta;
+		double y;
 	private:
 		axl::util::uc::Time time, ctime;
 	public:
@@ -38,7 +36,8 @@ class GameView : public axl::gl::View
 			axl::gl::View(_title, _position, _size, _cursor),
 			main_context(),
 			texture(&this->main_context),
-			theta(0.0f)
+			theta(0.0f),
+			y(0.0)
 		{}
 
 		~GameView()
@@ -47,6 +46,8 @@ class GameView : public axl::gl::View
 		void update()
 		{
 			theta += 45.0f * time.deltaTime();
+			y = axl::math::sin(axl::math::Constants::D_QUARTER_PI * (double)ctime.deltaTime());
+			printf("%lf\r", y);
 			time.set();
 		}
 
@@ -69,7 +70,7 @@ class GameView : public axl::gl::View
 				glMatrixMode(GL_MODELVIEW);
 				glLoadIdentity();
 				glTranslated(0.0, 0.0, -4.0);
-				glRotated(30.0, 1.0, 0.0, 0.0);
+				glRotated(45.0, 1.0, 0.0, 0.0);
 				glRotatef(theta, 0.0, 1.0, 0.0);
 				// glScaled(0.6, 0.6, 0.6);
 				if(p_clear)
@@ -77,15 +78,52 @@ class GameView : public axl::gl::View
 					glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
 					glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 				}
-				// Draw
-				glBegin(GL_QUADS);
-					glColor4ub(255,255,255,255);
-					glVertex3d(-1.0, -1.0, 0.0);
-					glVertex3d( 1.0, -1.0, 0.0);
-					glVertex3d( 1.0,  1.0, 0.0);
-					glVertex3d(-1.0,  1.0, 0.0);
-				glEnd();
-				
+				glEnable(axl::glfl::core::GL1::GL_TEXTURE_3D);
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+				this->texture.bind();
+				double txr_min = 0.0,  txr_max = 1.0;
+				if(p_exclude_alpha)
+				{
+					glBegin(GL_QUADS);
+						glTexCoord3d(txr_min, txr_min, txr_min); glVertex3d(-1.0, -1.0, -1.0);
+						glTexCoord3d(txr_max, txr_min, txr_min); glVertex3d( 1.0, -1.0, -1.0);
+						glTexCoord3d(txr_max, txr_max, txr_min); glVertex3d( 1.0,  1.0, -1.0);
+						glTexCoord3d(txr_min, txr_max, txr_min); glVertex3d(-1.0,  1.0, -1.0);
+						
+						glTexCoord3d(txr_min, txr_min, txr_min); glVertex3d(-1.0, -1.0, -1.0);
+						glTexCoord3d(txr_min, txr_max, txr_min); glVertex3d(-1.0,  1.0, -1.0);
+						glTexCoord3d(txr_min, txr_max, txr_max); glVertex3d(-1.0,  1.0,  1.0);
+						glTexCoord3d(txr_min, txr_min, txr_max); glVertex3d(-1.0, -1.0,  1.0);
+
+						glTexCoord3d(txr_min, txr_min, txr_min); glVertex3d(-1.0, -1.0, -1.0);
+						glTexCoord3d(txr_max, txr_min, txr_min); glVertex3d( 1.0, -1.0, -1.0);
+						glTexCoord3d(txr_max, txr_min, txr_max); glVertex3d( 1.0, -1.0,  1.0);
+						glTexCoord3d(txr_min, txr_min, txr_max); glVertex3d(-1.0, -1.0,  1.0);
+					glEnd();
+				}
+				else
+				{
+					double my = axl::math::Util::map(y, -1.0, 1.0, 0.0, 1.0);
+					glBegin(GL_QUADS);
+						glTexCoord3d(txr_min, my, txr_min); glVertex3d(-1.0, y, -1.0);
+						glTexCoord3d(txr_max, my, txr_min); glVertex3d( 1.0, y, -1.0);
+						glTexCoord3d(txr_max, my, txr_max); glVertex3d( 1.0, y,  1.0);
+						glTexCoord3d(txr_min, my, txr_max); glVertex3d(-1.0, y,  1.0);
+
+						glTexCoord3d(txr_min, txr_min, my); glVertex3d(-1.0, -1.0, y);
+						glTexCoord3d(txr_max, txr_min, my); glVertex3d( 1.0, -1.0, y);
+						glTexCoord3d(txr_max, txr_max, my); glVertex3d( 1.0,  1.0, y);
+						glTexCoord3d(txr_min, txr_max, my); glVertex3d(-1.0,  1.0, y);
+						
+						glTexCoord3d(my, txr_min, txr_min); glVertex3d(y, -1.0, -1.0);
+						glTexCoord3d(my, txr_max, txr_min); glVertex3d(y,  1.0, -1.0);
+						glTexCoord3d(my, txr_max, txr_max); glVertex3d(y,  1.0,  1.0);
+						glTexCoord3d(my, txr_min, txr_max); glVertex3d(y, -1.0,  1.0);
+					glEnd();
+				}
+				glFinish();
+				this->texture.unbind();
+				glDisable(axl::glfl::core::GL1::GL_TEXTURE_3D);
 				if(p_swap) this->swap();
 			}
 		}
@@ -106,7 +144,39 @@ class GameView : public axl::gl::View
 				axl::gl::Context::Config(3, 2, 1, axl::gl::Context::Config::GLP_COMPATIBLITY)
 			};
 			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
-			// Create stuff here
+			Assert(this->texture.create());
+			Assert(this->texture.isValid());
+			Assert(this->texture.allocate(4, 8, 16, GL_RGBA8));
+			axl::glfl::GLint tex_w, tex_h, tex_d;
+			Assert(this->texture.getLevelParamiv(0, GL_TEXTURE_WIDTH, &tex_w));
+			Assert(this->texture.getLevelParamiv(0, GL_TEXTURE_HEIGHT, &tex_h));
+			Assert(this->texture.getLevelParamiv(0, axl::glfl::core::GL::GL_TEXTURE_DEPTH, &tex_d));
+			GLubyte *image = new GLubyte[tex_w * tex_h * tex_d * 4];
+			if(image)
+			{
+				int tex_w_h = tex_h*tex_w;
+				for(int k=0; k<tex_d; ++k)
+				{
+					for(int j=0; j<tex_h; ++j)
+					{
+						for(int i=0; i<tex_w; ++i)
+						{
+							int index = ((k*(tex_w_h))+(j*tex_w)+i)*4;
+							image[index+0] = (GLubyte)(255.f * ((float)(i+1)/tex_w));
+							image[index+1] = (GLubyte)(255.f * ((float)(j+1)/tex_h));
+							image[index+2] = (GLubyte)(255.f * ((float)(k+1)/tex_d));
+							image[index+3] = 55+(GLubyte)(200.0f * ( ((float)(k+1)/tex_d) + ((float)(j+1)/tex_h) + ((float)(i+1)/tex_w) ) / 3.0f) ;;;
+						}
+					}
+				}
+				Assert(this->texture.setImage(0, 0, 0, 0, tex_w, tex_h, tex_d, GL_RGBA, GL_UNSIGNED_BYTE, image, 1));
+				delete[] image;
+				image = 0;
+				Assert(this->texture.generateMipmaps());
+				Assert(this->texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+				// Assert(this->texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+				this->texture.setParami(axl::glfl::core::GL::GL_TEXTURE_LOD_BIAS, 3);
+			}
 			return axl::gl::View::onCreate(recreating);
 		}
 

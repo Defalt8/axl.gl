@@ -29,6 +29,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"gfx/texture/Texture.cpp"
 	"gfx/texture/Texture1D.cpp"
 	"gfx/texture/Texture2D.cpp"
+	"gfx/texture/Texture3D.cpp"
 
 	"${AXLGL_INCLUDE_DIR}/axl.gl/lib.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/Display.hpp"
@@ -45,6 +46,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/texture/Texture.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/texture/Texture1D.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/texture/Texture2D.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/texture/Texture3D.hpp"
 )
 target_include_directories( axl.gl PUBLIC "${AXLGL_INCLUDE_DIR}" )
 target_link_libraries( axl.gl PUBLIC axl.math axl.util axl.glfl )
@@ -103,6 +105,7 @@ if( AXLGL_INSTALL_HEADERS )
 		"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/texture/Texture.hpp"
 		"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/texture/Texture1D.hpp"
 		"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/texture/Texture2D.hpp"
+		"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/texture/Texture3D.hpp"
 		DESTINATION "include/axl.gl"
 	)
 endif()
