@@ -5,7 +5,7 @@ A simple and multiplatform C++ game library.
 
 ## Version and supported platforms
 
-- **Latest version**: 0.12.24 alpha
+- **Latest version**: 0.13.25 alpha
 - **Supported platforms**: Windows
 
 ## Requirements and Dependencies
