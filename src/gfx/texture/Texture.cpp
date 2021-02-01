@@ -18,11 +18,6 @@ Texture::Texture(axl::gl::Context* ptr_context) :
 Texture::~Texture()
 {}
 
-axl::glfl::GLuint Texture::getId() const
-{
-	return this->txr_id;
-}
-
 } // namespace axl.gl.gfx
 } // namespace axl.gl
 } // namespace axl

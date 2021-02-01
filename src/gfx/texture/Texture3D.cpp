@@ -71,6 +71,10 @@ bool Texture3D::idestroy()
 	this->txr_id = -1;
 	return true;
 }
+axl::glfl::GLuint Texture3D::getId() const
+{
+	return this->txr_id;
+}
 bool Texture3D::isValid() const
 {
 	return this->ctx_context && this->ctx_context->isValid() && this->txr_id != -1;

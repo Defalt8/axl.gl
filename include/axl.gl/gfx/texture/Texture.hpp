@@ -21,7 +21,7 @@ class AXLGLCXXAPI Texture : public ContextObject
 		virtual bool icreate() = 0;
 		virtual bool idestroy() = 0;
 		virtual bool isValid() const = 0;
-		axl::glfl::GLuint getId() const;
+		virtual axl::glfl::GLuint getId() const = 0;
 		virtual bool bind() const = 0;
 		virtual bool unbind() const = 0;
 		virtual bool setParami(axl::glfl::GLenum tex_param, axl::glfl::GLint value) = 0;
