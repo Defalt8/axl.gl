@@ -11,9 +11,8 @@
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
 #include <axl.gl/ContextObject.hpp>
-#include <axl.gl/gfx/texture/Texture1D.hpp>
-#include <axl.gl/gfx/texture/Texture2D.hpp>
-#include <axl.gl/gfx/texture/Texture3D.hpp>
+#include <axl.gl/gfx/textures.hpp>
+#include <axl.gl/gfx/buffer/FrameBuffer.hpp>
 #include <axl.glfl/glCoreARB.hpp>
 #include <axl.util/uc/Clock.hpp>
 #include <axl.util/uc/Time.hpp>
@@ -25,11 +24,14 @@
 #include "Assert.hpp"
 #include "GLC.h"
 
+namespace GL = axl::glfl::core::GL;
+
 class GameView : public axl::gl::View
 {
 	public:
 		axl::gl::Context main_context;
-		axl::gl::gfx::Texture3D texture;
+		axl::gl::gfx::Texture2D texture, texture_color, texture_depth;
+		axl::gl::gfx::FrameBuffer frame_buffer;
 		float theta;
 	private:
 		axl::util::uc::Time time, ctime;
@@ -38,6 +40,9 @@ class GameView : public axl::gl::View
 			axl::gl::View(_title, _position, _size, _cursor),
 			main_context(),
 			texture(&this->main_context),
+			texture_color(&this->main_context),
+			texture_depth(&this->main_context),
+			frame_buffer(&this->main_context),
 			theta(0.0f)
 		{}
 
@@ -46,21 +51,55 @@ class GameView : public axl::gl::View
 
 		void update()
 		{
-			theta += 45.0f * time.deltaTime();
-			time.set();
+			this->theta += 45.0f * this->time.deltaTime();
+			this->time.set();
 		}
 
 		void render()
 		{
+			Assert(this->frame_buffer.bind());
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			this->render(true, true, false, false);
+			this->render(true, false, false, false);
+			// this->swap();
 			
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
+			Assert(this->frame_buffer.unbind());
+			Assert(this->frame_buffer.bind(axl::gl::gfx::FrameBuffer::FBT_READ));
+			GL::glBlitFramebuffer(0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			Assert(this->frame_buffer.unbind());
+
+			// glMatrixMode(GL_PROJECTION);
+			// glPushMatrix();
+			// glLoadIdentity();
+			// glOrtho(-1.0, 1.0, -1.0, 1.0, -100.0, 100.0);
+			// glMatrixMode(GL_MODELVIEW);
+			// glLoadIdentity();
+			// glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
+			// glClear(GL_COLOR_BUFFER_BIT);
+			// this->texture1.bind();
+			// glEnable(GL_TEXTURE_2D);
+			// glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			// glBegin(GL_QUADS);
+			// 	// glColor4ub(255,255,255,255);
+			// 	glTexCoord2d(0.0, 0.0); glVertex2d(-1.0, -1.0);
+			// 	glTexCoord2d(1.0, 0.0); glVertex2d( 1.0, -1.0);
+			// 	glTexCoord2d(1.0, 1.0); glVertex2d( 1.0,  1.0);
+			// 	glTexCoord2d(0.0, 1.0); glVertex2d(-1.0, 1.0);
+			// glEnd();
+			// glFinish();
+			// glDisable(GL_TEXTURE_2D);
+			
+			// glMatrixMode(GL_PROJECTION);
+			// glPopMatrix();
+			// glMatrixMode(GL_MODELVIEW);
+			// this->texture1.unbind();
+			this->swap();
+			// GL::glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, );
 		}
 
 		void render(bool p_clear, bool p_swap, bool p_exclude_opaque = false, bool p_exclude_alpha = false)
@@ -75,7 +114,7 @@ class GameView : public axl::gl::View
 				// glScaled(0.6, 0.6, 0.6);
 				if(p_clear)
 				{
-					glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
+					glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 					glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 				}
 				// Draw
@@ -106,7 +145,6 @@ class GameView : public axl::gl::View
 						glVertex3d(0.0, -1.0,  1.0);
 					glEnd();
 				}
-				glDisable(GL_STENCIL_TEST);
 				if(p_swap) this->swap();
 			}
 		}
@@ -128,6 +166,30 @@ class GameView : public axl::gl::View
 			};
 			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
 			// Create stuff here
+			Assert(!this->texture.isValid());
+			Assert(this->texture.create());
+			Assert(this->texture.isValid());
+			Assert(this->texture.allocate(this->size.x, this->size.y, GL_RGBA, 0));
+			
+			Assert(!this->texture_color.isValid());
+			Assert(this->texture_color.create());
+			Assert(this->texture_color.isValid());
+			Assert(this->texture_color.allocate(this->size.x, this->size.y, GL_RGBA, 0));
+
+			Assert(!this->texture_depth.isValid());
+			Assert(this->texture_depth.create());
+			Assert(this->texture_depth.isValid());
+			Assert(this->texture_depth.allocate(this->size.x, this->size.y, GL::GL_DEPTH_COMPONENT24, 0));
+
+			Assert(!this->frame_buffer.isValid());
+			Assert(this->frame_buffer.create());
+			Assert(this->frame_buffer.isValid());
+			Assert(this->frame_buffer.bind());
+			GLC(GL::glFramebufferTexture(GL::GL_DRAW_FRAMEBUFFER, GL::GL_COLOR_ATTACHMENT0, this->texture_color.getId(), 0));
+			GLC(GL::glFramebufferTexture(GL::GL_DRAW_FRAMEBUFFER, GL::GL_DEPTH_ATTACHMENT, this->texture_depth.getId(), 0));
+			GLC(GL::glFramebufferTexture(GL::GL_READ_FRAMEBUFFER, GL::GL_COLOR_ATTACHMENT0, this->texture_color.getId(), 0));
+			GLC(GL::glFramebufferTexture(GL::GL_READ_FRAMEBUFFER, GL::GL_DEPTH_ATTACHMENT, this->texture_depth.getId(), 0));
+			Assert(this->frame_buffer.unbind());
 			return axl::gl::View::onCreate(recreating);
 		}
 
@@ -172,6 +234,12 @@ class GameView : public axl::gl::View
 					// glOrtho(-1.0, 1.0, -ar, ar, -100.0, 100.0);
 				}
 			}
+			axl::math::Vec2i texture_size = this->texture.getSize();
+			if(texture_size != this->size) { Assert(this->texture.allocate(this->size.x, this->size.y, GL_RGBA, 0)); }
+			axl::math::Vec2i texture_color_size = this->texture_color.getSize();
+			if(texture_color_size != this->size) Assert(this->texture_color.allocate(this->size.x, this->size.y, GL_RGBA, 0));
+			axl::math::Vec2i texture_depth_size = this->texture_depth.getSize();
+			if(texture_depth_size != this->size) Assert(this->texture_depth.allocate(this->size.x, this->size.y, GL::GL_DEPTH_COMPONENT24, 0));
 			this->update();
 			this->render();
 		}
@@ -258,6 +326,8 @@ int main(int argc, char* argv[])
 			input::Key key_0(axl::gl::input::KeyCode::KEY_0);
 			input::Key key_1(axl::gl::input::KeyCode::KEY_1);
 			input::Key key_F(axl::gl::input::KeyCode::KEY_F);
+			input::Key key_UP(axl::gl::input::KeyCode::KEY_UP);
+			input::Key key_DOWN(axl::gl::input::KeyCode::KEY_DOWN);
 			while(!Application::IS_QUITTING)
 			{
 				/// -- handle events	
@@ -285,7 +355,7 @@ int main(int argc, char* argv[])
 					}
 					else fprintf(stderr, "Failed to set display settings!\n");
 					display.reopen(0);
-				}		
+				}
 				/// -- update
 				view.update();
 				/// -- render
