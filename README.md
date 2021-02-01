@@ -5,7 +5,7 @@ A simple and multiplatform C++ game library.
 
 ## Version and supported platforms
 
-- **Latest version**: 0.13.25 alpha
+- **Latest version**: 0.14.25 alpha
 - **Supported platforms**: Windows
 
 ## Requirements and Dependencies
@@ -87,6 +87,8 @@ A simple and multiplatform C++ game library.
 - [include/axl.gl/gfx/texture/Texture1D.hpp]("include/axl.gl/gfx/texture/Texture1D.hpp") - 1D texture derived class.
 - [include/axl.gl/gfx/texture/Texture2D.hpp]("include/axl.gl/gfx/texture/Texture2D.hpp") - 2D texture derived class.
 - [include/axl.gl/gfx/texture/Texture3D.hpp]("include/axl.gl/gfx/texture/Texture3D.hpp") - 3D texture derived class.
+- [include/axl.gl/gfx/textures.hpp]("include/axl.gl/gfx/textures.hpp") - Includes all headers under gfx/texture.
+- [include/axl.gl/gfx/buffer/FrameBuffer.hpp]("include/axl.gl/gfx/buffer/FrameBuffer.hpp") - An OpenGL FrameBuffer implementation class.
 - [include/axl.gl/input/KeyCodes.hpp]("include/axl.gl/input/KeyCodes.hpp") - Key code enumerations and functions.
 - [include/axl.gl/input/Keyboard.hpp]("include/axl.gl/input/Keyboard.hpp") - static Keyboard class methods and event listener.
 - [include/axl.gl/input/Mouse.hpp]("include/axl.gl/input/Mouse.hpp") - static Mouse class methods and event listener.

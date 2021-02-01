@@ -54,15 +54,16 @@ class GameView : public axl::gl::View
 		{
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);
-			this->render(true, false, true);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			this->render(false, true, false);
+
+			this->render(true, true, false, false);
+			
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 		}
 
-		void render(bool p_clear, bool p_swap, bool p_exclude_alpha = false)
+		void render(bool p_clear, bool p_swap, bool p_exclude_opaque = false, bool p_exclude_alpha = false)
 		{
 			if(this->main_context.makeCurrent())
 			{
@@ -78,14 +79,34 @@ class GameView : public axl::gl::View
 					glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 				}
 				// Draw
-				glBegin(GL_QUADS);
-					glColor4ub(255,255,255,255);
-					glVertex3d(-1.0, -1.0, 0.0);
-					glVertex3d( 1.0, -1.0, 0.0);
-					glVertex3d( 1.0,  1.0, 0.0);
-					glVertex3d(-1.0,  1.0, 0.0);
-				glEnd();
-				
+				if(!p_exclude_opaque)
+				{
+					glBegin(GL_QUADS);
+						glColor4ub(255,127,127,255);
+						glVertex3d(-1.0, -1.0, 0.0);
+						glVertex3d( 1.0, -1.0, 0.0);
+						glVertex3d( 1.0,  1.0, 0.0);
+						glVertex3d(-1.0,  1.0, 0.0);
+					glEnd();
+					glBegin(GL_QUADS);
+						glColor4ub(0,255,0,255);
+						glVertex3d(-1.0, -1.0, -1.0);
+						glVertex3d( 1.0, -1.0, -1.0);
+						glVertex3d( 1.0, -1.0,  1.0);
+						glVertex3d(-1.0, -1.0,  1.0);
+					glEnd();
+				}
+				if(!p_exclude_alpha)
+				{
+					glBegin(GL_QUADS);
+						glColor4ub(0,0,255,127);
+						glVertex3d(0.0, -1.0, -1.0);
+						glVertex3d(0.0,  1.0, -1.0);
+						glVertex3d(0.0,  1.0,  1.0);
+						glVertex3d(0.0, -1.0,  1.0);
+					glEnd();
+				}
+				glDisable(GL_STENCIL_TEST);
 				if(p_swap) this->swap();
 			}
 		}
