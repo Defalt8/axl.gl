@@ -28,6 +28,7 @@ class AXLGLCXXAPI FrameBuffer : public ContextObject
 		bool isComplete() const;
 		bool attachRenderBuffer(axl::glfl::GLenum attachment_target, RenderBuffer* render_buffer, Target target = Target::FBT_BOTH);
 		bool attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D* texture, Target target = Target::FBT_BOTH);
+		bool blit(const FrameBuffer* draw_framebuffer, axl::glfl::GLint srcX0, axl::glfl::GLint srcY0, axl::glfl::GLint srcX1, axl::glfl::GLint srcY1, axl::glfl::GLint dstX0, axl::glfl::GLint dstY0, axl::glfl::GLint dstX1, axl::glfl::GLint dstY1, axl::glfl::GLbitfield mask, axl::glfl::GLenum filter) const;
 	protected:
 		axl::glfl::GLuint fbo_id;
 };

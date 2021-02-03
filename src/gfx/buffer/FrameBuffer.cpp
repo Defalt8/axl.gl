@@ -64,35 +64,25 @@ bool FrameBuffer::bind(Target p_target) const
 {
 	using namespace GL;
 	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	axl::glfl::GLenum fb_target = p_target == Target::FBT_READ ? GL_READ_FRAMEBUFFER : (p_target == Target::FBT_DRAW ? GL_DRAW_FRAMEBUFFER : GL_FRAMEBUFFER);
 	GLCLEARERROR();
-	switch(p_target)
-	{
-		default:
-		case Target::FBT_BOTH: glBindFramebuffer(GL_FRAMEBUFFER, this->fbo_id); break;
-		case Target::FBT_READ: glBindFramebuffer(GL_READ_FRAMEBUFFER, this->fbo_id); break;
-		case Target::FBT_DRAW: glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->fbo_id); break;
-	}
+	glBindFramebuffer(fb_target, this->fbo_id);
 	return glGetError() == GL_NO_ERROR;
 }
 bool FrameBuffer::unbind(Target p_target) const
 {
 	using namespace GL;
 	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	axl::glfl::GLenum fb_target = p_target == Target::FBT_READ ? GL_READ_FRAMEBUFFER : (p_target == Target::FBT_DRAW ? GL_DRAW_FRAMEBUFFER : GL_FRAMEBUFFER);
 	GLCLEARERROR();
-	switch(p_target)
-	{
-		default:
-		case Target::FBT_BOTH: glBindFramebuffer(GL_FRAMEBUFFER, 0); break;
-		case Target::FBT_READ: glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); break;
-		case Target::FBT_DRAW: glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); break;
-	}
+	glBindFramebuffer(fb_target, 0);
 	return glGetError() == GL_NO_ERROR;
 }
 
 bool FrameBuffer::isComplete() const
 {
 	using namespace GL;
-	if(!this->bind()) return false;
+	if(!this->bind(Target::FBT_BOTH)) return false;
 	GLCLEARERROR();
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
@@ -105,22 +95,51 @@ bool FrameBuffer::isComplete() const
 bool FrameBuffer::attachRenderBuffer(axl::glfl::GLenum attachment_target, RenderBuffer* render_buffer, Target p_target)
 {
 	using namespace GL;
-	if(!this->bind()) return false;
+	if(!this->bind(Target::FBT_BOTH)) return false;
 	axl::glfl::GLuint render_buffer_id = render_buffer && render_buffer->isValid() ? render_buffer->getId() : 0;
 	axl::glfl::GLenum fb_target = p_target == Target::FBT_READ ? GL_READ_FRAMEBUFFER : (p_target == Target::FBT_DRAW ? GL_DRAW_FRAMEBUFFER : GL_FRAMEBUFFER);
 	GLCLEARERROR();
-	glFramebufferRenderbuffer(fb_target, attachment_target, GL_RENDERBUFFER, render_buffer_id);
+	if(p_target == Target::FBT_BOTH)
+	{
+		glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, attachment_target, GL_RENDERBUFFER, render_buffer_id);
+		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, attachment_target, GL_RENDERBUFFER, render_buffer_id);
+	}
+	else
+		glFramebufferRenderbuffer(fb_target, attachment_target, GL_RENDERBUFFER, render_buffer_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return glGetError() == GL_NO_ERROR;
 }
 bool FrameBuffer::attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D* texture, Target p_target)
 {
 	using namespace GL;
-	if(!this->bind()) return false;
+	if(!this->bind(Target::FBT_BOTH)) return false;
 	axl::glfl::GLuint texture_id = texture && texture->isValid() ? texture->getId() : 0;
 	axl::glfl::GLenum fb_target = p_target == Target::FBT_READ ? GL_READ_FRAMEBUFFER : (p_target == Target::FBT_DRAW ? GL_DRAW_FRAMEBUFFER : GL_FRAMEBUFFER);
+	GLCLEARERROR();if(p_target == Target::FBT_BOTH)
+	{
+		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, attachment_target, GL_TEXTURE_2D, texture_id, 0);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment_target, GL_TEXTURE_2D, texture_id, 0);
+	}
+	else
+		glFramebufferTexture2D(fb_target, attachment_target, GL_TEXTURE_2D, texture_id, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return glGetError() == GL_NO_ERROR;
+}
+bool FrameBuffer::blit(const FrameBuffer* draw_framebuffer, axl::glfl::GLint srcX0, axl::glfl::GLint srcY0, axl::glfl::GLint srcX1, axl::glfl::GLint srcY1, axl::glfl::GLint dstX0, axl::glfl::GLint dstY0, axl::glfl::GLint dstX1, axl::glfl::GLint dstY1, axl::glfl::GLbitfield mask, axl::glfl::GLenum filter) const
+{
+	using namespace GL;
+	if(!this->isComplete()) return false;
+	if(!draw_framebuffer) glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	else if(!draw_framebuffer->isComplete()) return false;
+	else
+	{
+		GLCLEARERROR();
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, draw_framebuffer->getId());
+		if(glGetError() != GL_NO_ERROR) return false;
+	}
 	GLCLEARERROR();
-	glFramebufferTexture2D(fb_target, attachment_target, GL_TEXTURE_2D, texture_id, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, this->getId());
+	glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return glGetError() == GL_NO_ERROR;
 }

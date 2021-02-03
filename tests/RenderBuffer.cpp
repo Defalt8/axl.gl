@@ -31,8 +31,9 @@ class GameView : public axl::gl::View
 {
 	public:
 		axl::gl::Context main_context;
-		axl::gl::gfx::FrameBuffer frame_buffer;
+		axl::gl::gfx::FrameBuffer frame_buffer, frame_buffer0;
 		axl::gl::gfx::RenderBuffer render_buffer_color, render_buffer_depth_stencil;
+		axl::gl::gfx::RenderBuffer render_buffer_color0, render_buffer_depth_stencil0;
 		axl::glfl::GLuint samples, max_sample;
 		bool offscreen;
 		float theta;
@@ -45,8 +46,11 @@ class GameView : public axl::gl::View
 			axl::gl::View(_title, _position, _size, _cursor),
 			main_context(),
 			frame_buffer(&this->main_context),
+			frame_buffer0(&this->main_context),
 			render_buffer_color(&this->main_context),
+			render_buffer_color0(&this->main_context),
 			render_buffer_depth_stencil(&this->main_context),
+			render_buffer_depth_stencil0(&this->main_context),
 			samples(0),
 			offscreen(true),
 			theta(0.0f),
@@ -83,9 +87,8 @@ class GameView : public axl::gl::View
 			if(this->offscreen)
 			{
 				Assert(this->frame_buffer.unbind());
-				Assert(this->frame_buffer.bind(axl::gl::gfx::FrameBuffer::FBT_READ));
-				GLC(GL::glBlitFramebuffer(0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST));
-				Assert(this->frame_buffer.unbind());
+				Assert(this->frame_buffer.blit(&this->frame_buffer0, 0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST));
+				Assert(this->frame_buffer0.blit(0, 0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 			}
 			this->swap();
 
@@ -179,13 +182,25 @@ class GameView : public axl::gl::View
 			Assert(this->render_buffer_color.create());
 			Assert(this->render_buffer_color.isValid());
 
+			Assert(!this->render_buffer_color0.isValid());
+			Assert(this->render_buffer_color0.create());
+			Assert(this->render_buffer_color0.isValid());
+
 			Assert(!this->render_buffer_depth_stencil.isValid());
 			Assert(this->render_buffer_depth_stencil.create());
 			Assert(this->render_buffer_depth_stencil.isValid());
+
+			Assert(!this->render_buffer_depth_stencil0.isValid());
+			Assert(this->render_buffer_depth_stencil0.create());
+			Assert(this->render_buffer_depth_stencil0.isValid());
 			
 			Assert(!this->frame_buffer.isValid());
 			Assert(this->frame_buffer.create());
 			Assert(this->frame_buffer.isValid());
+
+			Assert(!this->frame_buffer0.isValid());
+			Assert(this->frame_buffer0.create());
+			Assert(this->frame_buffer0.isValid());
 			
 			this->configureFrameBuffer();
 			return axl::gl::View::onCreate(recreating);
@@ -201,6 +216,15 @@ class GameView : public axl::gl::View
 			if(!this->frame_buffer.isComplete())
 			{
 				fprintf(stderr, "ERROR: incomplete Framebuffer!\n");
+				return false;
+			}
+			Assert(this->render_buffer_color0.allocate(this->samples, GL_RGBA8, this->size.x, this->size.y));
+			Assert(this->render_buffer_depth_stencil0.allocate(this->samples, GL::GL_DEPTH24_STENCIL8, this->size.x, this->size.y));
+			Assert(this->frame_buffer0.attachRenderBuffer(GL::GL_COLOR_ATTACHMENT0, &this->render_buffer_color0));
+			Assert(this->frame_buffer0.attachRenderBuffer(GL::GL_DEPTH_STENCIL_ATTACHMENT, &this->render_buffer_depth_stencil0));
+			if(!this->frame_buffer0.isComplete())
+			{
+				fprintf(stderr, "ERROR: incomplete Framebuffer[0]!\n");
 				return false;
 			}
 			return true;
