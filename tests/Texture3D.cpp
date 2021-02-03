@@ -201,10 +201,10 @@ class GameView : public axl::gl::View
 					double ar = (double)width/height;
 					double bottom, top, left, right;
 					double d = znear * axl::math::tan(axl::math::Angle::degToRad(fov) / 2.0);
-					left = -d;
-					right = d;
-					bottom = -d / ar;
-					top = d / ar;
+					left = -d * ar;
+					right = d * ar;
+					bottom = -d;
+					top = d;
 					glFrustum(left, right, bottom, top, znear, zfar);
 					// glOrtho(-ar, ar, -1.0, 1.0, -100.0, 100.0);
 				}
@@ -213,10 +213,10 @@ class GameView : public axl::gl::View
 					double ar = (double)height/width;
 					double bottom, top, left, right;
 					double d = znear * axl::math::tan(axl::math::Angle::degToRad(fov) / 2.0);
-					left = -d / ar;
-					right = d / ar;
-					bottom = -d;
-					top = d;
+					left = -d;
+					right = d;
+					bottom = -d * ar;
+					top = d * ar;
 					glFrustum(left, right, bottom, top, znear, zfar);
 					// glOrtho(-1.0, 1.0, -ar, ar, -100.0, 100.0);
 				}
