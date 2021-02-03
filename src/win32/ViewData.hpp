@@ -16,6 +16,7 @@ typedef struct
 	RECT prev_rect;
 	DWORD style;
 	bool is_recreating;
+	bool from_message;
 } ViewData;
 
 } // namespace axl.gl

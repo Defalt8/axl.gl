@@ -3,6 +3,7 @@
 #include <axl.gl/Context.hpp>
 #include <axl.gl/gfx/buffer/FrameBuffer.hpp>
 #include <axl.glfl/glCoreARB.hpp>
+#include <stdio.h>
 
 #define GLCLEARERROR() while(axl::glfl::core::GL1::glGetError())
 
@@ -16,9 +17,27 @@ namespace axl {
 namespace gl {
 namespace gfx {
 
+FrameBuffer::Binding::Binding() :
+	type(),
+	pointer()
+{}
+
+FrameBuffer::Binding::Binding(FrameBuffer::Binding::Type p_type, void* p_ptr) :
+	type(p_type),
+	pointer()
+{
+	switch(p_type)
+	{
+		case Type::BT_TEXTURE: *((Texture**)&pointer) = (Texture*)p_ptr; break; 
+		case Type::BT_RENDER_BUFFER: *((RenderBuffer**)&pointer) = (RenderBuffer*)p_ptr; break;
+		default: break;
+	}
+}
+
 FrameBuffer::FrameBuffer(axl::gl::Context* ptr_context) :
 	ContextObject(ptr_context),
-	fbo_id(-1)
+	fb_id(-1),
+	fb_bindings()
 {}
 FrameBuffer::~FrameBuffer()
 {
@@ -37,28 +56,41 @@ bool FrameBuffer::icreate()
 		glDeleteFramebuffers(1, &tmp_id);
 		return false;
 	}
-	this->fbo_id = tmp_id;
-	return glGetError() == GL_NO_ERROR;
+	this->fb_id = tmp_id;
+	printf("> FrameBuffer[%d].create()\n", this->fb_id);
+	return true;
 }
 bool FrameBuffer::idestroy()
 {
 	using namespace GL;
+	while(!this->fb_bindings.isEmpty())
+	{
+		Binding binding = this->fb_bindings.removeFirst();
+		switch(binding.type)
+		{
+			case Binding::Type::BT_TEXTURE: binding.pointer.texture->destroy(); break;
+			case Binding::Type::BT_RENDER_BUFFER: binding.pointer.render_buffer->destroy(); break;
+			default: break;
+		}
+	}
 	if(this->unbind())
 	{
 		GLCLEARERROR();
-		glDeleteFramebuffers(1, &this->fbo_id);
+		glDeleteFramebuffers(1, &this->fb_id);
 		if(glGetError() != GL_NO_ERROR) return false;
+		printf("> FrameBuffer[%d].destroy()\n", this->fb_id);
+		this->fb_id = -1;
+		return true;
 	}
-	this->fbo_id = -1;
-	return true;
+	return false;
 }
 bool FrameBuffer::isValid() const
 {
-	return this->ctx_context && this->ctx_context->isValid() && this->fbo_id != -1;
+	return this->ctx_context && this->ctx_context->isValid() && this->fb_id != -1;
 }
 axl::glfl::GLuint FrameBuffer::getId() const
 {
-	return this->fbo_id;
+	return this->fb_id;
 }
 bool FrameBuffer::bind(Target p_target) const
 {
@@ -66,7 +98,7 @@ bool FrameBuffer::bind(Target p_target) const
 	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
 	axl::glfl::GLenum fb_target = p_target == Target::FBT_READ ? GL_READ_FRAMEBUFFER : (p_target == Target::FBT_DRAW ? GL_DRAW_FRAMEBUFFER : GL_FRAMEBUFFER);
 	GLCLEARERROR();
-	glBindFramebuffer(fb_target, this->fbo_id);
+	glBindFramebuffer(fb_target, this->fb_id);
 	return glGetError() == GL_NO_ERROR;
 }
 bool FrameBuffer::unbind(Target p_target) const
@@ -107,7 +139,9 @@ bool FrameBuffer::attachRenderBuffer(axl::glfl::GLenum attachment_target, Render
 	else
 		glFramebufferRenderbuffer(fb_target, attachment_target, GL_RENDERBUFFER, render_buffer_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	return glGetError() == GL_NO_ERROR;
+	if(glGetError() != GL_NO_ERROR) return false;
+	this->fb_bindings.insertLast(Binding(Binding::Type::BT_RENDER_BUFFER, render_buffer));
+	return true;
 }
 bool FrameBuffer::attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D* texture, Target p_target)
 {
@@ -123,7 +157,9 @@ bool FrameBuffer::attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D
 	else
 		glFramebufferTexture2D(fb_target, attachment_target, GL_TEXTURE_2D, texture_id, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	return glGetError() == GL_NO_ERROR;
+	if(glGetError() != GL_NO_ERROR) return false;
+	this->fb_bindings.insertLast(Binding(Binding::Type::BT_TEXTURE, texture));
+	return true;
 }
 bool FrameBuffer::blit(const FrameBuffer* draw_framebuffer, axl::glfl::GLint srcX0, axl::glfl::GLint srcY0, axl::glfl::GLint srcX1, axl::glfl::GLint srcY1, axl::glfl::GLint dstX0, axl::glfl::GLint dstY0, axl::glfl::GLint dstX1, axl::glfl::GLint dstY1, axl::glfl::GLbitfield mask, axl::glfl::GLenum filter) const
 {

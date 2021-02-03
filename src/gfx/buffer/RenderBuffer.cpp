@@ -3,6 +3,7 @@
 #include <axl.gl/Context.hpp>
 #include <axl.gl/gfx/buffer/RenderBuffer.hpp>
 #include <axl.glfl/glCoreARB.hpp>
+#include <stdio.h>
 
 #define GLCLEARERROR() while(axl::glfl::core::GL1::glGetError())
 
@@ -18,7 +19,7 @@ namespace gfx {
 
 RenderBuffer::RenderBuffer(axl::gl::Context* ptr_context) :
 	ContextObject(ptr_context),
-	rbo_id(-1)
+	rb_id(-1)
 {}
 RenderBuffer::~RenderBuffer()
 {
@@ -37,35 +38,38 @@ bool RenderBuffer::icreate()
 		glDeleteRenderbuffers(1, &tmp_id);
 		return false;
 	}
-	this->rbo_id = tmp_id;
-	return glGetError() == GL_NO_ERROR;
+	this->rb_id = tmp_id;
+	printf("> RenderBuffer[%d].create()\n", this->rb_id);
+	return true;
 }
 bool RenderBuffer::idestroy()
 {
 	using namespace GL;
-	if(this->unbind())
+	if(this->unbind() || (this->ctx_context && this->ctx_context->makeCurrent()))
 	{
 		GLCLEARERROR();
-		glDeleteRenderbuffers(1, &this->rbo_id);
+		glDeleteRenderbuffers(1, &this->rb_id);
 		if(glGetError() != GL_NO_ERROR) return false;
+		printf("> RenderBuffer[%d].destroy()\n", this->rb_id);
+		this->rb_id = -1;
+		return true;
 	}
-	this->rbo_id = -1;
-	return true;
+	return false;
 }
 bool RenderBuffer::isValid() const
 {
-	return this->ctx_context && this->ctx_context->isValid() && this->rbo_id != -1;
+	return this->ctx_context && this->ctx_context->isValid() && this->rb_id != -1;
 }
 axl::glfl::GLuint RenderBuffer::getId() const
 {
-	return this->rbo_id;
+	return this->rb_id;
 }
 bool RenderBuffer::bind() const
 {
 	using namespace GL;
 	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
 	GLCLEARERROR();
-	glBindRenderbuffer(GL_RENDERBUFFER, this->rbo_id);
+	glBindRenderbuffer(GL_RENDERBUFFER, this->rb_id);
 	return glGetError() == GL_NO_ERROR;
 }
 bool RenderBuffer::unbind() const

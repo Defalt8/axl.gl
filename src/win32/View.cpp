@@ -282,16 +282,26 @@ bool View::create(Display& display, bool recreate, const Config* configs_, int c
 
 void View::destroy()
 {
-	if(m_reserved && ((ViewData*)m_reserved)->hwnd)
+	if(m_reserved)
 	{
-		Context* context;
-		while((context = this->m_contexts.removeFirst()))
-			context->destroy();
+		while(!this->m_contexts.isEmpty())
+		{
+			Context* contexts = this->m_contexts.removeFirst();
+			if(contexts) contexts->destroy();
+		}
 		((ViewData*)m_reserved)->is_recreating = false;
-		ReleaseDC(((ViewData*)m_reserved)->hwnd, ((ViewData*)m_reserved)->hdc);
-		((ViewData*)m_reserved)->hdc = NULL;
-		DestroyWindow(((ViewData*)m_reserved)->hwnd);
-		((ViewData*)m_reserved)->hwnd = NULL;
+		if(((ViewData*)m_reserved)->hwnd)
+		{
+			ReleaseDC(((ViewData*)m_reserved)->hwnd, ((ViewData*)m_reserved)->hdc);
+			((ViewData*)m_reserved)->hdc = NULL;
+			if(!((ViewData*)m_reserved)->from_message)
+			{
+				((ViewData*)m_reserved)->from_message = true;
+				DestroyWindow(((ViewData*)m_reserved)->hwnd);
+			}
+			((ViewData*)m_reserved)->hwnd = NULL;
+			((ViewData*)m_reserved)->from_message = false;
+		}
 	}
 }
 
@@ -812,10 +822,20 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 				if(!view->onCreate(((ViewData*)view->getReserved())->is_recreating)) DestroyWindow(hwnd);
 			}
 			break;
+		case WM_CLOSE:
 		case WM_DESTROY:
 			if(view && view->isValid())
 			{
-				if(((ViewData*)view->reserved)->hdc) view->onDestroy(((ViewData*)view->getReserved())->is_recreating);
+				if(((ViewData*)view->reserved)->hdc)
+				{
+					if(!((ViewData*)view->reserved)->from_message)
+					{
+						((ViewData*)view->reserved)->from_message = true;
+						view->destroy();
+					}
+					((ViewData*)view->reserved)->from_message = false;
+					view->onDestroy(((ViewData*)view->getReserved())->is_recreating);
+				}
 			}
 			break;
 		default:

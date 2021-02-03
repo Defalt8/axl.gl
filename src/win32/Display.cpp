@@ -148,9 +148,11 @@ bool Display::close()
 {
 	if(m_reserved)
 	{
-		View* view;
-		while((view = this->m_views.removeFirst()))
-			view->destroy();
+		while(!this->m_views.isEmpty())
+		{
+			View* view = this->m_views.removeFirst();
+			if(view) view->destroy();
+		}
 		m_index = -1;
 		((DisplayData*)this->m_reserved)->set = true;
 		return true;

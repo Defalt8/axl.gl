@@ -40,16 +40,16 @@ class GameView : public axl::gl::View
 	private:
 		axl::util::uc::Time time, ctime;
 		axl::util::uc::Clock clock_fps_update;
-		axl::gl::input::Key m_key_M, m_key_O, m_key_V;
+		axl::gl::input::Key m_key_M, m_key_O, m_key_V, m_key_B;
 	public:
 		GameView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const Cursor& _cursor = View::DefaultCursor) :
 			axl::gl::View(_title, _position, _size, _cursor),
 			main_context(),
 			frame_buffer(&this->main_context),
-			frame_buffer0(&this->main_context),
 			render_buffer_color(&this->main_context),
-			render_buffer_color0(&this->main_context),
 			render_buffer_depth_stencil(&this->main_context),
+			frame_buffer0(&this->main_context),
+			render_buffer_color0(&this->main_context),
 			render_buffer_depth_stencil0(&this->main_context),
 			samples(0),
 			offscreen(true),
@@ -57,7 +57,8 @@ class GameView : public axl::gl::View
 			clock_fps_update(200),
 			m_key_M(axl::gl::input::KeyCode::KEY_M),
 			m_key_O(axl::gl::input::KeyCode::KEY_O),
-			m_key_V(axl::gl::input::KeyCode::KEY_V)
+			m_key_V(axl::gl::input::KeyCode::KEY_V),
+			m_key_B(axl::gl::input::KeyCode::KEY_B)
 		{}
 
 		~GameView()
@@ -87,8 +88,8 @@ class GameView : public axl::gl::View
 			if(this->offscreen)
 			{
 				Assert(this->frame_buffer.unbind());
-				Assert(this->frame_buffer.blit(&this->frame_buffer0, 0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST));
-				Assert(this->frame_buffer0.blit(0, 0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST));
+				Assert(this->frame_buffer.blit(0, 0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST));
+				// Assert(this->frame_buffer0.blit(0, 0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 			}
 			this->swap();
 
@@ -178,29 +179,30 @@ class GameView : public axl::gl::View
 				this->max_sample = max_samples <= 0 ? 0 : max_samples;
 			}
 			// Create stuff here
+			
+			Assert(!this->frame_buffer.isValid());
+			Assert(this->frame_buffer.create());
+			Assert(this->frame_buffer.isValid());
+			
 			Assert(!this->render_buffer_color.isValid());
 			Assert(this->render_buffer_color.create());
 			Assert(this->render_buffer_color.isValid());
-
-			Assert(!this->render_buffer_color0.isValid());
-			Assert(this->render_buffer_color0.create());
-			Assert(this->render_buffer_color0.isValid());
 
 			Assert(!this->render_buffer_depth_stencil.isValid());
 			Assert(this->render_buffer_depth_stencil.create());
 			Assert(this->render_buffer_depth_stencil.isValid());
 
-			Assert(!this->render_buffer_depth_stencil0.isValid());
-			Assert(this->render_buffer_depth_stencil0.create());
-			Assert(this->render_buffer_depth_stencil0.isValid());
-			
-			Assert(!this->frame_buffer.isValid());
-			Assert(this->frame_buffer.create());
-			Assert(this->frame_buffer.isValid());
-
 			Assert(!this->frame_buffer0.isValid());
 			Assert(this->frame_buffer0.create());
 			Assert(this->frame_buffer0.isValid());
+
+			Assert(!this->render_buffer_color0.isValid());
+			Assert(this->render_buffer_color0.create());
+			Assert(this->render_buffer_color0.isValid());
+
+			Assert(!this->render_buffer_depth_stencil0.isValid());
+			Assert(this->render_buffer_depth_stencil0.create());
+			Assert(this->render_buffer_depth_stencil0.isValid());
 			
 			this->configureFrameBuffer();
 			return axl::gl::View::onCreate(recreating);
@@ -302,6 +304,10 @@ class GameView : public axl::gl::View
 			if(this->m_key_V.isPressed())
 			{
 				this->main_context.setVSync(!this->main_context.getVSync());
+			}
+			if(this->m_key_B.isPressed())
+			{
+				this->frame_buffer0.destroy();
 			}
 		}
 

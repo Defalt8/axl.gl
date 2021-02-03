@@ -24,7 +24,7 @@ class AXLGLCXXAPI RenderBuffer : public ContextObject
 		bool unbind() const;
 		bool allocate(axl::glfl::GLsizei samples, axl::glfl::GLenum internal_format, axl::glfl::GLsizei width, axl::glfl::GLsizei height);
 	protected:
-		axl::glfl::GLuint rbo_id;
+		axl::glfl::GLuint rb_id;
 };
 
 } // namespace axl.gl.gfx
