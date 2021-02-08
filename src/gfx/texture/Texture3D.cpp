@@ -6,6 +6,13 @@
 
 #define GLCLEARERROR() while(glGetError() != GL_NO_ERROR)
 
+namespace GL {
+	using namespace axl::glfl::core::GL1;
+	using namespace axl::glfl::core::GL2;
+	using namespace axl::glfl::core::GL3;
+	using namespace axl::glfl::core::GL4;
+}
+
 namespace axl {
 namespace gl {
 namespace gfx {
@@ -29,7 +36,7 @@ Texture3D::~Texture3D()
 }
 bool Texture3D::icreate()
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!GL_VERSION_1_0 || this->isValid() || !this->ctx_context->makeCurrent()) return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
@@ -61,7 +68,7 @@ bool Texture3D::icreate()
 }
 bool Texture3D::idestroy()
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(this->unbind())
 	{
 		GLCLEARERROR();
@@ -81,7 +88,7 @@ bool Texture3D::isValid() const
 }
 bool Texture3D::bind() const
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
 	GLCLEARERROR();
 	glBindTexture(GL_TEXTURE_3D, this->txr_id);
@@ -89,14 +96,14 @@ bool Texture3D::bind() const
 }
 bool Texture3D::unbind() const
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
 	glBindTexture(GL_TEXTURE_3D, 0);
 	return true;
 }
 bool Texture3D::setParami(axl::glfl::GLenum tex_param, axl::glfl::GLint value)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->bind()) return false;
 	glTexParameteri(GL_TEXTURE_3D, tex_param, value);
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -104,7 +111,7 @@ bool Texture3D::setParami(axl::glfl::GLenum tex_param, axl::glfl::GLint value)
 }
 bool Texture3D::setParamf(axl::glfl::GLenum tex_param, axl::glfl::GLfloat value)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->bind()) return false;
 	glTexParameterf(GL_TEXTURE_3D, tex_param, value);
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -112,7 +119,7 @@ bool Texture3D::setParamf(axl::glfl::GLenum tex_param, axl::glfl::GLfloat value)
 }
 bool Texture3D::setParamiv(axl::glfl::GLenum tex_param, const axl::glfl::GLint* value)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->bind()) return false;
 	glTexParameteriv(GL_TEXTURE_3D, tex_param, value);
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -120,7 +127,7 @@ bool Texture3D::setParamiv(axl::glfl::GLenum tex_param, const axl::glfl::GLint* 
 }
 bool Texture3D::setParamfv(axl::glfl::GLenum tex_param, const axl::glfl::GLfloat* value)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->bind()) return false;
 	glTexParameterfv(GL_TEXTURE_3D, tex_param, value);
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -128,7 +135,7 @@ bool Texture3D::setParamfv(axl::glfl::GLenum tex_param, const axl::glfl::GLfloat
 }
 bool Texture3D::getParamiv(axl::glfl::GLenum tex_param, axl::glfl::GLint* value_ptr)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->bind()) return false;
 	glGetTexParameteriv(GL_TEXTURE_3D, tex_param, value_ptr);
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -136,7 +143,7 @@ bool Texture3D::getParamiv(axl::glfl::GLenum tex_param, axl::glfl::GLint* value_
 }
 bool Texture3D::getParamfv(axl::glfl::GLenum tex_param, axl::glfl::GLfloat* value_ptr)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->bind()) return false;
 	glGetTexParameterfv(GL_TEXTURE_3D, tex_param, value_ptr);
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -144,7 +151,7 @@ bool Texture3D::getParamfv(axl::glfl::GLenum tex_param, axl::glfl::GLfloat* valu
 }
 bool Texture3D::getLevelParamiv(axl::glfl::GLint level, axl::glfl::GLenum tex_param, axl::glfl::GLint* value_ptr)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->bind()) return false;
 	glGetTexLevelParameteriv(GL_TEXTURE_3D, level, tex_param, value_ptr);
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -152,7 +159,7 @@ bool Texture3D::getLevelParamiv(axl::glfl::GLint level, axl::glfl::GLenum tex_pa
 }
 bool Texture3D::getLevelParamfv(axl::glfl::GLint level, axl::glfl::GLenum tex_param, axl::glfl::GLfloat* value_ptr)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->bind()) return false;
 	glGetTexLevelParameterfv(GL_TEXTURE_3D, level, tex_param, value_ptr);
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -160,9 +167,72 @@ bool Texture3D::getLevelParamfv(axl::glfl::GLint level, axl::glfl::GLenum tex_pa
 }
 bool Texture3D::allocate(axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLsizei depth, axl::glfl::GLint internal_format, axl::glfl::GLint border)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!this->bind()) return false;
-	glTexImage3D(GL_TEXTURE_3D, 0, internal_format, width, height, depth, border, GL_RGB, GL_UNSIGNED_BYTE, (const void*)0);
+	axl::glfl::GLenum format;
+	switch(internal_format)
+	{
+		default: format = GL_RED; break;
+		case GL_DEPTH_COMPONENT32F:
+		case GL_DEPTH_COMPONENT32:
+		case GL_DEPTH_COMPONENT24:
+		case GL_DEPTH_COMPONENT16: format = GL_DEPTH_COMPONENT; break;
+		case GL_RGBA32F:
+		case GL_RGBA32I:
+		case GL_RGBA32UI:
+		case GL_RGBA16:
+		case GL_RGBA16F:
+		case GL_RGBA16I:
+		case GL_RGBA16UI:
+		case GL_RGBA8:
+		case GL_RGBA8UI:
+		case GL_SRGB8_ALPHA8:
+		case GL_RGB10_A2:
+		case GL_RGB10_A2UI:
+		case GL_R11F_G11F_B10F:
+		case GL_RG32F:
+		case GL_RG32I:
+		case GL_RG32UI:
+		case GL_RG16:
+		case GL_RG16F:
+		case GL_RGB16I:
+		case GL_RGB16UI:
+		case GL_RG8:
+		case GL_RG8I:
+		case GL_RG8UI:
+		case GL_R32F:
+		case GL_R32I:
+		case GL_R32UI:
+		case GL_R16F:
+		case GL_R16I:
+		case GL_R16UI:
+		case GL_R8:
+		case GL_R8I:
+		case GL_R8UI:
+		case GL_RGBA16_SNORM:
+		case GL_RGBA8_SNORM:
+		case GL_RGB32F:
+		case GL_RGB32I:
+		case GL_RGB32UI:
+		case GL_RGB16_SNORM:
+		case GL_RGB16F:
+		case GL_RGB16:
+		case GL_RGB8_SNORM:
+		case GL_RGB8:
+		case GL_RGB8I:
+		case GL_RGB8UI:
+		case GL_SRGB8:
+		case GL_RGB9_E5:
+		case GL_RG16_SNORM:
+		case GL_RG8_SNORM:
+		case GL_COMPRESSED_RG_RGTC2:
+		case GL_COMPRESSED_SIGNED_RG_RGTC2:
+		case GL_R16_SNORM:
+		case GL_R8_SNORM:
+		case GL_COMPRESSED_RED_RGTC1:
+		case GL_COMPRESSED_SIGNED_RED_RGTC1: format = GL_RED; break;
+	}
+	glTexImage3D(GL_TEXTURE_3D, 0, internal_format, width, height, depth, border, format, GL_UNSIGNED_BYTE, (const void*)0);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_LOD, 0);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LOD, (axl::glfl::GLsizei)std::log2((float)width >= height ? width : height));
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -170,7 +240,7 @@ bool Texture3D::allocate(axl::glfl::GLsizei width, axl::glfl::GLsizei height, ax
 }
 bool Texture3D::setImage(axl::glfl::GLint level, axl::glfl::GLint x_offset, axl::glfl::GLint y_offset, axl::glfl::GLint z_offset, axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLsizei depth, axl::glfl::GLenum format, axl::glfl::GLenum data_type, const axl::glfl::GLvoid* image_data, axl::glfl::GLint pixel_alignment)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!image_data || !this->bind()) return false;
 	glPixelStorei(GL_UNPACK_ALIGNMENT, pixel_alignment);
 	if(glGetError() != GL_NO_ERROR) return false;
@@ -180,7 +250,7 @@ bool Texture3D::setImage(axl::glfl::GLint level, axl::glfl::GLint x_offset, axl:
 }
 bool Texture3D::getImage(axl::glfl::GLint level, axl::glfl::GLenum format, axl::glfl::GLenum data_type, axl::glfl::GLvoid* image_data, axl::glfl::GLint pixel_alignment)
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(!image_data || !this->bind()) return false;
 	glPixelStorei(GL_PACK_ALIGNMENT, pixel_alignment);
 	if(glGetError() != GL_NO_ERROR) return false;
@@ -190,7 +260,7 @@ bool Texture3D::getImage(axl::glfl::GLint level, axl::glfl::GLenum format, axl::
 }
 bool Texture3D::generateMipmaps()
 {
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	using namespace axl::glfl::core::GL3;
 	if(!GL_VERSION_3_0 || !this->bind()) return false;
 	glGenerateMipmap(GL_TEXTURE_3D);
@@ -200,7 +270,7 @@ bool Texture3D::generateMipmaps()
 axl::math::Vec3f Texture3D::getSize(axl::glfl::GLint level) const
 {
 	axl::math::Vec3f tex_size(-1.f,-1.f, -1.f);
-	using namespace axl::glfl::core::GL1;
+	using namespace GL;
 	if(this->bind())
 	{
 		axl::glfl::GLint tex_width, tex_height, tex_depth;
