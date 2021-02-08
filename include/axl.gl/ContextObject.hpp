@@ -13,14 +13,17 @@ class AXLGLCXXAPI ContextObject
 		virtual ~ContextObject();
 		bool create();
 		bool destroy();
+		bool isCreated() const;
+		bool isBeingDestroyed() const;
 		virtual bool icreate() = 0;
 		virtual bool idestroy() = 0;
 		axl::gl::Context* getContext();
 		void setContext(axl::gl::Context* ptr_context);
 	protected:
 		axl::gl::Context* ctx_context;
-		bool ctx_created;
-		bool ctx_destroyed;
+	private:
+		bool m_created;
+		bool m_being_destroyed;
 };
 
 } // axl.gl

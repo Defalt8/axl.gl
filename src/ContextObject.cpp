@@ -6,8 +6,8 @@ namespace gl {
 
 ContextObject::ContextObject(axl::gl::Context* ptr_context) :
 	ctx_context(),
-	ctx_created(false),
-	ctx_destroyed(false)
+	m_created(false),
+	m_being_destroyed(false)
 {
 	this->setContext(ptr_context);
 }
@@ -20,19 +20,32 @@ ContextObject::~ContextObject()
 
 bool ContextObject::create()
 {
-	if(this->ctx_created && !this->ctx_destroyed) return true;
-	if(!this->ctx_context || !this->icreate()) return false;
-	this->ctx_destroyed = false;
-	return this->ctx_created = true;
+	if(!ContextObject::m_created && this->icreate())
+		ContextObject::m_created = true;
+	return ContextObject::m_created;
 }
 
 bool ContextObject::destroy()
 {
-	if(this->ctx_destroyed) return true;
-	if(!this->ctx_created || !this->idestroy()) return false;
-	this->ctx_created = false;
-	return this->ctx_destroyed = true;
+	if(ContextObject::m_being_destroyed) return false;
+	else if(!ContextObject::m_created) return true;
+	ContextObject::m_being_destroyed = true;
+	if(this->idestroy())
+		ContextObject::m_created = false;
+	ContextObject::m_being_destroyed = false;
+	return !ContextObject::m_created;
 }
+
+bool ContextObject::isCreated() const
+{
+	return this->m_created;
+}
+
+bool ContextObject::isBeingDestroyed() const
+{
+	return this->m_being_destroyed;
+}
+
 
 axl::gl::Context* ContextObject::getContext()
 {
