@@ -31,9 +31,8 @@ class GameView : public axl::gl::View
 {
 	public:
 		axl::gl::Context main_context;
-		axl::gl::gfx::FrameBuffer frame_buffer, frame_buffer0;
+		axl::gl::gfx::FrameBuffer frame_buffer;
 		axl::gl::gfx::RenderBuffer render_buffer_color, render_buffer_depth_stencil;
-		axl::gl::gfx::RenderBuffer render_buffer_color0, render_buffer_depth_stencil0;
 		axl::glfl::GLuint samples, max_sample;
 		bool offscreen;
 		float theta;
@@ -48,9 +47,6 @@ class GameView : public axl::gl::View
 			frame_buffer(&this->main_context),
 			render_buffer_color(&this->main_context),
 			render_buffer_depth_stencil(&this->main_context),
-			frame_buffer0(&this->main_context),
-			render_buffer_color0(&this->main_context),
-			render_buffer_depth_stencil0(&this->main_context),
 			samples(0),
 			offscreen(true),
 			theta(0.0f),
@@ -66,12 +62,14 @@ class GameView : public axl::gl::View
 
 		void update()
 		{
+			if(!this->isValid() || this->is_paused) return;
 			this->theta += 45.0f * this->time.deltaTime();
 			this->time.set();
 		}
 
 		void render()
 		{
+			if(!this->isValid() || this->is_paused) return;
 			if(this->offscreen)
 			{
 				Assert(this->frame_buffer.bind(axl::gl::gfx::FrameBuffer::FBT_DRAW));
@@ -89,7 +87,6 @@ class GameView : public axl::gl::View
 			{
 				Assert(this->frame_buffer.unbind());
 				Assert(this->frame_buffer.blit(0, 0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST));
-				// Assert(this->frame_buffer0.blit(0, 0, 0, this->size.x, this->size.y, 0, 0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 			}
 			this->swap();
 
@@ -111,6 +108,7 @@ class GameView : public axl::gl::View
 
 		void render(bool p_clear, bool p_swap, bool p_exclude_opaque = false, bool p_exclude_alpha = false)
 		{
+			if(!this->isValid()) return;
 			if(this->main_context.makeCurrent())
 			{
 				glMatrixMode(GL_MODELVIEW);
@@ -158,6 +156,7 @@ class GameView : public axl::gl::View
 
 		void onDisplayConfig(const axl::gl::Display& display)
 		{
+			if(!this->isValid() || this->is_paused) return;
 			axl::gl::View::onDisplayConfig(display);
 			printf("onDisplayConfig:display.size: %d,%d\n", display.size.x, display.size.y);
 			this->setPosition((display.size - this->size) / 2); // center to display
@@ -191,18 +190,6 @@ class GameView : public axl::gl::View
 			Assert(!this->render_buffer_depth_stencil.isValid());
 			Assert(this->render_buffer_depth_stencil.create());
 			Assert(this->render_buffer_depth_stencil.isValid());
-
-			Assert(!this->frame_buffer0.isValid());
-			Assert(this->frame_buffer0.create());
-			Assert(this->frame_buffer0.isValid());
-
-			Assert(!this->render_buffer_color0.isValid());
-			Assert(this->render_buffer_color0.create());
-			Assert(this->render_buffer_color0.isValid());
-
-			Assert(!this->render_buffer_depth_stencil0.isValid());
-			Assert(this->render_buffer_depth_stencil0.create());
-			Assert(this->render_buffer_depth_stencil0.isValid());
 			
 			this->configureFrameBuffer();
 			return axl::gl::View::onCreate(recreating);
@@ -210,23 +197,15 @@ class GameView : public axl::gl::View
 		
 		bool configureFrameBuffer()
 		{
+			if(!this->isValid()) return false;
 			if(!this->isValid() || !this->main_context.isValid() || !this->main_context.makeCurrent()) return false;
-			Assert(this->render_buffer_color.allocate(this->samples, GL_RGBA8, this->size.x, this->size.y));
-			Assert(this->render_buffer_depth_stencil.allocate(this->samples, GL::GL_DEPTH24_STENCIL8, this->size.x, this->size.y));
+			Assert(this->render_buffer_color.allocate(this->size.x, this->size.y, GL_RGBA8, this->samples));
+			Assert(this->render_buffer_depth_stencil.allocate(this->size.x, this->size.y, GL::GL_DEPTH24_STENCIL8, this->samples));
 			Assert(this->frame_buffer.attachRenderBuffer(GL::GL_COLOR_ATTACHMENT0, &this->render_buffer_color));
 			Assert(this->frame_buffer.attachRenderBuffer(GL::GL_DEPTH_STENCIL_ATTACHMENT, &this->render_buffer_depth_stencil));
 			if(!this->frame_buffer.isComplete())
 			{
 				fprintf(stderr, "ERROR: incomplete Framebuffer!\n");
-				return false;
-			}
-			Assert(this->render_buffer_color0.allocate(this->samples, GL_RGBA8, this->size.x, this->size.y));
-			Assert(this->render_buffer_depth_stencil0.allocate(this->samples, GL::GL_DEPTH24_STENCIL8, this->size.x, this->size.y));
-			Assert(this->frame_buffer0.attachRenderBuffer(GL::GL_COLOR_ATTACHMENT0, &this->render_buffer_color0));
-			Assert(this->frame_buffer0.attachRenderBuffer(GL::GL_DEPTH_STENCIL_ATTACHMENT, &this->render_buffer_depth_stencil0));
-			if(!this->frame_buffer0.isComplete())
-			{
-				fprintf(stderr, "ERROR: incomplete Framebuffer[0]!\n");
 				return false;
 			}
 			return true;
@@ -281,17 +260,6 @@ class GameView : public axl::gl::View
 		void onKey(axl::gl::input::KeyCode key, bool down)
 		{
 			using namespace axl::gl::input;
-			switch (key)
-			{
-			case KeyCode::KEY_ESCAPE:
-				axl::gl::Application::quit(0);
-				break;
-			case KeyCode::KEY_C:
-				if(this->display && *this->display) (*this->display)->close();
-				break;
-			default:
-				axl::gl::View::onKey(key, down);
-			}
 			if(this->m_key_M.isPressed())
 			{
 				this->samples = this->samples == 0 ? 1 : (this->samples >= max_sample ? 0 : this->samples * 2);
@@ -305,9 +273,16 @@ class GameView : public axl::gl::View
 			{
 				this->main_context.setVSync(!this->main_context.getVSync());
 			}
-			if(this->m_key_B.isPressed())
+			switch (key)
 			{
-				this->frame_buffer0.destroy();
+			case KeyCode::KEY_ESCAPE:
+				axl::gl::Application::quit(0);
+				break;
+			case KeyCode::KEY_C:
+				if(this->display && *this->display) (*this->display)->close();
+				break;
+			default:
+				axl::gl::View::onKey(key, down);
 			}
 		}
 
@@ -352,7 +327,7 @@ int main(int argc, char* argv[])
 	bool verbose = argc > 1 && (0 == strcmp(argv[1], "-v") || 0 == strcmp(argv[1], "--verbose"));
 	using namespace axl::gl;
 	using namespace axl::gl::lib;
-	printf(">> axl.gl Display test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
+	printf(">> axl.gl RenderBuffer test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
 	puts("----------------------------------------");
 	{
 		Application::onExit = onExit;
@@ -364,8 +339,6 @@ int main(int argc, char* argv[])
 		axl::math::Vec2i position = (display.size - size) / 2;
 
 		GameView view(L"axl.gl.View", position, size);
-		// Assertv(view.create(display), verbose);
-		// Assertv(view.isValid(), verbose);
 		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(GameView::Config), GameView::VF_RESIZABLE), verbose);
 		Assertv(view.isValid(), verbose);
 		printf(".. View.Config %d selected.\n", view.config.id);
