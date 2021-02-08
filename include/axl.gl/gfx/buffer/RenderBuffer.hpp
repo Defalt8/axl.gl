@@ -11,6 +11,8 @@ class AXLGLCXXAPI Context;
 
 namespace gfx {
 
+class AXLGLCXXAPI FrameBuffer;
+
 class AXLGLCXXAPI RenderBuffer : public ContextObject
 {
 	public:
@@ -22,7 +24,7 @@ class AXLGLCXXAPI RenderBuffer : public ContextObject
 		axl::glfl::GLuint getId() const;
 		bool bind() const;
 		bool unbind() const;
-		bool allocate(axl::glfl::GLsizei samples, axl::glfl::GLenum internal_format, axl::glfl::GLsizei width, axl::glfl::GLsizei height);
+		bool allocate(axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLenum internal_format, axl::glfl::GLsizei samples);
 	protected:
 		axl::glfl::GLuint rb_id;
 };

@@ -12,6 +12,8 @@ class AXLGLCXXAPI Context;
 
 namespace gfx {
 
+class AXLGLCXXAPI RenderBuffer;
+
 class AXLGLCXXAPI FrameBuffer : public ContextObject
 {
 		struct Binding
@@ -22,8 +24,10 @@ class AXLGLCXXAPI FrameBuffer : public ContextObject
 				Texture* texture;
 				RenderBuffer* render_buffer;
 			} pointer;
+			axl::glfl::GLenum attachment_target;
 			Binding();
-			Binding(Type type, void* ptr);
+			Binding(Type type, axl::glfl::GLenum attachment_target, void* ptr);
+			bool operator==(const Binding& binding) const;
 		};
 	public:
 		AXLGL_ENUM_CLASS Target { FBT_BOTH = 0, FBT_READ, FBT_DRAW };
@@ -43,6 +47,7 @@ class AXLGLCXXAPI FrameBuffer : public ContextObject
 	protected:
 		axl::glfl::GLuint fb_id;
 		axl::util::ds::UniList<Binding> fb_bindings;
+		friend class AXLGLCXXAPI RenderBuffer;
 };
 
 } // namespace axl.gl.gfx

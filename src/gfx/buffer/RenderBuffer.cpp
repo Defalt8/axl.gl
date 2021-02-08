@@ -1,9 +1,9 @@
 #pragma once
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
+#include <axl.gl/gfx/buffer/FrameBuffer.hpp>
 #include <axl.gl/gfx/buffer/RenderBuffer.hpp>
 #include <axl.glfl/glCoreARB.hpp>
-#include <stdio.h>
 
 #define GLCLEARERROR() while(axl::glfl::core::GL1::glGetError())
 
@@ -39,7 +39,6 @@ bool RenderBuffer::icreate()
 		return false;
 	}
 	this->rb_id = tmp_id;
-	printf("> RenderBuffer[%d].create()\n", this->rb_id);
 	return true;
 }
 bool RenderBuffer::idestroy()
@@ -50,7 +49,6 @@ bool RenderBuffer::idestroy()
 		GLCLEARERROR();
 		glDeleteRenderbuffers(1, &this->rb_id);
 		if(glGetError() != GL_NO_ERROR) return false;
-		printf("> RenderBuffer[%d].destroy()\n", this->rb_id);
 		this->rb_id = -1;
 		return true;
 	}
@@ -80,7 +78,7 @@ bool RenderBuffer::unbind() const
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	return glGetError() == GL_NO_ERROR;
 }
-bool RenderBuffer::allocate(axl::glfl::GLsizei samples, axl::glfl::GLenum internal_format, axl::glfl::GLsizei width, axl::glfl::GLsizei height)
+bool RenderBuffer::allocate(axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLenum internal_format, axl::glfl::GLsizei samples)
 {
 	using namespace GL;
 	if(!this->bind()) return false;
