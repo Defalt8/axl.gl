@@ -284,6 +284,7 @@ void View::destroy()
 {
 	if(m_reserved)
 	{
+		if(this->isValid()) this->onDestroy(false);
 		while(!this->m_contexts.isEmpty())
 		{
 			Context* contexts = this->m_contexts.removeFirst();
@@ -834,7 +835,6 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 						view->destroy();
 					}
 					((ViewData*)view->reserved)->from_message = false;
-					view->onDestroy(((ViewData*)view->getReserved())->is_recreating);
 				}
 			}
 			break;
