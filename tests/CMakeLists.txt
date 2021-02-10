@@ -8,7 +8,9 @@ add_executable( axl.gl.texture3d "Texture3D.cpp" "GLC.cpp" )
 add_executable( axl.gl.renderbuffer "RenderBuffer.cpp" "GLC.cpp" )
 add_executable( axl.gl.rendertotexture "RenderToTexture.cpp" "GLC.cpp" )
 add_executable( axl.gl.projection "Projection.cpp" "GLC.cpp" )
+add_executable( axl.gl.camera3d "Camera3D.cpp" "GLC.cpp" )
 
-set_target_properties( axl.gl.lib axl.gl.display axl.gl.view axl.gl.texture3d axl.gl.renderbuffer axl.gl.rendertotexture axl.gl.projection
+set_target_properties( axl.gl.lib axl.gl.display axl.gl.view axl.gl.texture3d axl.gl.renderbuffer
+	axl.gl.rendertotexture axl.gl.projection axl.gl.camera3d
 	PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${AXLGL_RUNTIME_DIR}"
 )
