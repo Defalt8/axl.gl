@@ -343,9 +343,7 @@ int main(int argc, char* argv[])
 		axl::math::Vec2i size(640, 480);
 		axl::math::Vec2i position = (display.size - size) / 2;
 
-		GameView view(L"axl.gl.View", position, size);
-		// Assertv(view.create(display), verbose);
-		// Assertv(view.isValid(), verbose);
+		GameView view(L"axl.gl.RenderToTexture", position, size);
 		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(GameView::Config), GameView::VF_RESIZABLE), verbose);
 		Assertv(view.isValid(), verbose);
 		printf(".. View.Config %d selected.\n", view.config.id);

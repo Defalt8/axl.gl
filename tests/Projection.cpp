@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
 	bool verbose = argc > 1 && (0 == strcmp(argv[1], "-v") || 0 == strcmp(argv[1], "--verbose"));
 	using namespace axl::gl;
 	using namespace axl::gl::lib;
-	printf(">> axl.gl View test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
+	printf(">> axl.gl Projection test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
 	puts("----------------------------------------");
 	{
 		Application::onExit = onExit;
@@ -291,9 +291,7 @@ int main(int argc, char* argv[])
 		axl::math::Vec2i size(640, 480);
 		axl::math::Vec2i position = (display.size - size) / 2;
 
-		GameView view(L"axl.gl.View", position, size);
-		// Assertv(view.create(display), verbose);
-		// Assertv(view.isValid(), verbose);
+		GameView view(L"axl.gl.Projection", position, size);
 		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(GameView::Config), GameView::VF_RESIZABLE), verbose);
 		Assertv(view.isValid(), verbose);
 		printf(".. View.Config %d selected.\n", view.config.id);
