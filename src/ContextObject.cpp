@@ -54,9 +54,9 @@ axl::gl::Context* ContextObject::getContext()
 
 void ContextObject::setContext(axl::gl::Context* ptr_context)
 {
-	this->ctx_context = ptr_context;
-	if(this->ctx_context)
+	if(this->ctx_context != ptr_context)
 	{
+		this->ctx_context = ptr_context;
 		this->ctx_context->m_context_objects.insertLast(this);
 	}
 }
