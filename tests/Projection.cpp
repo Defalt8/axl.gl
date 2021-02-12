@@ -53,7 +53,7 @@ class GameView : public axl::gl::View
 
 		void update()
 		{
-			this->theta += 45.0f * this->time.deltaTime();
+			this->theta += 45.0f * this->time.deltaTimef();
 			this->time.set();
 		}
 
@@ -71,11 +71,11 @@ class GameView : public axl::gl::View
 						default:
 						case axl::gl::projection::Projection::Type::PT_ORTHOGRAPHIC:
 							this->orthographic_projection.set(-ar, ar, -1.0, 1.0, znear, zfar);
-							this->orthographic_projection.calculate();
+							this->orthographic_projection.updateTransform();
 							break;
 						case axl::gl::projection::Projection::Type::PT_PERSPECTIVE:
 							this->perspective_projection.set(znear, zfar, ar, fov);
-							this->perspective_projection.calculate();
+							this->perspective_projection.updateTransform();
 							break;
 					}
 					glLoadMatrixd(projection->matrix.values);

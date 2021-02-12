@@ -30,7 +30,7 @@ Orthographic::Orthographic(double p_left, double p_right, double p_bottom, doubl
 Orthographic::~Orthographic()
 {}
 
-void Orthographic::calculate()
+void Orthographic::updateTransform()
 {
 	Projection::projection_matrix.set(
 		(2.0 / (m_right - m_left)), 0.0, 0.0, 0.0,

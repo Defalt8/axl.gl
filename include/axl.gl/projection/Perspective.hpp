@@ -12,7 +12,7 @@ class AXLGLCXXAPI Perspective : public Projection
 	public:
 		Perspective(double zNear = 0.001, double zFar = 1000.0, double aspect_ratio = 1.0, double fov = 70.0);
 		~Perspective();
-		void calculate();
+		void updateTransform();
 		void set(double zNear, double zFar, double aspect_ratio, double fov);
 	public:
 		const double& left;

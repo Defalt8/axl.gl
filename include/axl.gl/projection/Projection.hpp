@@ -15,7 +15,7 @@ class AXLGLCXXAPI Projection
 	public:
 		Projection(Projection::Type type = Projection::Type::PT_IDENTITY, axl::math::Mat4d matrix = axl::math::Mat4d::Identity);
 		virtual ~Projection();
-		virtual void calculate();
+		virtual void updateTransform();
 	public:
 		const Type& type;
 		const axl::math::Mat4d& matrix;

@@ -17,6 +17,7 @@
 #include <axl.math/angle.hpp>
 #include <axl.math/basic.hpp>
 #include <axl.math/util.hpp>
+#include <axl.math/vec.hpp>
 #include <gl/GL.h>
 #include "Assert.hpp"
 #include "GLC.h"
@@ -27,83 +28,89 @@ class GameView : public axl::gl::View
 {
 	public:
 		axl::gl::Context main_context;
-		float theta;
+		axl::math::Vec3d position;
 	private:
+		Cursor NormalCursor;
 		axl::util::uc::Time time, ctime;
+		axl::gl::input::Key key_F1, key_F2;
 	public:
 		GameView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const Cursor& _cursor = View::DefaultCursor) :
 			axl::gl::View(_title, _position, _size, _cursor),
 			main_context(),
-			theta(0.0f)
+			NormalCursor(CUR_CROSS),
+			key_F1(axl::gl::input::KeyCode::KEY_F1),
+			key_F2(axl::gl::input::KeyCode::KEY_F2)
 		{}
 
 		~GameView()
 		{}
 
+		void init()
+		{
+			this->position.set(0.0, 0.0, 4.0);
+			this->time.set();
+		}
+
 		void update()
 		{
-			this->theta += 45.0f * this->time.deltaTime();
 			this->time.set();
 		}
 
 		void render()
 		{
+			if(!this->main_context.makeCurrent()) return;
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			this->render(true, false, false, false);
+			this->render(true, false, false);
 			this->swap();
 			
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 		}
 
-		void render(bool p_clear, bool p_swap, bool p_exclude_opaque = false, bool p_exclude_alpha = false)
+		void render(bool p_clear, bool p_exclude_opaque = false, bool p_exclude_alpha = false)
 		{
-			if(this->main_context.makeCurrent())
+			if(!this->main_context.makeCurrent()) return;
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			glTranslated(-this->position.x, -this->position.y, -this->position.z);
+			glRotated(30.0, 1.0, 0.0, 0.0);
+			glScaled(0.6, 0.6, 0.6);
+			if(p_clear)
 			{
-				glMatrixMode(GL_MODELVIEW);
-				glLoadIdentity();
-				glTranslated(0.0, 0.0, -4.0);
-				glRotated(30.0, 1.0, 0.0, 0.0);
-				glRotatef(theta, 0.0, 1.0, 0.0);
-				// glScaled(0.6, 0.6, 0.6);
-				if(p_clear)
-				{
-					glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-					glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-				}
-				// Draw
-				if(!p_exclude_opaque)
-				{
-					glBegin(GL_QUADS);
-						glColor4ub(255,127,127,255);
-						glVertex3d(-1.0, -1.0, 0.0);
-						glVertex3d( 1.0, -1.0, 0.0);
-						glVertex3d( 1.0,  1.0, 0.0);
-						glVertex3d(-1.0,  1.0, 0.0);
-					glEnd();
-					glBegin(GL_QUADS);
-						glColor4ub(0,255,0,255);
-						glVertex3d(-1.0, -1.0, -1.0);
-						glVertex3d( 1.0, -1.0, -1.0);
-						glVertex3d( 1.0, -1.0,  1.0);
-						glVertex3d(-1.0, -1.0,  1.0);
-					glEnd();
-				}
-				if(!p_exclude_alpha)
-				{
-					glBegin(GL_QUADS);
-						glColor4ub(0,0,255,127);
-						glVertex3d(0.0, -1.0, -1.0);
-						glVertex3d(0.0,  1.0, -1.0);
-						glVertex3d(0.0,  1.0,  1.0);
-						glVertex3d(0.0, -1.0,  1.0);
-					glEnd();
-				}
-				if(p_swap) this->swap();
+				glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+				glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			}
+			// Draw
+			if(!p_exclude_opaque)
+			{
+				glBegin(GL_QUADS);
+					glColor4ub(255,127,127,255);
+					glVertex3d(-1.0, -1.0, 0.0);
+					glVertex3d( 1.0, -1.0, 0.0);
+					glVertex3d( 1.0,  1.0, 0.0);
+					glVertex3d(-1.0,  1.0, 0.0);
+				glEnd();
+				glBegin(GL_QUADS);
+					glColor4ub(0,255,0,255);
+					glVertex3d(-1.0, -1.0, -1.0);
+					glVertex3d( 1.0, -1.0, -1.0);
+					glVertex3d( 1.0, -1.0,  1.0);
+					glVertex3d(-1.0, -1.0,  1.0);
+				glEnd();
+			}
+			if(!p_exclude_alpha)
+			{
+				glBegin(GL_QUADS);
+					glColor4ub(0,0,255,127);
+					glVertex3d(0.0, -1.0, -1.0);
+					glVertex3d(0.0,  1.0, -1.0);
+					glVertex3d(0.0,  1.0,  1.0);
+					glVertex3d(0.0, -1.0,  1.0);
+				glEnd();
 			}
 		}
 
@@ -123,6 +130,7 @@ class GameView : public axl::gl::View
 				axl::gl::Context::Config(3, 2, 1, axl::gl::Context::Config::GLP_COMPATIBLITY)
 			};
 			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
+			this->init();
 			// Create stuff here
 			
 			return axl::gl::View::onCreate(recreating);
@@ -176,13 +184,18 @@ class GameView : public axl::gl::View
 		void onKey(axl::gl::input::KeyCode key, bool down)
 		{
 			using namespace axl::gl::input;
+			if(key_F1.isPressed())
+			{
+				this->show(this->visiblity == VS_FULLSCREEN ? SM_SHOW : SM_FULLSCREEN);
+			}
+			if(key_F2.isPressed())
+			{
+				this->setCursor(this->cursor == CUR_NONE ? NormalCursor : CUR_NONE);
+			}
 			switch (key)
 			{
 			case KeyCode::KEY_ESCAPE:
 				axl::gl::Application::quit(0);
-				break;
-			case KeyCode::KEY_C:
-				if(this->display && *this->display) (*this->display)->close();
 				break;
 			default:
 				axl::gl::View::onKey(key, down);
@@ -227,7 +240,7 @@ int main(int argc, char* argv[])
 	bool verbose = argc > 1 && (0 == strcmp(argv[1], "-v") || 0 == strcmp(argv[1], "--verbose"));
 	using namespace axl::gl;
 	using namespace axl::gl::lib;
-	printf(">> axl.gl Texture3D test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
+	printf(">> axl.gl View test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
 	puts("----------------------------------------");
 	{
 		Application::onExit = onExit;
@@ -238,7 +251,7 @@ int main(int argc, char* argv[])
 		axl::math::Vec2i size(640, 480);
 		axl::math::Vec2i position = (display.size - size) / 2;
 
-		GameView view(L"axl.gl.Texture3D", position, size);
+		GameView view(L"axl.gl.View", position, size);
 		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(GameView::Config), GameView::VF_RESIZABLE), verbose);
 		Assertv(view.isValid(), verbose);
 		printf(".. View.Config %d selected.\n", view.config.id);
@@ -250,39 +263,20 @@ int main(int argc, char* argv[])
 			Assertve(view.show(GameView::SM_SHOW), verbose);
 			///
 			axl::util::uc::Time time;
-			input::Key key_0(axl::gl::input::KeyCode::KEY_0);
-			input::Key key_1(axl::gl::input::KeyCode::KEY_1);
-			input::Key key_F(axl::gl::input::KeyCode::KEY_F);
-			input::Key key_UP(axl::gl::input::KeyCode::KEY_UP);
-			input::Key key_DOWN(axl::gl::input::KeyCode::KEY_DOWN);
+			axl::gl::input::Key key_left(axl::gl::input::KeyCode::KEY_LEFT);
+			axl::gl::input::Key key_right(axl::gl::input::KeyCode::KEY_RIGHT);
+			axl::gl::input::Key key_down(axl::gl::input::KeyCode::KEY_DOWN);
+			axl::gl::input::Key key_up(axl::gl::input::KeyCode::KEY_UP);
 			while(!Application::IS_QUITTING)
 			{
-				/// -- handle events	
-				if(key_F.isPressed())
-				{
-					view.show(view.visiblity == axl::gl::View::VS_FULLSCREEN ? axl::gl::View::SM_SHOW : axl::gl::View::SM_FULLSCREEN);
-				}
-				if(key_0.isPressed())
-				{
-					Display::Settings display_settings;
-					Display::enumSettings(&display_settings, Display::Settings::DI_DEFAULT);
-					if(Display::setSettings(display_settings, true))
-					{
-						Assertv(Display::setSettings(display_settings), verbose);
-					}
-					else fprintf(stderr, "Failed to set display settings!\n");
-					display.reopen(0);
-				}		
-				if(key_1.isPressed())
-				{
-					Display::Settings display_settings(-1, 1280, 720);
-					if(Display::setSettings(display_settings, true))
-					{
-						Assertv(Display::setSettings(display_settings), verbose);
-					}
-					else fprintf(stderr, "Failed to set display settings!\n");
-					display.reopen(0);
-				}
+				/// -- handle realtime events	
+				bool bk_left = key_left.isDown();
+				bool bk_right = key_right.isDown();
+				bool bk_down = key_down.isDown();
+				bool bk_up = key_up.isDown();
+				if(bk_left ^ bk_right) view.position.x += (bk_left ? -1.0 : 1.0) * time.deltaTime();
+				if(bk_down ^ bk_up) view.position.z += (bk_down ? 1.0 : -1.0) * time.deltaTime();
+				time.set();
 				/// -- update
 				view.update();
 				/// -- render

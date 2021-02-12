@@ -34,7 +34,7 @@ Perspective::Perspective(double p_zNear, double p_zFar, double p_aspect_ratio, d
 Perspective::~Perspective()
 {}
 
-void Perspective::calculate()
+void Perspective::updateTransform()
 {
 	double d = m_zNear * axl::math::tan(axl::math::Angle::degToRad(m_fov) / 2.0);
 	m_left = -d * m_aspect_ratio;

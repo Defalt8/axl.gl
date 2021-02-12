@@ -27,6 +27,7 @@ class GameView : public axl::gl::View
 		axl::gl::projection::Perspective perspective_projection;
 		double fov;
 		float theta;
+		bool enable_roll;
 	private: 
 		axl::util::uc::Time time, ctime;
 		axl::gl::input::Key key_P;
@@ -49,19 +50,20 @@ class GameView : public axl::gl::View
 
 		void init()
 		{
-			this->camera.set(axl::math::Vec3d(0.0,0.0,4.0), axl::math::Vec3d(0.0,0.0,0.0), 0.0, axl::math::Vec3d::filled(0.7), axl::math::Vec2i(0,0), axl::math::Vec2i(this->size.x, this->size.y), &this->perspective_projection);
+			this->camera.set(axl::math::Vec3d(0.0,0.0,4.0), axl::math::Vec3d(0.0,0.0,0.0), 0.0, axl::math::Vec3d::filled(1.0), axl::math::Vec2i(0,0), axl::math::Vec2i(this->size.x, this->size.y), &this->perspective_projection);
 			this->fov = 70.0;
 			this->theta = 0.0;
 			this->time.set();
 			this->ctime.set();
+			this->enable_roll = false;
 		}
 
 		void update()
 		{
 			if(View::visiblity == View::VS_HIDDEN || this->is_paused) return;
 			using namespace axl::math;
-			this->theta += 45.0f * this->time.deltaTime();
-			this->camera.roll_angle += -Angle::degToRad(30.0) * this->time.deltaTime();
+			this->theta += 45.0f * this->time.deltaTimef();
+			if(this->enable_roll) this->camera.roll_angle += -Angle::degToRad(30.0) * this->time.deltaTime();
 			double daz = Util::map(axl::math::sin(Constants::D_QUARTER_PI * this->ctime.deltaTime()), -1.0, 1.0, 10.0, 45.0);
 			Vec3d pos(0.0, 0.0, 4.0);
 			pos.rotateX(Angle::degToRad(-daz));
@@ -85,11 +87,11 @@ class GameView : public axl::gl::View
 						default:
 						case axl::gl::projection::Projection::Type::PT_ORTHOGRAPHIC:
 							this->orthographic_projection.set(-ar, ar, -1.0, 1.0, znear, zfar);
-							this->orthographic_projection.calculate();
+							this->orthographic_projection.updateTransform();
 							break;
 						case axl::gl::projection::Projection::Type::PT_PERSPECTIVE:
 							this->perspective_projection.set(znear, zfar, ar, fov);
-							this->perspective_projection.calculate();
+							this->perspective_projection.updateTransform();
 							break;
 					}
 					glLoadMatrixd(this->camera.projection->matrix.values);
@@ -151,27 +153,33 @@ class GameView : public axl::gl::View
 					}
 					glBegin(GL_QUADS);
 						glColor4ub(255,127,127,255);
-						glVertex3d(-1.0, 1.0+-1.0, 0.0);
-						glVertex3d( 1.0, 1.0+-1.0, 0.0);
+						glVertex3d(-1.0, 1.0-1.0, 0.0);
+						glVertex3d( 1.0, 1.0-1.0, 0.0);
 						glVertex3d( 1.0, 1.0+ 1.0, 0.0);
 						glVertex3d(-1.0, 1.0+ 1.0, 0.0);
 					glEnd();
 					glBegin(GL_QUADS);
 						glColor4ub(0,255,0,255);
-						glVertex3d(-1.0, 1.0+-1.0, -1.0);
-						glVertex3d( 1.0, 1.0+-1.0, -1.0);
-						glVertex3d( 1.0, 1.0+-1.0,  1.0);
-						glVertex3d(-1.0, 1.0+-1.0,  1.0);
+						glVertex3d(-1.0, 1.0-1.0, -1.0);
+						glVertex3d( 1.0, 1.0-1.0, -1.0);
+						glVertex3d( 1.0, 1.0-1.0,  1.0);
+						glVertex3d(-1.0, 1.0-1.0,  1.0);
 					glEnd();
 				}
+				glPointSize(8.0f);
+				glBegin(GL_POINTS);
+					glColor4ub(255,0,0,255);
+					glVertex3dv(&this->camera.target.x);
+				glEnd();
+				glPointSize(1.0f);
 				if(!p_exclude_alpha)
 				{
 					glBegin(GL_QUADS);
 						glColor4ub(0,0,255,127);
-						glVertex3d(0.0, 1.0+-1.0, -1.0);
+						glVertex3d(0.0, 1.0-1.0, -1.0);
 						glVertex3d(0.0, 1.0+ 1.0, -1.0);
 						glVertex3d(0.0, 1.0+ 1.0,  1.0);
-						glVertex3d(0.0, 1.0+-1.0,  1.0);
+						glVertex3d(0.0, 1.0-1.0,  1.0);
 					glEnd();
 				}
 				if(p_swap) this->swap();
@@ -219,8 +227,6 @@ class GameView : public axl::gl::View
 			this->render();
 		}
 
-		//
-
 		void onPause()
 		{
 			View::onPause();
@@ -265,10 +271,14 @@ class GameView : public axl::gl::View
 			case KeyCode::KEY_C:
 				if(this->display && *this->display) (*this->display)->close();
 				break;
+			case KeyCode::KEY_E:
+				this->camera.roll_angle = 0.0;
+				break;
 			default:
 				axl::gl::View::onKey(key, down);
 			}
 		}
+
 };
 
 
@@ -316,7 +326,7 @@ int main(int argc, char* argv[])
 		Assertve(Application::init(), verbose);
 		Assertve(display.isOpen(), verbose);
 
-		axl::math::Vec2i size(640, 480);
+		axl::math::Vec2i size(800, 600);
 		axl::math::Vec2i position = (display.size - size) / 2;
 
 		GameView view(L"axl.gl.Camera3D", position, size);
@@ -334,14 +344,39 @@ int main(int argc, char* argv[])
 			input::Key key_0(axl::gl::input::KeyCode::KEY_0);
 			input::Key key_1(axl::gl::input::KeyCode::KEY_1);
 			input::Key key_F(axl::gl::input::KeyCode::KEY_F);
+			input::Key key_R(axl::gl::input::KeyCode::KEY_R);
 			input::Key key_UP(axl::gl::input::KeyCode::KEY_UP);
 			input::Key key_DOWN(axl::gl::input::KeyCode::KEY_DOWN);
+			input::Key key_LEFT(axl::gl::input::KeyCode::KEY_LEFT);
+			input::Key key_RIGHT(axl::gl::input::KeyCode::KEY_RIGHT);
 			input::Key key_Control(axl::gl::input::KeyCode::KEY_CONTROL);
 			input::Key key_Shift(axl::gl::input::KeyCode::KEY_SHIFT);
 			input::Key key_O(axl::gl::input::KeyCode::KEY_O);
 			while(!Application::IS_QUITTING)
 			{
-				/// -- handle events	
+				/// -- handle events
+				static axl::util::uc::Time time0;
+				bool b_kdown = key_DOWN.isDown(),
+				b_kup = key_UP.isDown(),
+				b_kshift = key_Shift.isDown(),
+				b_kleft = key_LEFT.isDown(),
+				b_kright = key_RIGHT.isDown(),
+				b_kcontrol = key_Control.isDown();
+				if(b_kdown ^ b_kup){
+					double factor = (b_kshift ? 0.25 : 1.0) * (b_kup ? 1.0 : -1.0);
+					if(b_kcontrol)
+						view.camera.target.y += factor * (double)time0.deltaTime();
+					else
+						view.camera.target.z += factor * (double)time0.deltaTime();
+				}
+				if(b_kleft ^ b_kright){
+					double factor = (b_kshift ? 0.25 : 1.0) * (b_kright ? 1.0 : -1.0);
+					view.camera.target.x += factor * (double)time0.deltaTime();
+				}
+				if(key_R.isPressed())
+				{
+					view.enable_roll = !view.enable_roll;
+				}
 				if(key_F.isPressed())
 				{
 					view.show(view.visiblity == axl::gl::View::VS_FULLSCREEN ? axl::gl::View::SM_SHOW : axl::gl::View::SM_FULLSCREEN);
@@ -367,12 +402,38 @@ int main(int argc, char* argv[])
 					else fprintf(stderr, "Failed to set display settings!\n");
 					display.reopen(0);
 				}
-				static axl::util::uc::Time time0;
 				if(key_O.isDown()) {
-					double factor = (key_Control.isDown() ? -1.0 : 1.0) * (key_Shift.isDown() ? 1.0 : 5.0);
+					double factor = (b_kcontrol ? -1.0 : 1.0) * (b_kshift ? 1.0 : 5.0);
 					view.fov = axl::math::Util::clamp(view.fov + factor * 10.0 * (double)time0.deltaTime(), 1.0, 179.0);
 					view.update_projection();
 					printf("FOV: %6.1lf\r", view.fov);
+				}
+				static axl::util::uc::Clock title_update_clock(200);
+				if(title_update_clock.checkAndSet(true))
+				{
+					axl::util::WString new_title(256);
+					axl::util::WString fov_str(64);
+					const axl::util::WString::char_t *projection_type;
+					fov_str.format(L"");
+					switch(view.camera.projection->type)
+					{
+						default:
+						case axl::gl::projection::Projection::Type::PT_OTHER: projection_type = L"Other"; break;
+						case axl::gl::projection::Projection::Type::PT_IDENTITY: projection_type = L"Identity"; break;
+						case axl::gl::projection::Projection::Type::PT_ORTHOGRAPHIC: projection_type = L"Orthographic"; break;
+						case axl::gl::projection::Projection::Type::PT_PERSPECTIVE: projection_type = L"Perspective";
+							fov_str.format(L":FOV[%.1lf]", ((axl::gl::projection::Perspective*)view.camera.projection)->fov);
+							break;
+					}
+					
+
+					new_title.format(L"Projection(%s%s) Position(%.1lf,%.1lf,%.1lf) Target(%.1lf,%.1lf,%.1lf) RollAngle(%.1lf)",
+						projection_type, fov_str.cwstr(),
+						view.camera.position.x, view.camera.position.y, view.camera.position.z,
+						view.camera.target.x, view.camera.target.y, view.camera.target.z,
+						axl::math::mod(axl::math::Angle::radToDeg(view.camera.roll_angle), 360.0));
+					view.setTitle(new_title);
+					wprintf(L"%s            \r", new_title.cwstr());
 				}
 				time0.set();
 				/// -- update

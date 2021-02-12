@@ -20,7 +20,7 @@ Projection::Projection(Projection::Type p_type, axl::math::Mat4d p_matrix) :
 Projection::~Projection()
 {}
 
-void Projection::calculate()
+void Projection::updateTransform()
 {
 	Projection::projection_matrix = axl::math::Mat4d::Identity;
 }

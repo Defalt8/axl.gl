@@ -45,7 +45,7 @@ class GameView : public axl::gl::View
 
 		void update()
 		{
-			theta += 45.0f * time.deltaTime();
+			theta += 45.0f * time.deltaTimef();
 			y = axl::math::sin(axl::math::Constants::D_QUARTER_PI * (double)ctime.deltaTime());
 			printf("%lf\r", y);
 			time.set();
