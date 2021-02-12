@@ -11,6 +11,8 @@
 #include <axl.math/angle.hpp>
 #include <axl.math/basic.hpp>
 #include <axl.math/util.hpp>
+#include <axl.math/mat.hpp>
+#include <axl.math/mat/transform4.hpp>
 #include "Assert.hpp"
 #include "GLC.h"
 
@@ -23,7 +25,8 @@ class GameView : public axl::gl::View
 		axl::gl::camera::Camera3Df camera;
 		axl::gl::gfx::Program program;
 		axl::glfl::GLuint vertex_array, vertex_buffer;
-		axl::glfl::GLint uloc_projection, uloc_view;
+		axl::glfl::GLint uloc_projection, uloc_view, uloc_model;
+		axl::math::Mat4f model_transform;
 	private:
 		Cursor NormalCursor;
 		axl::util::uc::Time time, ctime;
@@ -58,6 +61,8 @@ class GameView : public axl::gl::View
 			vertex_buffer = 0;
 			uloc_projection = -1;
 			uloc_view = -1;
+			uloc_model = -1;
+			model_transform = model_transform.Identity;
 			time.set();
 			ctime.set();
 		}
@@ -65,6 +70,7 @@ class GameView : public axl::gl::View
 		void update()
 		{
 			// update code
+			model_transform = axl::math::Transform4::scale(axl::math::Vec3f::filled(0.6f)) * axl::math::Transform4::rotateZ(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI);
 			this->time.set();
 		}
 
@@ -92,6 +98,7 @@ class GameView : public axl::gl::View
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
 			Assert(program.setUniformMat4f(uloc_view, this->camera.view_transform.values));
+			Assert(program.setUniformMat4f(uloc_model, this->model_transform.values));
 			// Draw
 			if(vertex_array != 0 && vertex_buffer != 0 && program.use())
 			{
@@ -237,8 +244,9 @@ class GameView : public axl::gl::View
 					"layout(location = 0) in vec3 in_Position;\n"
 					"uniform mat4 u_MatProjection = mat4(1);"
 					"uniform mat4 u_MatView = mat4(1);"
+					"uniform mat4 u_MatModel = mat4(1);"
 					"void main() {\n"
-					"	gl_Position = u_MatProjection * u_MatView * vec4(in_Position.xyz, 1.0);\n"
+					"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.xyz, 1.0);\n"
 					"}\n"
 				));
 				Assert(vertex_shader.getSource().length() != 0);
@@ -288,6 +296,7 @@ class GameView : public axl::gl::View
 					}
 					uloc_projection = program.getUniformLocation("u_MatProjection");
 					uloc_view = program.getUniformLocation("u_MatView");
+					uloc_model = program.getUniformLocation("u_MatModel");
 					Assert(vertex_shader.detach(program));
 					Assert(fragment_shader.detach(program));
 				}
