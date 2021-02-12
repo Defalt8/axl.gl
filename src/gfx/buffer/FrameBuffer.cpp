@@ -60,7 +60,7 @@ FrameBuffer::~FrameBuffer()
 bool FrameBuffer::icreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_3_0 || this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!GL_VERSION_3_0 || this->isValid() || !(this->ctx_context && this->ctx_context->makeCurrent())) return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	glGenFramebuffers(1, &tmp_id);
