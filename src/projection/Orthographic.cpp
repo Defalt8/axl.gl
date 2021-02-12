@@ -50,6 +50,49 @@ void Orthographic::set(double p_left, double p_right, double p_bottom, double p_
 	m_zFar = p_zFar;
 }
 
+//
+// Orthographicf
+//
+
+Orthographicf::Orthographicf(float p_left, float p_right, float p_bottom, float p_top, float p_zNear, float p_zFar) :
+	Projectionf(Projectionf::Type::PT_ORTHOGRAPHIC, axl::math::Mat4f::Identity),
+	left(m_left),
+	right(m_right),
+	bottom(m_bottom),
+	top(m_top),
+	zNear(m_zNear),
+	zFar(m_zFar),
+	m_left(p_left),
+	m_right(p_right),
+	m_bottom(p_bottom),
+	m_top(p_top),
+	m_zNear(p_zNear),
+	m_zFar(p_zFar)
+{}
+
+Orthographicf::~Orthographicf()
+{}
+
+void Orthographicf::updateTransform()
+{
+	Projectionf::projection_matrix.set(
+		(2.0f / (m_right - m_left)), 0.0f, 0.0f, 0.0f,
+		0.0f, (2.0f / (m_top - m_bottom)), 0.0f, 0.0f,
+		0.0f, 0.0f, (-2.0f / (m_zFar - m_zNear)), 0.0f,
+		(-(m_right + m_left) / (m_right - m_left)), (-(m_top + m_bottom) / (m_top - m_bottom)), (-(m_zFar + m_zNear) / (m_zFar - m_zNear)), 1.0f
+	);
+}
+
+void Orthographicf::set(float p_left, float p_right, float p_bottom, float p_top, float p_zNear, float p_zFar)
+{
+	m_left = p_left;
+	m_right = p_right;
+	m_bottom = p_bottom;
+	m_top = p_top;
+	m_zNear = p_zNear;
+	m_zFar = p_zFar;
+}
+
 } // axl::gl::projection
 } // axl::gl
 } // axl

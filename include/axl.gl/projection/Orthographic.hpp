@@ -30,6 +30,29 @@ class AXLGLCXXAPI Orthographic : public Projection
 		double m_zFar;
 };
 
+class AXLGLCXXAPI Orthographicf : public Projectionf
+{
+	public:
+		Orthographicf(float left = -1.0f, float right = 1.0f, float bottom = -1.0f, float top = 1.0f, float zNear = -1.0f, float zFar = 1.0f);
+		~Orthographicf();
+		void updateTransform();
+		void set(float left, float right, float bottom, float top, float zNear, float zFar);
+	public:
+		const float& left;
+		const float& right;
+		const float& bottom;
+		const float& top;
+		const float& zNear;
+		const float& zFar;
+	private:
+		float m_left;
+		float m_right;
+		float m_bottom;
+		float m_top;
+		float m_zNear;
+		float m_zFar;
+};
+
 } // axl::gl::projection
 } // axl::gl
 } // axl

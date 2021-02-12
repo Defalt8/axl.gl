@@ -25,6 +25,25 @@ void Projection::updateTransform()
 	Projection::projection_matrix = axl::math::Mat4d::Identity;
 }
 
+//
+// Projectionf
+//
+
+Projectionf::Projectionf(Projectionf::Type p_type, axl::math::Mat4f p_matrix) :
+	type(m_type),
+	matrix(projection_matrix),
+	m_type(p_type),
+	projection_matrix(p_matrix)
+{}
+
+Projectionf::~Projectionf()
+{}
+
+void Projectionf::updateTransform()
+{
+	Projectionf::projection_matrix = axl::math::Mat4f::Identity;
+}
+
 } // axl::gl::projection
 } // axl::gl
 } // axl
