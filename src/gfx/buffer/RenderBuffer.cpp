@@ -1,8 +1,8 @@
-#pragma once
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
 #include <axl.gl/gfx/buffer/FrameBuffer.hpp>
 #include <axl.gl/gfx/buffer/RenderBuffer.hpp>
+#include <axl.glfl/gl.hpp>
 #include <axl.glfl/glCoreARB.hpp>
 
 #define GLCLEARERROR() while(axl::glfl::core::GL1::glGetError())

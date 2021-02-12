@@ -2,7 +2,7 @@
 #include "../../lib.hpp"
 #include "Texture.hpp"
 #include <axl.math/vec/Vec3f.hpp>
-#include <axl.glfl/glCoreARB.hpp>
+#include <axl.glfl/gl.hpp>
 
 namespace axl {
 namespace gl {

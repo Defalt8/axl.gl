@@ -2,7 +2,7 @@
 #include "../../lib.hpp"
 #include "../../ContextObject.hpp"
 #include <axl.glfl/gl.hpp>
-#include <axl.glfl/glCoreARB.hpp>
+#include <axl.glfl/gl.hpp>
 
 namespace axl {
 namespace gl {

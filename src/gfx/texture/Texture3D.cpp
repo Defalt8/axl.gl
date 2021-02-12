@@ -2,6 +2,7 @@
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
 #include <axl.gl/gfx/texture/Texture3D.hpp>
+#include <axl.glfl/gl.hpp>
 #include <axl.glfl/glCoreARB.hpp>
 
 #define GLCLEARERROR() while(glGetError() != GL_NO_ERROR)

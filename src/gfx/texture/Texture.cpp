@@ -1,6 +1,8 @@
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
 #include <axl.gl/gfx/texture/Texture.hpp>
+#include <axl.glfl/gl.hpp>
+#include <axl.glfl/glCoreARB.hpp>
 
 namespace axl {
 namespace gl {

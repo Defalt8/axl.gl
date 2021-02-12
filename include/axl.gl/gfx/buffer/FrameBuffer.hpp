@@ -3,7 +3,7 @@
 #include "../../ContextObject.hpp"
 #include "RenderBuffer.hpp"
 #include "../texture/Texture2D.hpp"
-#include <axl.glfl/glCoreARB.hpp>
+#include <axl.glfl/gl.hpp>
 
 namespace axl {
 namespace gl {

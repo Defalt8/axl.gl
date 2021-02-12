@@ -12,7 +12,7 @@ class AXLGLCXXAPI Orthographic : public Projection
 	public:
 		Orthographic(double left = -1.0, double right = 1.0, double bottom = -1.0, double top = 1.0, double zNear = -1.0, double zFar = 1.0);
 		~Orthographic();
-		void calculate();
+		void updateTransform();
 		void set(double left, double right, double bottom, double top, double zNear, double zFar);
 	public:
 		const double& left;
