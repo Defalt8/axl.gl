@@ -2,6 +2,7 @@
 #include "../../lib.hpp"
 #include "../../ContextObject.hpp"
 #include <axl.glfl/gl.hpp>
+#include <axl.math/vec/Vec2i.hpp>
 
 namespace axl {
 namespace gl {

@@ -1,6 +1,7 @@
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
 #include <axl.gl/camera/Camera3D.hpp>
+#include <axl.math/rules.hpp>
 #include <axl.math/angle.hpp>
 #include <axl.math/constants.hpp>
 #include <axl.math/basic.hpp>
@@ -19,6 +20,7 @@ namespace camera {
 //
 
 axl::gl::projection::Projection Camera3D::DefaultProjection = axl::gl::projection::Projection();
+axl::math::Rules::Axis Camera3D::DefaultAxisRule = axl::math::Rules::Axis::AXIS_RHS;
 
 Camera3D::Camera3D(const axl::math::Vec3d& p_position,
 				const axl::math::Vec3d& p_target,
@@ -68,7 +70,7 @@ void Camera3D::updateTransform()
 	}
 	angle.x = (axl::math::atan2(hyp, delta.y) - axl::math::Constants::D_HALF_PI);
 	angle.z = -this->roll_angle;
-	Camera3D::view_transform = axl::math::Transform4::rotateZXY(angle, this->axis_rule) * axl::math::Transform4::scaleTranslate(this->scale, -this->position);
+	Camera3D::view_transform = axl::math::Transform4::rotateZXY(angle, this->axis_rule) * axl::math::Transform4::translateScale(-this->position, this->scale);
 }
 
 void Camera3D::lookAt(const axl::math::Vec3d& p_position, const axl::math::Vec3d& p_target, double p_roll_angle)

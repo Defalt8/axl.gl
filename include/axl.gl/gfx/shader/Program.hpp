@@ -31,6 +31,7 @@ class AXLGLCXXAPI Program : public ContextObject
 		axl::glfl::GLint getUniformLocation(const axl::util::String& uniform_name) const;
 		bool setUniformMat4f(axl::glfl::GLint location, const axl::glfl::GLfloat* matrix_ptr, axl::glfl::GLboolean transpose = 0);
 		bool setUniformMat4d(axl::glfl::GLint location, const axl::glfl::GLdouble* matrix_ptr, axl::glfl::GLboolean transpose = 0);
+		bool setUniformVec4f(axl::glfl::GLint location, const axl::glfl::GLfloat* vector_ptr);
 	protected:
 		axl::glfl::GLuint program_id;
 		axl::glfl::GLenum program_type;

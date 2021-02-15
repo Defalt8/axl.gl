@@ -155,6 +155,18 @@ bool Program::setUniformMat4d(axl::glfl::GLint location, const axl::glfl::GLdoub
 	return gl_err == GL_NO_ERROR && glGetError() == GL_NO_ERROR;
 }
 
+bool Program::setUniformVec4f(axl::glfl::GLint location, const axl::glfl::GLfloat* vector_ptr)
+{
+	using namespace GL;
+	if(!GL::GL_VERSION_3_0 || !(this->ctx_context && this->ctx_context->config.major_version >= 3) || location == -1 || !vector_ptr || !this->use()) return false;
+	GLCLEARERROR();
+	if(glGetError() != GL_NO_ERROR) return false;
+	glUniform4fv(location, 1, vector_ptr);
+	GLenum gl_err = glGetError();
+	glUseProgram(0);
+	return gl_err == GL_NO_ERROR && glGetError() == GL_NO_ERROR;
+}
+
 } // namespace axl.gl.gfx
 } // namespace axl.gl
 } // namespace axl
