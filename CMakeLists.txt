@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.4 )
 
-project( axl.gl VERSION 0.19.36 DESCRIPTION "A simple and multiplatform C++ game library." )
+project( axl.gl VERSION 0.20.37 DESCRIPTION "A simple and multiplatform C++ game library." )
 
 if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
 	set( AXLGL_STANDALONE TRUE )
@@ -23,6 +23,9 @@ set( BUILD_SHARED_LIBS OFF CACHE BOOL "" )
 if( BUILD_SHARED_LIBS )
 	set( AXLGL_TYPE SHARED )
 endif()
+
+set( THIRD_PARTY_INCLUDE_DIR "../../ThirdParty/include" )
+set( THIRD_PARTY_LIB_DIR "../../ThirdParty/lib" )
 
 set( AXLMATH_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.math" CACHE PATH "Path to axl.math library source." )
 set( AXLMATH_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
