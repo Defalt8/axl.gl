@@ -16,6 +16,34 @@
 #include "Assert.hpp"
 #include "GLC.h"
 
+class File {
+	public:
+		static axl::util::String getStringContent(const axl::util::String& filename)
+		{
+			axl::util::String content;
+			FILE* file = (FILE*)0;
+#			ifdef __STDC_WANT_SECURE_LIB__
+				fopen_s(&file, filename.cstr(), "r");
+#			else
+				fopen(filename.cstr(), "r");
+#			endif
+			if(file)
+			{
+				fseek(file, 0, SEEK_END);
+				long size = ftell(file);
+				fseek(file, 0, SEEK_SET);
+				if(content.resize(size))
+				{
+					size_t read_size = fread(content.str(), sizeof(axl::util::String::char_t), size, file);
+					content[read_size] = '\0';
+					content.length(true);
+				}
+				fclose(file);
+			}
+			return content;
+		}
+};
+
 namespace GL = axl::glfl::core::GL;
 
 class GameView : public axl::gl::View
@@ -24,27 +52,33 @@ class GameView : public axl::gl::View
 		axl::gl::Context main_context;
 		axl::gl::camera::Camera3Df camera;
 		axl::gl::gfx::Program program;
+		axl::gl::gfx::Texture2D texture;
 		axl::glfl::GLuint vertex_array, vertex_buffer;
 		axl::glfl::GLint uloc_projection, uloc_view, uloc_model;
 		axl::math::Mat4f model_transform;
+		
 	private:
 		Cursor NormalCursor;
 		axl::util::uc::Time time, ctime;
 		axl::gl::projection::Orthographicf projection;
-		axl::gl::input::Key key_Control, key_Shift, key_Alt, key_F2, key_F3;
+		axl::gl::input::Key key_Control, key_Shift, key_Alt, key_F2, key_F3, key_Space;
+		bool is_animating;
 	public:
 		GameView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const Cursor& _cursor = View::DefaultCursor) :
 			axl::gl::View(_title, _position, _size, _cursor),
 			main_context(),
 			camera(),
 			projection(),
-			program(&this->main_context),
+			program(),
+			texture(),
+			is_animating(false),
 			NormalCursor(CUR_CROSS),
 			key_Control(axl::gl::input::KeyCode::KEY_CONTROL),
 			key_Shift(axl::gl::input::KeyCode::KEY_SHIFT),
 			key_Alt(axl::gl::input::KeyCode::KEY_ALT),
 			key_F2(axl::gl::input::KeyCode::KEY_F2),
-			key_F3(axl::gl::input::KeyCode::KEY_F3)
+			key_F3(axl::gl::input::KeyCode::KEY_F3),
+			key_Space(axl::gl::input::KeyCode::KEY_SPACE)
 		{}
 
 		~GameView()
@@ -56,13 +90,15 @@ class GameView : public axl::gl::View
 			this->setCursor(NormalCursor);
 			this->camera.set(Vec3f(0.0f,0.0f,4.0f), Vec3f(0.0f,0.0f,0.0f), 0.0f, Vec3f(1.0f,1.0f,1.0f), Vec2i(0,0), this->size, &this->projection);
 			this->camera.updateTransform();
+			this->is_animating = false;
 			program.setContext(&this->main_context);
+			texture.setContext(&this->main_context);
 			vertex_array = 0;
 			vertex_buffer = 0;
 			uloc_projection = -1;
 			uloc_view = -1;
 			uloc_model = -1;
-			model_transform = model_transform.Identity;
+			model_transform = Transform4::scale(Vec3f::filled(0.8f));
 			time.set();
 			ctime.set();
 		}
@@ -70,7 +106,10 @@ class GameView : public axl::gl::View
 		void update()
 		{
 			// update code
-			model_transform = axl::math::Transform4::scale(axl::math::Vec3f::filled(0.6f)) * axl::math::Transform4::rotateZ(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI);
+			if(this->is_animating)
+			{
+				model_transform = axl::math::Transform4::scale(axl::math::Vec3f::filled(0.7f)) * axl::math::Transform4::rotateZ(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI);
+			}
 			this->time.set();
 		}
 
@@ -97,16 +136,24 @@ class GameView : public axl::gl::View
 				GL::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
-			Assert(program.setUniformMat4f(uloc_view, this->camera.view_transform.values));
-			Assert(program.setUniformMat4f(uloc_model, this->model_transform.values));
+			if(uloc_view)
+			{
+				Assert(program.setUniformMat4f(uloc_view, this->camera.view_transform.values));
+			}
+			if(uloc_model)
+			{
+				Assert(program.setUniformMat4f(uloc_model, this->model_transform.values));
+			}
 			// Draw
 			if(vertex_array != 0 && vertex_buffer != 0 && program.use())
 			{
+				this->texture.bind();
 				GL::glBindVertexArray(vertex_array);
 				GL::glBindBuffer(GL::GL_ARRAY_BUFFER, vertex_buffer);
 				GL::glDrawArrays(GL::GL_TRIANGLES, 0, 3);
 				GL::glBindBuffer(GL::GL_ARRAY_BUFFER, 0);
 				GL::glBindVertexArray(0);
+				this->texture.unbind();
 			}
 		}
 
@@ -232,102 +279,134 @@ class GameView : public axl::gl::View
 				Assert(!program.isLinked());
 			}
 			// VERTEX_SHADER
-				axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
-				Assert(!vertex_shader.isValid());
-				Assert(vertex_shader.create());
-				Assert(vertex_shader.isValid());
-				Assert(vertex_shader.getSource().length() == 0);
-				Assert(!vertex_shader.compile());
-				Assert(!vertex_shader.isCompiled());
-				Assert(vertex_shader.setSource(
-					"# version 330 core\n"
-					"layout(location = 0) in vec3 in_Position;\n"
-					"uniform mat4 u_MatProjection = mat4(1);"
-					"uniform mat4 u_MatView = mat4(1);"
-					"uniform mat4 u_MatModel = mat4(1);"
-					"void main() {\n"
-					"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.xyz, 1.0);\n"
-					"}\n"
-				));
-				Assert(vertex_shader.getSource().length() != 0);
-				Assert(vertex_shader.compile());
-				Assert(vertex_shader.isCompiled());
+			axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
+			Assert(!vertex_shader.isValid());
+			Assert(vertex_shader.create());
+			Assert(vertex_shader.isValid());
+			Assert(vertex_shader.getSource().length() == 0);
+			Assert(!vertex_shader.compile());
+			Assert(!vertex_shader.isCompiled());
+			axl::util::String vertex_code = File::getStringContent("tests/shaders/330/basic_vpvms.vert");
+			if(vertex_code.length() == 0)
+			{
+				vertex_code = "# version 330 core\n"
+				"layout(location = 0) in vec3 in_Position;\n"
+				"uniform mat4 u_MatProjection = mat4(1);\n"
+				"uniform mat4 u_MatView = mat4(1);\n"
+				"uniform mat4 u_MatModel = mat4(1);\n"
+				"void main() {\n"
+				"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.xyz, 1.0);\n"
+				"}\n";
+			}
+			Assert(vertex_shader.setSource(vertex_code.cstr()));
+			Assert(vertex_shader.getSource().length() != 0);
+			Assert(vertex_shader.compile());
+			Assert(vertex_shader.isCompiled());
 
-				// FRAGMENT_SHADER
-				axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
-				Assert(!fragment_shader.isValid());
-				Assert(fragment_shader.create());
-				Assert(fragment_shader.isValid());
-				Assert(fragment_shader.getSource().length() == 0);
-				Assert(!fragment_shader.compile());
-				Assert(!fragment_shader.isCompiled());
-				Assert(fragment_shader.setSource(
-					"# version 330 core\n"
-					"void main() {"
-					"	gl_FragColor = vec4(1.0,0.0,1.0,1.0);"
-					"}\n"
-				));
-				Assert(fragment_shader.compile());
-				Assert(fragment_shader.isCompiled());
-				if(!vertex_shader.isCompiled())
+			// FRAGMENT_SHADER
+			axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
+			Assert(!fragment_shader.isValid());
+			Assert(fragment_shader.create());
+			Assert(fragment_shader.isValid());
+			Assert(fragment_shader.getSource().length() == 0);
+			Assert(!fragment_shader.compile());
+			Assert(!fragment_shader.isCompiled());
+			axl::util::String fragment_code = File::getStringContent("tests/shaders/330/basic_vpvms.frag");
+			if(fragment_code.length() == 0)
+			{
+				fragment_code = "# version 330 core\n"
+				"void main() {\n"
+				"	gl_FragColor = vec4(1.0,0.0,1.0,1.0);\n"
+				"}\n";
+			}
+			Assert(fragment_shader.setSource(fragment_code.cstr()));
+			Assert(fragment_shader.compile());
+			Assert(fragment_shader.isCompiled());
+			if(!vertex_shader.isCompiled())
+			{
+				axl::util::String info_log = vertex_shader.getInfoLog();
+				printf("VERTEX_SHADER_INFO_LOG:\n****\n%s****\n", info_log.cstr());
+			}
+			if(!fragment_shader.isCompiled())
+			{
+				axl::util::String info_log = fragment_shader.getInfoLog();
+				printf("FRAGMENT_SHADER_INFO_LOG:\n****\n%s****\n", info_log.cstr());
+			}
+			// Program
+			Assert(program.create());
+			Assert(program.isValid());
+			// attach shaders
+			if(vertex_shader.isCompiled() && fragment_shader.isCompiled())
+			{
+				Assert(vertex_shader.attach(program));
+				Assert(fragment_shader.attach(program));
+				Assert(program.link());
+				Assert(program.isLinked());
+				if(!program.isLinked())
 				{
-					axl::util::String info_log = vertex_shader.getInfoLog();
-					printf("VERTEX_SHADER_INFO_LOG:\n****\n%s****\n", info_log.cstr());
+					axl::util::String info_log = program.getInfoLog();
+					printf("PROGRAM_INFO_LOG:\n****\n%s****\n", info_log.cstr());
 				}
-				if(!fragment_shader.isCompiled())
+				uloc_projection = program.getUniformLocation("u_MatProjection");
+				uloc_view = program.getUniformLocation("u_MatView");
+				uloc_model = program.getUniformLocation("u_MatModel");
+				Assert(vertex_shader.detach(program));
+				Assert(fragment_shader.detach(program));
+			}
+			else
+			{
+				program.destroy();
+			}
+			// destroy shaders
+			Assert(vertex_shader.destroy());
+			Assert(fragment_shader.destroy());
+			// create vertext array and vertex buffer objects
+			if(this->main_context.makeCurrent())
+			{
+				GL::glGenVertexArrays(1, &vertex_array);
+				GL::glGenBuffers(1, &vertex_buffer);
+				if(vertex_array != 0 && vertex_buffer != 0)
 				{
-					axl::util::String info_log = fragment_shader.getInfoLog();
-					printf("FRAGMENT_SHADER_INFO_LOG:\n****\n%s****\n", info_log.cstr());
+					const axl::glfl::GLfloat vertices[] = {
+						-1.0f, -1.0, 0.0, 0.0, 0.0,
+						 1.0f, -1.0, 0.0, 1.0, 0.0,
+						 0.0f,  1.0, 0.0, 0.5, 1.0,
+					};
+					GLC(GL::glBindVertexArray(vertex_array));
+					GLC(GL::glBindBuffer(GL::GL_ARRAY_BUFFER, vertex_buffer));
+					GLC(GL::glBufferData(GL::GL_ARRAY_BUFFER, (axl::glfl::GLsizeiptr)sizeof(vertices), vertices, GL::GL_STATIC_DRAW));
+					GLC(GL::glEnableVertexAttribArray(0));
+					GLC(GL::glEnableVertexAttribArray(1));
+					GLC(GL::glVertexAttribPointer(0, 3, GL::GL_FLOAT, 0, (axl::glfl::GLsizei)(sizeof(axl::glfl::GLfloat)*5), 0));
+					GLC(GL::glVertexAttribPointer(1, 2, GL::GL_FLOAT, 0, (axl::glfl::GLsizei)(sizeof(axl::glfl::GLfloat)*5), (axl::glfl::GLvoid*)(sizeof(axl::glfl::GLfloat)*3)));
+					GLC(GL::glBindBuffer(GL::GL_ARRAY_BUFFER, 0));
+					GLC(GL::glBindVertexArray(0));
 				}
-				// Program
-				Assert(program.create());
-				Assert(program.isValid());
-				// attach shaders
-				if(vertex_shader.isCompiled() && fragment_shader.isCompiled())
+			}
+			Assert(this->texture.create());
+			Assert(this->texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR));
+			Assert(this->texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR));
+			const axl::glfl::GLsizei txw = 128, txh = 128;
+			if(this->texture.allocate(txw, txh, GL::GL_RGB8))
+			{
+				axl::glfl::GLsizei size = txw * txh * 3 * sizeof(axl::glfl::GLubyte);
+				axl::glfl::GLubyte *image = new axl::glfl::GLubyte[size];
+				if(image)
 				{
-					Assert(vertex_shader.attach(program));
-					Assert(fragment_shader.attach(program));
-					Assert(program.link());
-					Assert(program.isLinked());
-					if(!program.isLinked())
+					for(axl::glfl::GLsizei j = 0; j < txh; ++j)
 					{
-						axl::util::String info_log = program.getInfoLog();
-						printf("PROGRAM_INFO_LOG:\n****\n%s****\n", info_log.cstr());
+						for(axl::glfl::GLsizei i = 0; i < txw; ++i)
+						{
+							axl::glfl::GLsizei index = (j*txw + i) * 3;
+							image[index] = (axl::glfl::GLubyte)((float)(i+1)/txw * 255.f * (float)(txh-j)/txh);
+							image[index + 1] = (axl::glfl::GLubyte)((float)(txw-i)/txw * 255.f * (float)(txh-j)/txh);
+							image[index + 2] = (axl::glfl::GLubyte)((float)j/txh * 255.f);
+						}
 					}
-					uloc_projection = program.getUniformLocation("u_MatProjection");
-					uloc_view = program.getUniformLocation("u_MatView");
-					uloc_model = program.getUniformLocation("u_MatModel");
-					Assert(vertex_shader.detach(program));
-					Assert(fragment_shader.detach(program));
+					Assert(this->texture.setImage(0, 0, 0, txw, txh, GL::GL_RGB, GL::GL_UNSIGNED_BYTE, image, 1));
+					delete[] image;
 				}
-				else
-				{
-					program.destroy();
-				}
-				// destroy shaders
-				Assert(vertex_shader.destroy());
-				Assert(fragment_shader.destroy());
-				// create vertext array and vertex buffer objects
-				if(this->main_context.makeCurrent())
-				{
-					GL::glGenVertexArrays(1, &vertex_array);
-					GL::glGenBuffers(1, &vertex_buffer);
-					if(vertex_array != 0 && vertex_buffer != 0)
-					{
-						const axl::glfl::GLfloat vertices[] = {
-							-1.0f, -1.0, 0.0,
-							 1.0f, -1.0, 0.0,
-							 0.0f,  1.0, 0.0,
-						};
-						GLC(GL::glBindVertexArray(vertex_array));
-						GLC(GL::glBindBuffer(GL::GL_ARRAY_BUFFER, vertex_buffer));
-						GLC(GL::glBufferData(GL::GL_ARRAY_BUFFER, (axl::glfl::GLsizeiptr)sizeof(vertices), vertices, GL::GL_STATIC_DRAW));
-						GLC(GL::glEnableVertexAttribArray(0));
-						GLC(GL::glVertexAttribPointer(0, 3, GL::GL_FLOAT, 0, 0, 0));
-						GLC(GL::glBindBuffer(GL::GL_ARRAY_BUFFER, 0));
-						GLC(GL::glBindVertexArray(0));
-					}
-				}
+			}
 			return axl::gl::View::onCreate(recreating);
 		}
 
@@ -380,6 +459,16 @@ class GameView : public axl::gl::View
 				this->show(this->visiblity == VS_FULLSCREEN ? SM_SHOW : SM_FULLSCREEN);
 			if(key_F3.isPressed() && no_modifiers)
 				this->setCursor(this->cursor == CUR_NONE ? this->NormalCursor : CUR_NONE);
+			if(key_Space.isPressed() && no_modifiers)
+			{
+				static axl::util::uc::Time ptime = ctime;
+				this->is_animating = !this->is_animating;
+				if(this->is_animating)
+				{
+					this->time.set();
+					this->ctime.setFromReference(ptime);
+				} else ptime.set();
+			}
 			switch (key)
 			{
 				case KeyCode::KEY_ESCAPE:
@@ -389,6 +478,7 @@ class GameView : public axl::gl::View
 					axl::gl::View::onKey(key, down);
 			}
 		}
+
 };
 
 
