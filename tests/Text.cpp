@@ -143,8 +143,8 @@ class GameView : public axl::gl::View
 				GL::glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
-			program.setUniformMat4f(uloc_view, this->camera.view_transform.values);
-			program.setUniformMat4f(uloc_model, this->model_transform.values);
+			program.setUniformMat4fv(uloc_view, this->camera.view_transform.values);
+			program.setUniformMat4fv(uloc_model, this->model_transform.values);
 			// Draw
 			if(vertex_array != 0 && vertex_buffer != 0 && program.use())
 			{
@@ -276,7 +276,7 @@ class GameView : public axl::gl::View
 					GLC(GL::glBindVertexArray(0));
 				}
 			}
-			program.setUniformVec4f(uloc_TextColor, &this->font_color.x);
+			program.setUniform4fv(uloc_TextColor, &this->font_color.x);
 			return axl::gl::View::onCreate(recreating);
 		}
 
@@ -313,7 +313,7 @@ class GameView : public axl::gl::View
 					((axl::gl::projection::Orthographicf*)this->camera.projection)->set((float)-width, (float)width, (float)-height, (float)height, 0.01f, 1000.0f);
 				}
 				this->camera.projection->updateTransform();
-				program.setUniformMat4f(uloc_projection, this->camera.projection->matrix.values);
+				program.setUniformMat4fv(uloc_projection, this->camera.projection->matrix.values);
 			}
 			this->update();
 			this->render();

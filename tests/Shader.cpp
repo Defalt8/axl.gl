@@ -54,8 +54,9 @@ class GameView : public axl::gl::View
 		axl::gl::gfx::Program program;
 		axl::gl::gfx::Texture2D texture;
 		axl::glfl::GLuint vertex_array, vertex_buffer;
-		axl::glfl::GLint uloc_projection, uloc_view, uloc_model;
+		axl::glfl::GLint uloc_projection, uloc_view, uloc_model, uloc_color;
 		axl::math::Mat4f model_transform;
+		axl::math::Vec4f color;
 		
 	private:
 		Cursor NormalCursor;
@@ -98,17 +99,22 @@ class GameView : public axl::gl::View
 			uloc_projection = -1;
 			uloc_view = -1;
 			uloc_model = -1;
+			uloc_color = -1;
 			model_transform = Transform4::scale(Vec3f::filled(0.8f));
+			color.set(1.0f);
 			time.set();
 			ctime.set();
 		}
 
 		void update()
 		{
+			using namespace axl::math;
 			// update code
 			if(this->is_animating)
 			{
-				model_transform = axl::math::Transform4::scale(axl::math::Vec3f::filled(0.7f)) * axl::math::Transform4::rotateZ(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI);
+				this->model_transform = Transform4::scale(Vec3f::filled(0.7f)) * Transform4::rotateZ(ctime.deltaTimef() * Constants::F_QUARTER_PI);
+				float color_value = Util::map(sin(ctime.deltaTimef() * Constants::F_HALF_PI), -1.0f, 1.0f, 0.0f, 1.0f);
+				this->color.set(color_value, 0.2f, 1.0f-color_value, 1.0f);
 			}
 			this->time.set();
 		}
@@ -136,14 +142,10 @@ class GameView : public axl::gl::View
 				GL::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
-			if(uloc_view)
-			{
-				Assert(program.setUniformMat4f(uloc_view, this->camera.view_transform.values));
-			}
-			if(uloc_model)
-			{
-				Assert(program.setUniformMat4f(uloc_model, this->model_transform.values));
-			}
+			program.setUniformMat4fv(uloc_projection, this->camera.projection->matrix.values);
+			program.setUniformMat4fv(uloc_view, this->camera.view_transform.values);
+			program.setUniformMat4fv(uloc_model, this->model_transform.values);
+			program.setUniform4fv(uloc_color, &this->color.x);
 			// Draw
 			if(vertex_array != 0 && vertex_buffer != 0 && program.use())
 			{
@@ -155,6 +157,64 @@ class GameView : public axl::gl::View
 				GL::glBindVertexArray(0);
 				this->texture.unbind();
 			}
+		}
+
+		bool loadShaders(const axl::util::String& vertex_shader_file, const axl::util::String& fragment_shader_file)
+		{
+			bool success = false;
+			// VERTEX_SHADER
+			axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
+			if(vertex_shader.create())
+			{
+				vertex_shader.setSource(File::getStringContent(vertex_shader_file));
+				vertex_shader.compile();
+				if(!vertex_shader.isCompiled())
+					fprintf(stderr, "VERTEX_SHADER_INFO_LOG:\n****\n%s****\n", vertex_shader.getInfoLog().cstr());
+			}
+			// FRAGMENT_SHADER
+			axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
+			if(fragment_shader.create())
+			{
+				fragment_shader.setSource(File::getStringContent(fragment_shader_file));
+				fragment_shader.compile();
+				if(!fragment_shader.isCompiled())
+					fprintf(stderr, "FRAGMENT_SHADER_INFO_LOG:\n****\n%s****\n", fragment_shader.getInfoLog().cstr());
+			}
+			// Program
+			if(!this->program.isCreated())
+				program.create();
+			if(this->program.isValid())
+			{
+				// attach shaders
+				if(vertex_shader.isCompiled() && vertex_shader.attach(program) &&
+				   fragment_shader.isCompiled() && fragment_shader.attach(program)
+				)
+				{
+					if(program.link())
+					{
+						uloc_projection = program.getUniformLocation("u_MatProjection");
+						uloc_view = program.getUniformLocation("u_MatView");
+						uloc_model = program.getUniformLocation("u_MatModel");
+						uloc_color = program.getUniformLocation("u_VecColor");
+						vertex_shader.detach(program);
+						fragment_shader.detach(program);
+						success = true;
+					}
+					else
+					{
+						axl::util::String info_log = program.getInfoLog();
+						printf("PROGRAM_INFO_LOG:\n****\n%s****\n", info_log.cstr());
+					}
+				}
+				else
+				{
+					program.destroy();
+				}
+			}
+			// destroy shaders
+			vertex_shader.destroy();
+			fragment_shader.destroy();
+			return success;
 		}
 
 		void onDisplayConfig(const axl::gl::Display& display)
@@ -177,189 +237,130 @@ class GameView : public axl::gl::View
 			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
 			this->init();
 			// Create stuff here
-			{
-				axl::gl::gfx::Shader shader;
-				Assert(!shader.isValid());
-				Assert(!shader.create());
-				Assert(!shader.isValid());
-				Assert(!shader.compile());
-				Assert(!shader.isValid());
-				Assert(!shader.isCompiled());
-			}
-			{
-				axl::gl::gfx::Shader shader(&this->main_context);
-				Assert(!shader.isValid());
-				Assert(!shader.create());
-				Assert(!shader.isValid());
-				Assert(!shader.compile());
-				Assert(!shader.isValid());
-				Assert(!shader.isCompiled());
-			}
-			{
-				axl::gl::gfx::Program program;
-				Assert(!program.isValid());
-				Assert(!program.create());
-				Assert(!program.isValid());
-				Assert(!program.link());
-				Assert(!program.isValid());
-				Assert(!program.isLinked());
-			}
-			{
-				axl::gl::gfx::Program program(&this->main_context);
-				Assert(!program.isValid());
-				Assert(program.create());
-				Assert(program.isValid());
-				Assert(!program.link());
-				Assert(!program.isLinked());
-				Assert(program.destroy());
-				Assert(!program.isValid());
-				Assert(!program.isLinked());
-			}
-			{
-				// VERTEX_SHADER
-				axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
-				Assert(!vertex_shader.isValid());
-				Assert(vertex_shader.create());
-				Assert(vertex_shader.isValid());
-				Assert(vertex_shader.getSource().length() == 0);
-				Assert(!vertex_shader.compile());
-				Assert(!vertex_shader.isCompiled());
-				Assert(vertex_shader.setSource(
-					"# version 330 core\n"
-					"void main() {}\n"
-				));
-				Assert(vertex_shader.getSource().length() != 0);
-				Assert(vertex_shader.compile());
-				Assert(vertex_shader.isCompiled());
-
-				// FRAGMENT_SHADER
-				axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
-				Assert(!fragment_shader.isValid());
-				Assert(fragment_shader.create());
-				Assert(fragment_shader.isValid());
-				Assert(fragment_shader.getSource().length() == 0);
-				Assert(!fragment_shader.compile());
-				Assert(!fragment_shader.isCompiled());
-				Assert(fragment_shader.setSource(
-					"# version 330 core\n"
-					"out vec4 out_Color;"
-					"void main() {"
-					"	out_Color = vec4(1.0,0.0,1.0,1.0);"
-					"}\n"
-				));
-				Assert(fragment_shader.getSource().length() != 0);
-				Assert(fragment_shader.compile());
-				Assert(fragment_shader.isCompiled());
-
-				// Program
-				axl::gl::gfx::Program program(&this->main_context);
-				Assert(!program.isValid());
-				Assert(program.create());
-				Assert(program.isValid());
-				Assert(!program.link());
-				Assert(!program.isLinked());
-				Assert(program.isValid());
-				// attach shaders
-				Assert(vertex_shader.attach(program));
-				Assert(fragment_shader.attach(program));
-				Assert(program.link());
-				Assert(program.isLinked());
-				Assert(vertex_shader.detach(program));
-				Assert(fragment_shader.detach(program));
-				// destroy shaders
-				Assert(vertex_shader.destroy());
-				Assert(!vertex_shader.isValid());
-				Assert(!vertex_shader.isCompiled());
-				Assert(fragment_shader.destroy());
-				Assert(!fragment_shader.isValid());
-				Assert(!fragment_shader.isCompiled());
-				// destroy program
-				Assert(program.destroy());
-				Assert(!program.isValid());
-				Assert(!program.isLinked());
-			}
-			// VERTEX_SHADER
-			axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
-			Assert(!vertex_shader.isValid());
-			Assert(vertex_shader.create());
-			Assert(vertex_shader.isValid());
-			Assert(vertex_shader.getSource().length() == 0);
-			Assert(!vertex_shader.compile());
-			Assert(!vertex_shader.isCompiled());
-			axl::util::String vertex_code = File::getStringContent("tests/shaders/330/basic_vpvms.vert");
-			if(vertex_code.length() == 0)
-			{
-				vertex_code = "# version 330 core\n"
-				"layout(location = 0) in vec3 in_Position;\n"
-				"uniform mat4 u_MatProjection = mat4(1);\n"
-				"uniform mat4 u_MatView = mat4(1);\n"
-				"uniform mat4 u_MatModel = mat4(1);\n"
-				"void main() {\n"
-				"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.xyz, 1.0);\n"
-				"}\n";
-			}
-			Assert(vertex_shader.setSource(vertex_code.cstr()));
-			Assert(vertex_shader.getSource().length() != 0);
-			Assert(vertex_shader.compile());
-			Assert(vertex_shader.isCompiled());
-
-			// FRAGMENT_SHADER
-			axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
-			Assert(!fragment_shader.isValid());
-			Assert(fragment_shader.create());
-			Assert(fragment_shader.isValid());
-			Assert(fragment_shader.getSource().length() == 0);
-			Assert(!fragment_shader.compile());
-			Assert(!fragment_shader.isCompiled());
-			axl::util::String fragment_code = File::getStringContent("tests/shaders/330/basic_vpvms.frag");
-			if(fragment_code.length() == 0)
-			{
-				fragment_code = "# version 330 core\n"
-				"void main() {\n"
-				"	gl_FragColor = vec4(1.0,0.0,1.0,1.0);\n"
-				"}\n";
-			}
-			Assert(fragment_shader.setSource(fragment_code.cstr()));
-			Assert(fragment_shader.compile());
-			Assert(fragment_shader.isCompiled());
-			if(!vertex_shader.isCompiled())
-			{
-				axl::util::String info_log = vertex_shader.getInfoLog();
-				printf("VERTEX_SHADER_INFO_LOG:\n****\n%s****\n", info_log.cstr());
-			}
-			if(!fragment_shader.isCompiled())
-			{
-				axl::util::String info_log = fragment_shader.getInfoLog();
-				printf("FRAGMENT_SHADER_INFO_LOG:\n****\n%s****\n", info_log.cstr());
-			}
-			// Program
-			Assert(program.create());
-			Assert(program.isValid());
-			// attach shaders
-			if(vertex_shader.isCompiled() && fragment_shader.isCompiled())
-			{
-				Assert(vertex_shader.attach(program));
-				Assert(fragment_shader.attach(program));
-				Assert(program.link());
-				Assert(program.isLinked());
-				if(!program.isLinked())
+			{ // Shader tests
 				{
-					axl::util::String info_log = program.getInfoLog();
-					printf("PROGRAM_INFO_LOG:\n****\n%s****\n", info_log.cstr());
+					axl::gl::gfx::Shader shader;
+					Assert(!shader.isValid());
+					Assert(!shader.create());
+					Assert(!shader.isValid());
+					Assert(!shader.compile());
+					Assert(!shader.isValid());
+					Assert(!shader.isCompiled());
 				}
-				uloc_projection = program.getUniformLocation("u_MatProjection");
-				uloc_view = program.getUniformLocation("u_MatView");
-				uloc_model = program.getUniformLocation("u_MatModel");
-				Assert(vertex_shader.detach(program));
-				Assert(fragment_shader.detach(program));
+				{
+					axl::gl::gfx::Shader shader(&this->main_context);
+					Assert(!shader.isValid());
+					Assert(!shader.create());
+					Assert(!shader.isValid());
+					Assert(!shader.compile());
+					Assert(!shader.isValid());
+					Assert(!shader.isCompiled());
+				}
+				{
+					axl::gl::gfx::Program program;
+					Assert(!program.isValid());
+					Assert(!program.create());
+					Assert(!program.isValid());
+					Assert(!program.link());
+					Assert(!program.isValid());
+					Assert(!program.isLinked());
+				}
+				{
+					axl::gl::gfx::Program program(&this->main_context);
+					Assert(!program.isValid());
+					Assert(program.create());
+					Assert(program.isValid());
+					Assert(!program.use());
+					Assert(program.unuse());
+					Assert(!program.link());
+					Assert(!program.isLinked());
+					Assert(program.destroy());
+					Assert(!program.isValid());
+					Assert(!program.isLinked());
+				}
+				{
+					// VERTEX_SHADER
+					axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
+					Assert(!vertex_shader.isValid());
+					Assert(vertex_shader.create());
+					Assert(vertex_shader.isValid());
+					Assert(vertex_shader.getSource().length() == 0);
+					Assert(!vertex_shader.compile());
+					Assert(!vertex_shader.isCompiled());
+					Assert(vertex_shader.setSource(
+						"# version 330 core\n"
+						"void main() {}\n"
+					));
+					Assert(vertex_shader.getSource().length() != 0);
+					Assert(vertex_shader.compile());
+					Assert(vertex_shader.isCompiled());
+
+					// FRAGMENT_SHADER
+					axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
+					Assert(!fragment_shader.isValid());
+					Assert(fragment_shader.create());
+					Assert(fragment_shader.isValid());
+					Assert(fragment_shader.getSource().length() == 0);
+					Assert(!fragment_shader.compile());
+					Assert(!fragment_shader.isCompiled());
+					Assert(fragment_shader.setSource(
+						"# version 330 core\n"
+						"uniform vec4 u_Color = vec4(1.0,0.0,1.0,1.0);\n"
+						"void main() {\n"
+						"	gl_FragColor = u_Color;\n"
+						"}\n"
+					));
+					Assert(fragment_shader.getSource().length() != 0);
+					Assert(fragment_shader.compile());
+					Assert(fragment_shader.isCompiled());
+
+					// Program
+					axl::gl::gfx::Program program(&this->main_context);
+					Assert(!program.isValid());
+					Assert(program.create());
+					Assert(program.isValid());
+					Assert(!program.link());
+					Assert(!program.isLinked());
+					Assert(program.isValid());
+					// attach shaders and link program
+					Assert(vertex_shader.attach(program));
+					Assert(fragment_shader.attach(program));
+					Assert(program.link());
+					Assert(program.isLinked());
+					// detach and destroy shaders
+					Assert(vertex_shader.detach(program));
+					Assert(fragment_shader.detach(program));
+					Assert(vertex_shader.destroy());
+					Assert(!vertex_shader.isValid());
+					Assert(!vertex_shader.isCompiled());
+					Assert(fragment_shader.destroy());
+					Assert(!fragment_shader.isValid());
+					Assert(!fragment_shader.isCompiled());
+					if(program.isLinked())
+					{
+						axl::glfl::GLint uloc_color;
+						axl::math::Vec4f color(0.45f, 0.1f, 0.0f, 1.0f), rcolor;
+						Assert(program.getUniformLocation("u_COLOR") == -1);
+						uloc_color = program.getUniformLocation("u_Color");
+						Assert(uloc_color != -1);
+						if(uloc_color != -1)
+						{
+							Assert(program.setUniform4fv(uloc_color, &color.x));
+							Assert(program.getUniformfv(uloc_color, &rcolor.x));
+							Assert(rcolor.equals(color, 0.001f));
+						}
+					}
+					// destroy program
+					Assert(program.destroy());
+					Assert(!program.isValid());
+					Assert(!program.isLinked());
+				}
 			}
+			// END-Shader tests
+			if(this->loadShaders("tests/shaders/330/shader_test.vert", "tests/shaders/330/shader_test.frag"))
+				printf(":) Shaders loading successful!\n");
 			else
-			{
-				program.destroy();
-			}
-			// destroy shaders
-			Assert(vertex_shader.destroy());
-			Assert(fragment_shader.destroy());
+				fprintf(stderr, ":( Shaders loading failed!\n");
 			// create vertext array and vertex buffer objects
 			if(this->main_context.makeCurrent())
 			{
@@ -443,8 +444,6 @@ class GameView : public axl::gl::View
 					((axl::gl::projection::Orthographicf*)this->camera.projection)->set(-aspect_ratio, aspect_ratio, -1.0f, 1.0f, 0.01f, 1000.0f);
 				}
 				this->camera.projection->updateTransform();
-				Assert(!program.setUniformMat4d(uloc_projection, axl::math::Mat4d(this->camera.projection->matrix).values));
-				Assert(program.setUniformMat4f(uloc_projection, this->camera.projection->matrix.values));
 			}
 			this->update();
 			this->render();
@@ -469,13 +468,36 @@ class GameView : public axl::gl::View
 					this->ctime.setFromReference(ptime);
 				} else ptime.set();
 			}
-			switch (key)
+			if(down) // KEY_DOWN
 			{
-				case KeyCode::KEY_ESCAPE:
-					axl::gl::Application::quit(0);
-					break;
-				default:
-					axl::gl::View::onKey(key, down);
+				switch (key)
+				{
+					case KeyCode::KEY_ESCAPE:
+						if(no_modifiers)
+						{
+							axl::gl::Application::quit(0);
+						}
+						break;
+					default:
+						axl::gl::View::onKey(key, down);
+				}
+			}
+			else // KEY_UP
+			{
+				switch (key)
+				{
+					case KeyCode::KEY_L:
+						if(bk_control && !bk_shift && !bk_alt)
+						{
+							if(this->loadShaders("tests/shaders/330/shader_test.vert", "tests/shaders/330/shader_test.frag"))
+								printf(":) Shaders loading successful!\n");
+							else
+								fprintf(stderr, ":( Shaders loading failed!\n");
+						}
+						break;
+					default:
+						axl::gl::View::onKey(key, down);
+				}
 			}
 		}
 
