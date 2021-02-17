@@ -612,7 +612,7 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 	if(kAlt && kF4) Application::quit(0);
 }
 
-void View::onChar(char char_code)
+void View::onChar(wchar_t char_code)
 {}
 
 void View::onPointer(int index, int x, int y, bool is_down)
@@ -687,8 +687,12 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 		case WM_CHAR:
 			if(view)
 			{
-				view->onChar((char)wparam);
+				view->onChar((wchar_t)wparam);
 			}
+			break;
+		case WM_UNICHAR:
+			if(wparam == UNICODE_NOCHAR) return TRUE;
+			else return FALSE;
 			break;
 		case WM_POINTERUPDATE:
 			if(view)

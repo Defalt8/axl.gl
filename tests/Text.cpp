@@ -57,7 +57,7 @@ class GameView : public axl::gl::View
 		axl::gl::gfx::Program program;
 		axl::gl::gfx::Font font;
 		axl::glfl::GLuint vertex_array, vertex_buffer;
-		axl::glfl::GLint uloc_projection, uloc_view, uloc_model, uloc_FontColor;
+		axl::glfl::GLint uloc_projection, uloc_view, uloc_model, uloc_TextColor;
 		axl::math::Mat4f model_transform;
 		axl::math::Vec4f font_color;
 	private:
@@ -103,7 +103,7 @@ class GameView : public axl::gl::View
 			uloc_projection = -1;
 			uloc_view = -1;
 			uloc_model = -1;
-			uloc_FontColor = -1;
+			uloc_TextColor = -1;
 			model_transform = Transform4::scale(Vec3f::filled(0.8f));
 			font_color = axl::math::Vec4f(0.1f,0.1f,0.1f,1.0f);
 			time.set();
@@ -183,7 +183,7 @@ class GameView : public axl::gl::View
 				axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
 				if(vertex_shader.create())
 				{
-					axl::util::String vertex_code = File::getStringContent("tests/shaders/330/font_vpvms.vert");
+					axl::util::String vertex_code = File::getStringContent("tests/shaders/330/text_vpvms.vert");
 					vertex_shader.setSource(vertex_code.cstr());
 					vertex_shader.compile();
 				}
@@ -196,7 +196,7 @@ class GameView : public axl::gl::View
 				axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
 				if(fragment_shader.create())
 				{
-					axl::util::String fragment_code = File::getStringContent("tests/shaders/330/font_vpvms.frag");
+					axl::util::String fragment_code = File::getStringContent("tests/shaders/330/text_vpvms.frag");
 					fragment_shader.setSource(fragment_code.cstr());
 					fragment_shader.compile();
 				}
@@ -223,7 +223,7 @@ class GameView : public axl::gl::View
 					uloc_projection = program.getUniformLocation("u_MatProjection");
 					uloc_view = program.getUniformLocation("u_MatView");
 					uloc_model = program.getUniformLocation("u_MatModel");
-					uloc_FontColor = program.getUniformLocation("u_FontColor");
+					uloc_TextColor = program.getUniformLocation("u_TextColor");
 					Assert(vertex_shader.detach(program));
 					Assert(fragment_shader.detach(program));
 				}
@@ -240,7 +240,7 @@ class GameView : public axl::gl::View
 			axl::math::Vec4f char_uv;
 			if(this->font.create())
 			{
-				Assert(this->font.loadFromFile("../../common/fonts/Arial.ttf", axl::math::Vec2i(96,96)));
+				Assert(this->font.loadFromFile("../../common/fonts/ebrima.ttf", axl::math::Vec2i(64,64)));
 				char_uv.set(0.0, 0.0, 1.0, 1.0);
 			}
 			if(this->main_context.makeCurrent())
@@ -276,7 +276,7 @@ class GameView : public axl::gl::View
 					GLC(GL::glBindVertexArray(0));
 				}
 			}
-			program.setUniformVec4f(uloc_FontColor, &this->font_color.x);
+			program.setUniformVec4f(uloc_TextColor, &this->font_color.x);
 			return axl::gl::View::onCreate(recreating);
 		}
 
@@ -313,8 +313,7 @@ class GameView : public axl::gl::View
 					((axl::gl::projection::Orthographicf*)this->camera.projection)->set((float)-width, (float)width, (float)-height, (float)height, 0.01f, 1000.0f);
 				}
 				this->camera.projection->updateTransform();
-				Assert(!program.setUniformMat4d(uloc_projection, axl::math::Mat4d(this->camera.projection->matrix).values));
-				Assert(program.setUniformMat4f(uloc_projection, this->camera.projection->matrix.values));
+				program.setUniformMat4f(uloc_projection, this->camera.projection->matrix.values);
 			}
 			this->update();
 			this->render();
@@ -349,17 +348,17 @@ class GameView : public axl::gl::View
 					if(verteces)
 					{
 						verteces[0 * 5] = (float)-this->camera.viewport_size.x;
-						verteces[0 * 5 + 1] = (float)-this->camera.viewport_size.y;
+						verteces[0 * 5 + 1] = (float)-this->camera.viewport_size.x;
 						verteces[1 * 5] = (float)this->camera.viewport_size.x;
-						verteces[1 * 5 + 1] = (float)-this->camera.viewport_size.y;
+						verteces[1 * 5 + 1] = (float)-this->camera.viewport_size.x;
 						verteces[2 * 5] = (float)this->camera.viewport_size.x;
-						verteces[2 * 5 + 1] = (float)this->camera.viewport_size.y;
+						verteces[2 * 5 + 1] = (float)this->camera.viewport_size.x;
 						verteces[3 * 5] = (float)this->camera.viewport_size.x;
-						verteces[3 * 5 + 1] = (float)this->camera.viewport_size.y;
+						verteces[3 * 5 + 1] = (float)this->camera.viewport_size.x;
 						verteces[4 * 5] = (float)-this->camera.viewport_size.x;
-						verteces[4 * 5 + 1] = (float)this->camera.viewport_size.y;
+						verteces[4 * 5 + 1] = (float)this->camera.viewport_size.x;
 						verteces[5 * 5] = (float)-this->camera.viewport_size.x;
-						verteces[5 * 5 + 1] = (float)-this->camera.viewport_size.y;
+						verteces[5 * 5 + 1] = (float)-this->camera.viewport_size.x;
 						verteces[0 * 5 + 3] = char_uv.x; verteces[0 * 5 + 4] = char_uv.y;
 						verteces[1 * 5 + 3] = char_uv.z; verteces[1 * 5 + 4] = char_uv.y;
 						verteces[2 * 5 + 3] = char_uv.z; verteces[2 * 5 + 4] = char_uv.w;
@@ -410,14 +409,15 @@ class GameView : public axl::gl::View
 			}
 		}
 
-		void onChar(char ch)
+		void onChar(wchar_t ch)
 		{
-			bool bk_control = key_Control.isDown(), bk_shift = key_Shift.isDown(), bk_alt = key_Alt.isDown();
 			axl::gl::View::onChar(ch);
+			if(ch == 13) return;
+			bool bk_control = key_Control.isDown(), bk_shift = key_Shift.isDown(), bk_alt = key_Alt.isDown();
 			if(bk_control || bk_alt) return;
 			if(this->font.isValid())
 			{
-				unsigned int glyph_index = this->font.getCharIndex((wchar_t)ch);
+				unsigned int glyph_index = this->font.getCharIndex(ch);
 				if(glyph_index != -1 && this->main_context.makeCurrent())
 				{
 					GL::glBindBuffer(GL::GL_ARRAY_BUFFER, this->vertex_buffer);
@@ -533,7 +533,7 @@ int main(int argc, char* argv[])
 					}
 					else if(no_modifiers)
 					{
-						float delta = 0.8f * (bk_up ? 1.0f : -1.0f) * delta_time;
+						float delta = 1.0f * view.camera.viewport_size.y * (bk_up ? 1.0f : -1.0f) * delta_time;
 						view.camera.position.y += delta;
 						view.camera.target.y += delta;
 						view.camera.updateTransform();
@@ -543,7 +543,7 @@ int main(int argc, char* argv[])
 				{
 					if(no_modifiers)
 					{
-						float delta = 0.8f * (bk_right ? 1.0f : -1.0f) * delta_time;
+						float delta = 1.0f * view.camera.viewport_size.y * (bk_right ? 1.0f : -1.0f) * delta_time;
 						view.camera.position.x += delta;
 						view.camera.target.x += delta;
 						view.camera.updateTransform();
