@@ -71,6 +71,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/shader/Program.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/shaders.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Font.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Text.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text.hpp"
 )
 target_link_directories( axl.gl
@@ -154,6 +155,7 @@ if( AXLGL_INSTALL_HEADERS )
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/shader/Program.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/shaders.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Font.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Text.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx.hpp"
 		DESTINATION "include/axl.gl"

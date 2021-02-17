@@ -16,6 +16,8 @@ class AXLGLCXXAPI Context;
 
 namespace gfx {
 
+class AXLGLCXXAPI Text;
+
 class AXLGLCXXAPI Font : public ContextObject
 {
 	public:
@@ -37,7 +39,7 @@ class AXLGLCXXAPI Font : public ContextObject
 		bool setSize(const axl::math::Vec2i& font_size);
 		unsigned int getCharIndex(axl::util::WString::char_t unicode_char) const;
 	private:
-		bool loadGlyphs(const axl::math::Vec2i& font_size, unsigned long count = -1);
+		bool loadGlyphs(const axl::math::Vec2i& font_size, int level = 0, unsigned long count = -1);
 	public:
 		static bool init();
 		static bool cleanup();
