@@ -146,7 +146,7 @@ class GameView : public axl::gl::View
 			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
 			Assert(this->texture.create());
 			Assert(this->texture.isValid());
-			Assert(this->texture.allocate(4, 8, 16, GL_RGBA8));
+			Assert(this->texture.allocate(0, 4, 8, 16, GL_RGBA8));
 			axl::glfl::GLint tex_w, tex_h, tex_d;
 			Assert(this->texture.getLevelParamiv(0, GL_TEXTURE_WIDTH, &tex_w));
 			Assert(this->texture.getLevelParamiv(0, GL_TEXTURE_HEIGHT, &tex_h));

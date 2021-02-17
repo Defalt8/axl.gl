@@ -200,8 +200,8 @@ class GameView : public axl::gl::View
 		{
 			if(!this->isValid()) return false;
 			if(!this->isValid() || !this->main_context.isValid() || !this->main_context.makeCurrent()) return false;
-			Assert(this->texture2d_color.allocate(this->size.x, this->size.y, GL_RGBA8));
-			Assert(this->texture2d_depth.allocate(this->size.x, this->size.y, GL::GL_DEPTH_COMPONENT24));
+			Assert(this->texture2d_color.allocate(0, this->size.x, this->size.y, GL_RGBA8));
+			Assert(this->texture2d_depth.allocate(0, this->size.x, this->size.y, GL::GL_DEPTH_COMPONENT24));
 			Assert(this->frame_buffer.attachTexture2D(GL::GL_COLOR_ATTACHMENT0, &this->texture2d_color));
 			Assert(this->frame_buffer.attachTexture2D(GL::GL_DEPTH_ATTACHMENT, &this->texture2d_depth));
 			if(!this->frame_buffer.isComplete())

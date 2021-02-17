@@ -166,7 +166,7 @@ bool Texture3D::getLevelParamfv(axl::glfl::GLint level, axl::glfl::GLenum tex_pa
 	glBindTexture(GL_TEXTURE_3D, 0);
 	return glGetError() == GL_NO_ERROR;
 }
-bool Texture3D::allocate(axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLsizei depth, axl::glfl::GLint internal_format, axl::glfl::GLint border)
+bool Texture3D::allocate(axl::glfl::GLint level, axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLsizei depth, axl::glfl::GLint internal_format, axl::glfl::GLint border)
 {
 	using namespace GL;
 	if(!this->bind()) return false;
@@ -233,9 +233,12 @@ bool Texture3D::allocate(axl::glfl::GLsizei width, axl::glfl::GLsizei height, ax
 		case GL_COMPRESSED_RED_RGTC1:
 		case GL_COMPRESSED_SIGNED_RED_RGTC1: format = GL_RED; break;
 	}
-	glTexImage3D(GL_TEXTURE_3D, 0, internal_format, width, height, depth, border, format, GL_UNSIGNED_BYTE, (const void*)0);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_LOD, 0);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LOD, (axl::glfl::GLsizei)std::log2((float)width >= height ? width : height));
+	glTexImage3D(GL_TEXTURE_3D, level, internal_format, width, height, depth, border, format, GL_UNSIGNED_BYTE, (const void*)0);
+	if(level == 0)
+	{
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_LOD, 0);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LOD, (axl::glfl::GLsizei)std::log2((float)width >= height ? width : height));
+	}
 	glBindTexture(GL_TEXTURE_3D, 0);
 	return glGetError() == GL_NO_ERROR;
 }

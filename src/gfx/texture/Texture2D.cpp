@@ -1,9 +1,9 @@
-#include <cmath>
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
 #include <axl.gl/gfx/texture/Texture2D.hpp>
 #include <axl.glfl/gl.hpp>
 #include <axl.glfl/glCoreARB.hpp>
+#include <axl.math/basic.hpp>
 
 #define GLCLEARERROR() while(glGetError() != GL_NO_ERROR)
 
@@ -164,7 +164,7 @@ bool Texture2D::getLevelParamfv(axl::glfl::GLint level, axl::glfl::GLenum tex_pa
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return glGetError() == GL_NO_ERROR;
 }
-bool Texture2D::allocate(axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLint internal_format, axl::glfl::GLint border)
+bool Texture2D::allocate(axl::glfl::GLint level, axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLint internal_format, axl::glfl::GLint border)
 {
 	using namespace GL;
 	if(!this->bind()) return false;
@@ -231,9 +231,12 @@ bool Texture2D::allocate(axl::glfl::GLsizei width, axl::glfl::GLsizei height, ax
 		case GL_COMPRESSED_RED_RGTC1:
 		case GL_COMPRESSED_SIGNED_RED_RGTC1: format = GL_RED; break;
 	}
-	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, border, format, GL_UNSIGNED_BYTE, (const void*)0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, (axl::glfl::GLsizei)std::log2((float)width >= height ? width : height));
+	glTexImage2D(GL_TEXTURE_2D, level, internal_format, width, height, border, format, GL_UNSIGNED_BYTE, (const void*)0);
+	if(level == 0)
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, (axl::glfl::GLsizei)axl::math::log2((float)(width >= height ? width : height)));
+	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return glGetError() == GL_NO_ERROR;
 }

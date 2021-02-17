@@ -387,7 +387,7 @@ class GameView : public axl::gl::View
 			Assert(this->texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR));
 			Assert(this->texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR));
 			const axl::glfl::GLsizei txw = 128, txh = 128;
-			if(this->texture.allocate(txw, txh, GL::GL_RGB8))
+			if(this->texture.allocate(0, txw, txh, GL::GL_RGB8))
 			{
 				axl::glfl::GLsizei size = txw * txh * 3 * sizeof(axl::glfl::GLubyte);
 				axl::glfl::GLubyte *image = new axl::glfl::GLubyte[size];
