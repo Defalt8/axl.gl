@@ -28,6 +28,8 @@ class AXLGLCXXAPI Program : public ContextObject
 		axl::util::String getInfoLog() const;
 		bool use() const;
 		bool unuse() const;
+
+		axl::glfl::GLint getAttributeLocation(const axl::util::String& attribute_name) const;
 		axl::glfl::GLint getUniformLocation(const axl::util::String& uniform_name) const;
 		
 		bool getUniformfv(axl::glfl::GLint location, axl::glfl::GLfloat* out_ptr) const;

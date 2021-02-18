@@ -5,7 +5,7 @@ A simple and multiplatform C++ game library.
 
 ## Version and supported platforms
 
-- **Latest version**: 0.24.43 alpha
+- **Latest version**: 0.24.44 alpha
 - **Supported platforms**: Windows
 It is possible to implement this library for linux systems using the X11 library, and for android using the EGL library.
 Other platforms will be implemented once the library is complete enough to be a game library.

@@ -121,6 +121,16 @@ bool Program::unuse() const
 	return glGetError() == GL_NO_ERROR;
 }
 
+axl::glfl::GLint Program::getAttributeLocation(const axl::util::String& attribute_name) const
+{
+	using namespace GL;
+	if(attribute_name.length() == 0 || !this->isLinked()) return -1;
+	GLCLEARERROR();
+	axl::glfl::GLint location = glGetAttribLocation(this->program_id, (const axl::glfl::GLchar*)attribute_name.cstr());
+	if(glGetError() != GL_NO_ERROR) return -1;
+	return location;
+}
+
 axl::glfl::GLint Program::getUniformLocation(const axl::util::String& uniform_name) const
 {
 	using namespace GL;
