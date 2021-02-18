@@ -1,6 +1,7 @@
 #pragma once
 #include "../../lib.hpp"
 #include "../../ContextObject.hpp"
+#include "../../camera/Camera3D.hpp"
 #include "../shader/Program.hpp"
 #include <axl.glfl/gl.hpp>
 #include <axl.util/String.hpp>
@@ -30,14 +31,14 @@ class AXLGLCXXAPI Text : public ContextObject
 		bool icreate();
 		bool idestroy();
 		bool isValid() const;
-		bool render() const;
+		bool render(const axl::gl::camera::Camera3Df* camera = 0) const;
+		void updateTransform();
 		// set methods
 		void setPosition(const axl::math::Vec3f& position);
 		void setScale(const axl::math::Vec3f& scale);
 		void setRotation(const axl::math::Vec3f& rotation);
-		void setTransform(const axl::math::Mat4f& transform);
-		void setBoxSize(const axl::math::Vec2f& box_size);
-		void setText(const axl::util::WString& wstring);
+		void setColor(const axl::math::Vec4f& color);
+		bool setText(const axl::util::WString& wstring);
 		void setFont(const Font* font);
 		void setProgram(const axl::gl::gfx::Program* text_shader_program);
 		void setOrientation(Orientation orientation);
@@ -47,7 +48,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		const axl::math::Vec3f& getScale() const;
 		const axl::math::Vec3f& getRotation() const;
 		const axl::math::Mat4f& getTransform() const;
-		const axl::math::Vec2f& getBoxSize() const;
+		const axl::math::Vec4f& getColor() const;
 		const axl::util::WString& getText() const;
 		const axl::gl::gfx::Font* getFont() const;
 		const axl::gl::gfx::Program* getProgram() const;
@@ -58,15 +59,23 @@ class AXLGLCXXAPI Text : public ContextObject
 		axl::math::Vec3f text_scale;
 		axl::math::Vec3f text_rotation;
 		axl::math::Mat4f text_transform;
-		axl::math::Vec2f text_box_size;
+		axl::math::Vec4f text_color;
 		axl::util::WString text_wstring;
 		const axl::gl::gfx::Font* text_font;
 		const axl::gl::gfx::Program* text_program;
 		Orientation text_orientation;
 		AlignmentFlag text_alignment;
 	private:
+		unsigned int actual_text_length;
 		axl::glfl::GLuint vertex_array_id;
 		axl::glfl::GLuint vertex_buffer_id;
+		axl::glfl::GLuint element_array_id;
+		axl::glfl::GLint attribute_location_position;
+		axl::glfl::GLint attribute_location_UV;
+		axl::glfl::GLint uniform_location_projection_matrix;
+		axl::glfl::GLint uniform_location_view_matrix;
+		axl::glfl::GLint uniform_location_model_matrix;
+		axl::glfl::GLint uniform_location_text_color;
 };
 
 } // namespace axl.gl.gfx

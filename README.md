@@ -5,7 +5,7 @@ A simple and multiplatform C++ game library.
 
 ## Version and supported platforms
 
-- **Latest version**: 0.24.44 alpha
+- **Latest version**: 0.25.46 alpha
 - **Supported platforms**: Windows
 It is possible to implement this library for linux systems using the X11 library, and for android using the EGL library.
 Other platforms will be implemented once the library is complete enough to be a game library.
@@ -130,5 +130,6 @@ Other platforms will be implemented once the library is complete enough to be a 
 - [include/axl.gl/gfx/shader/Program.hpp]("include/axl.gl/gfx/shader/Program.hpp") - OpenGL program class.
 - [include/axl.gl/gfx/shaders.hpp]("include/axl.gl/gfx/shaders.hpp") - Includes all headers under axl.gl/gfx/shader.
 - [include/axl.gl/gfx/text/Font.hpp]("include/axl.gl/gfx/text/Font.hpp") - Font class. Texture atlas implementation. Requires Freetype2 library.
+- [include/axl.gl/gfx/text/Text.hpp]("include/axl.gl/gfx/text/Text.hpp") - Text class.
 - [include/axl.gl/gfx/text.hpp]("include/axl.gl/gfx/text.hpp") - Includes all headers under axl.gl/gfx/text.
 - [include/axl.gl/gfx.hpp]("include/axl.gl/gfx.hpp") - Includes all headers under axl.gl/gfx.

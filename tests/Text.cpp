@@ -49,17 +49,21 @@ namespace GL {
 	using namespace axl::glfl::core::GL;
 }
 
+bool loadTextShaders(axl::gl::gfx::Program& text_program, const axl::util::String& vertex_shader_file, const axl::util::String& fragment_shader_file)
+{
+
+	return false;
+}
+
 class GameView : public axl::gl::View
 {
 	public:
 		axl::gl::Context main_context;
 		axl::gl::camera::Camera3Df camera;
-		axl::gl::gfx::Program program;
+		axl::gl::gfx::Program text_program;
 		axl::gl::gfx::Font font;
+		axl::gl::gfx::Text text;
 		axl::glfl::GLuint vertex_array, vertex_buffer;
-		axl::glfl::GLint uloc_projection, uloc_view, uloc_model, uloc_TextColor;
-		axl::math::Mat4f model_transform;
-		axl::math::Vec4f font_color;
 	private:
 		Cursor NormalCursor;
 		axl::util::uc::Time time, ctime;
@@ -67,14 +71,13 @@ class GameView : public axl::gl::View
 		axl::gl::input::Key key_Control, key_Shift, key_Alt, key_F2, key_F3, key_F4, key_F5, key_Space;
 		bool is_animating;
 		int size_delta;
-		unsigned int current_glyph_index; 
 	public:
 		GameView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const Cursor& _cursor = View::DefaultCursor) :
 			axl::gl::View(_title, _position, _size, _cursor),
 			main_context(),
 			camera(),
 			projection(),
-			program(),
+			text_program(),
 			font(),
 			NormalCursor(CUR_CROSS),
 			key_Control(axl::gl::input::KeyCode::KEY_CONTROL),
@@ -97,19 +100,15 @@ class GameView : public axl::gl::View
 			this->camera.set(Vec3f(0.0f,0.0f,4.0f), Vec3f(0.0f,0.0f,0.0f), 0.0f, Vec3f(1.0f,1.0f,1.0f), Vec2i(0,0), this->size, &this->projection);
 			this->camera.updateTransform();
 			this->is_animating = false;
-			program.setContext(&this->main_context);
+			text_program.setContext(&this->main_context);
 			font.setContext(&this->main_context);
+			text.setContext(&this->main_context);
+			text.setFont(&this->font);
+			text.setProgram(&this->text_program);
 			vertex_array = 0;
 			vertex_buffer = 0;
-			uloc_projection = -1;
-			uloc_view = -1;
-			uloc_model = -1;
-			uloc_TextColor = -1;
-			model_transform = Transform4::scale(Vec3f::filled(0.8f));
-			font_color = axl::math::Vec4f(0.1f,0.1f,0.1f,1.0f);
 			is_animating = false;
 			size_delta = 0;
-			current_glyph_index = -1;
 			time.set();
 			ctime.set();
 		}
@@ -119,7 +118,7 @@ class GameView : public axl::gl::View
 			// update code
 			if(this->is_animating)
 			{
-				model_transform = axl::math::Transform4::scale(axl::math::Vec3f::filled(0.7f)) * axl::math::Transform4::rotateZ(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI);
+				// model_transform = axl::math::Transform4::scale(axl::math::Vec3f::filled(0.7f)) * axl::math::Transform4::rotateZ(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI);
 			}
 			this->time.set();
 		}
@@ -147,19 +146,9 @@ class GameView : public axl::gl::View
 				GL::glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
-			program.setUniformMat4fv(uloc_projection, this->camera.projection->matrix.values);
-			program.setUniformMat4fv(uloc_view, this->camera.view_transform.values);
-			program.setUniformMat4fv(uloc_model, this->model_transform.values);
-			// Draw
-			if(vertex_array != 0 && vertex_buffer != 0 && program.use())
+			if(this->text.isValid())
 			{
-				this->font.texture.bind();
-				GL::glBindVertexArray(vertex_array);
-				GL::glBindBuffer(GL::GL_ARRAY_BUFFER, vertex_buffer);
-				GL::glDrawArrays(GL::GL_TRIANGLES, 0, 6);
-				GL::glBindBuffer(GL::GL_ARRAY_BUFFER, 0);
-				GL::glBindVertexArray(0);
-				this->font.texture.unbind();
+				this->text.render(&this->camera);
 			}
 		}
 
@@ -183,12 +172,12 @@ class GameView : public axl::gl::View
 			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
 			this->init();
 			// Create stuff here
-			{ // program
+			{ // text_program
 				// VERTEX_SHADER
 				axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
 				if(vertex_shader.create())
 				{
-					axl::util::String vertex_code = File::getStringContent("tests/shaders/330/text_vpvms.vert");
+					axl::util::String vertex_code = File::getStringContent("tests/shaders/330/text_vuPVMs.vert");
 					vertex_shader.setSource(vertex_code.cstr());
 					vertex_shader.compile();
 				}
@@ -201,7 +190,7 @@ class GameView : public axl::gl::View
 				axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
 				if(fragment_shader.create())
 				{
-					axl::util::String fragment_code = File::getStringContent("tests/shaders/330/text_vpvms.frag");
+					axl::util::String fragment_code = File::getStringContent("tests/shaders/330/text_vuPVMs.frag");
 					fragment_shader.setSource(fragment_code.cstr());
 					fragment_shader.compile();
 				}
@@ -211,92 +200,52 @@ class GameView : public axl::gl::View
 					printf("FRAGMENT_SHADER_INFO_LOG:\n****\n%s****\n", info_log.cstr());
 				}
 				// Program
-				Assert(program.create());
-				Assert(program.isValid());
+				Assert(text_program.create());
+				Assert(text_program.isValid());
 				// attach shaders
 				if(vertex_shader.isCompiled() && fragment_shader.isCompiled())
 				{
-					Assert(vertex_shader.attach(program));
-					Assert(fragment_shader.attach(program));
-					Assert(program.link());
-					Assert(program.isLinked());
-					if(!program.isLinked())
+					Assert(vertex_shader.attach(text_program));
+					Assert(fragment_shader.attach(text_program));
+					Assert(text_program.link());
+					Assert(text_program.isLinked());
+					if(!text_program.isLinked())
 					{
-						axl::util::String info_log = program.getInfoLog();
+						axl::util::String info_log = text_program.getInfoLog();
 						printf("PROGRAM_INFO_LOG:\n****\n%s****\n", info_log.cstr());
 					}
-					uloc_projection = program.getUniformLocation("u_MatProjection");
-					uloc_view = program.getUniformLocation("u_MatView");
-					uloc_model = program.getUniformLocation("u_MatModel");
-					uloc_TextColor = program.getUniformLocation("u_TextColor");
-					Assert(vertex_shader.detach(program));
-					Assert(fragment_shader.detach(program));
+					Assert(vertex_shader.detach(text_program));
+					Assert(fragment_shader.detach(text_program));
 				}
 				else
 				{
-					program.destroy();
+					text_program.destroy();
 				}
 				// destroy shaders
 				Assert(vertex_shader.destroy());
 				Assert(fragment_shader.destroy());
 			}
 			// create vertext array and vertex buffer objects
-			axl::math::Vec4f char_uv;
 			if(this->font.create())
 			{
-				Assert(this->font.loadFromFile("../../common/fonts/webdings.ttf", axl::math::Vec2i(64,64)));
-				char_uv.set(0.0, 0.0, 1.0, 1.0);
+				Assert(this->font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(64,64)));
 			}
-			if(this->main_context.makeCurrent())
+			if(this->text.create())
 			{
-				GL::glGenVertexArrays(1, &vertex_array);
-				GL::glGenBuffers(1, &vertex_buffer);
-				if(vertex_array != 0 && vertex_buffer != 0)
-				{
-					axl::math::Vec2i texture_size = this->font.texture.getSize();
-					axl::math::Vec2i font_size = this->font.size;
-					GL::GLfloat tminx = char_uv.x;
-					GL::GLfloat tmaxx = char_uv.z;
-					GL::GLfloat tminy = char_uv.y;
-					GL::GLfloat tmaxy = char_uv.w;
-					const axl::glfl::GLfloat vertices[] = {
-						-(float)this->size.y, -(float)this->size.y, 0.0, tminx, tminy,
-						 (float)this->size.y, -(float)this->size.y, 0.0, tmaxx, tminy,
-						 (float)this->size.y,  (float)this->size.y, 0.0, tmaxx, tmaxy,
-						 (float)this->size.y,  (float)this->size.y, 0.0, tmaxx, tmaxy,
-						-(float)this->size.y,  (float)this->size.y, 0.0, tminx, tmaxy,
-						-(float)this->size.y, -(float)this->size.y, 0.0, tminx, tminy,
-					};
-					GLC(GL::glBindVertexArray(vertex_array));
-					GLC(GL::glBindBuffer(GL::GL_ARRAY_BUFFER, vertex_buffer));
-					GLC(GL::glBufferData(GL::GL_ARRAY_BUFFER, (axl::glfl::GLsizeiptr)sizeof(vertices), vertices, GL::GL_STATIC_DRAW));
-					GLC(GL::glEnableVertexAttribArray(0));
-					GLC(GL::glEnableVertexAttribArray(1));
-					GLC(GL::glVertexAttribPointer(0, 3, GL::GL_FLOAT, 0, (axl::glfl::GLsizei)(sizeof(axl::glfl::GLfloat)*5), 0));
-					GLC(GL::glVertexAttribPointer(1, 2, GL::GL_FLOAT, 0, (axl::glfl::GLsizei)(sizeof(axl::glfl::GLfloat)*5), (axl::glfl::GLvoid*)(sizeof(axl::glfl::GLfloat)*3)));
-					GLC(GL::glBindBuffer(GL::GL_ARRAY_BUFFER, 0));
-					GLC(GL::glBindVertexArray(0));
-				}
+				Assert(this->text.setText(L"Hello World!{\t36\t}\n"
+					"ABCDEFGHIJKLMNOPQRSTUVWXYZ\r\n"
+					"abcdefghijklmnopqrstuvwxyz\n"
+					"  0123456789\n"
+					"`~!@#$%^&*()_+-=[]{};':\".>/?\n"
+					L"The quick brown fox jumps over the lazy dog."
+				));
+				this->text.setPosition(axl::math::Vec3f((float)-this->size.x, (float)this->size.y - 150, 0.0f));
 			}
-			program.setUniform4fv(uloc_TextColor, &this->font_color.x);
 			return axl::gl::View::onCreate(recreating);
 		}
 
 		void onDestroy(bool recreating)
 		{
-			if(this->main_context.makeCurrent())
-			{
-				if(vertex_array != 0)
-				{
-					GLC(GL::glDeleteVertexArrays(1, &vertex_array));
-					vertex_array = 0;
-				}
-				if(vertex_buffer != 0)
-				{
-					GLC(GL::glDeleteBuffers(1, &vertex_buffer));
-					vertex_buffer = 0;
-				}
-			}
 			axl::gl::View::onDestroy(recreating);
 			if(!recreating)
 				axl::gl::Application::quit(0);
@@ -387,55 +336,8 @@ class GameView : public axl::gl::View
 							printf("Font.size(%3d)\r", this->font.size.x + size_delta);
 						}
 						break;
-					case KeyCode::KEY_LEFT:
-						if(current_glyph_index == -1) current_glyph_index = this->font.glyphs.count() - 1;
-						else if(bk_alt && (!bk_shift && !bk_control) && current_glyph_index > 0) current_glyph_index -= 1;
-						else current_glyph_index = 0;
-						break;
-					case KeyCode::KEY_RIGHT:
-						if(current_glyph_index == -1) current_glyph_index = 0;
-						else if(bk_alt && (!bk_shift && !bk_control) && current_glyph_index < this->font.glyphs.count() - 1) current_glyph_index += 1;
-						else current_glyph_index = this->font.glyphs.count() - 1;
-						break;
 					default:
 						axl::gl::View::onKey(key, down);
-				}
-				if((key == KeyCode::KEY_LEFT || key == KeyCode::KEY_RIGHT) && bk_alt && (!bk_shift && !bk_control))
-				{
-					if(this->font.isValid())
-					{
-						unsigned int glyph_index = current_glyph_index;
-						if(glyph_index != -1 && this->main_context.makeCurrent())
-						{
-							GL::glBindBuffer(GL::GL_ARRAY_BUFFER, this->vertex_buffer);
-							GL::GLfloat *verteces = (GL::GLfloat*)GL::glMapBuffer(GL::GL_ARRAY_BUFFER, GL::GL_WRITE_ONLY);
-							if(verteces)
-							{
-								float x_off = (float)this->font.glyphs[glyph_index].horiBearingX;
-								float y_off = (float)this->font.glyphs[glyph_index].horiBearingY - this->font.glyphs[glyph_index].height;
-								verteces[0 * 5] = x_off;
-								verteces[0 * 5 + 1] = y_off;
-								verteces[1 * 5] = x_off + this->font.size.x;
-								verteces[1 * 5 + 1] = y_off;
-								verteces[2 * 5] = x_off + this->font.size.x;
-								verteces[2 * 5 + 1] = y_off + this->font.size.y;
-								verteces[3 * 5] = x_off + this->font.size.x;
-								verteces[3 * 5 + 1] = y_off + this->font.size.y;
-								verteces[4 * 5] = x_off;
-								verteces[4 * 5 + 1] = y_off + this->font.size.y;
-								verteces[5 * 5] = x_off;
-								verteces[5 * 5 + 1] = y_off;
-								verteces[0 * 5 + 3] = this->font.glyphs[glyph_index].UV.x; verteces[0 * 5 + 4] = this->font.glyphs[glyph_index].UV.y;
-								verteces[1 * 5 + 3] = this->font.glyphs[glyph_index].UV.z; verteces[1 * 5 + 4] = this->font.glyphs[glyph_index].UV.y;
-								verteces[2 * 5 + 3] = this->font.glyphs[glyph_index].UV.z; verteces[2 * 5 + 4] = this->font.glyphs[glyph_index].UV.w;
-								verteces[3 * 5 + 3] = this->font.glyphs[glyph_index].UV.z; verteces[3 * 5 + 4] = this->font.glyphs[glyph_index].UV.w;
-								verteces[4 * 5 + 3] = this->font.glyphs[glyph_index].UV.x; verteces[4 * 5 + 4] = this->font.glyphs[glyph_index].UV.w;
-								verteces[5 * 5 + 3] = this->font.glyphs[glyph_index].UV.x; verteces[5 * 5 + 4] = this->font.glyphs[glyph_index].UV.y;
-							}
-							GL::glUnmapBuffer(GL::GL_ARRAY_BUFFER);
-							GL::glBindBuffer(GL::GL_ARRAY_BUFFER, 0);
-						}
-					}
 				}
 			}
 			else
@@ -462,41 +364,6 @@ class GameView : public axl::gl::View
 			if(ch == 13) return;
 			bool bk_control = key_Control.isDown(), bk_shift = key_Shift.isDown(), bk_alt = key_Alt.isDown();
 			if(bk_control || bk_alt) return;
-			if(this->font.isValid())
-			{
-				unsigned int glyph_index = this->font.getCharIndex(ch);
-				if(glyph_index != -1 && this->main_context.makeCurrent())
-				{
-					current_glyph_index = glyph_index;
-					GL::glBindBuffer(GL::GL_ARRAY_BUFFER, this->vertex_buffer);
-					GL::GLfloat *verteces = (GL::GLfloat*)GL::glMapBuffer(GL::GL_ARRAY_BUFFER, GL::GL_WRITE_ONLY);
-					if(verteces)
-					{
-						float x_off = (float)this->font.glyphs[glyph_index].horiBearingX;
-						float y_off = (float)this->font.glyphs[glyph_index].horiBearingY - this->font.glyphs[glyph_index].height;
-						verteces[0 * 5] = x_off;
-						 verteces[0 * 5 + 1] = y_off;
-						verteces[1 * 5] = x_off + this->font.size.x;
-						 verteces[1 * 5 + 1] = y_off;
-						verteces[2 * 5] = x_off + this->font.size.x;
-						 verteces[2 * 5 + 1] = y_off + this->font.size.y;
-						verteces[3 * 5] = x_off + this->font.size.x;
-						 verteces[3 * 5 + 1] = y_off + this->font.size.y;
-						verteces[4 * 5] = x_off;
-						 verteces[4 * 5 + 1] = y_off + this->font.size.y;
-						verteces[5 * 5] = x_off;
-						 verteces[5 * 5 + 1] = y_off;
-						verteces[0 * 5 + 3] = this->font.glyphs[glyph_index].UV.x; verteces[0 * 5 + 4] = this->font.glyphs[glyph_index].UV.y;
-						verteces[1 * 5 + 3] = this->font.glyphs[glyph_index].UV.z; verteces[1 * 5 + 4] = this->font.glyphs[glyph_index].UV.y;
-						verteces[2 * 5 + 3] = this->font.glyphs[glyph_index].UV.z; verteces[2 * 5 + 4] = this->font.glyphs[glyph_index].UV.w;
-						verteces[3 * 5 + 3] = this->font.glyphs[glyph_index].UV.z; verteces[3 * 5 + 4] = this->font.glyphs[glyph_index].UV.w;
-						verteces[4 * 5 + 3] = this->font.glyphs[glyph_index].UV.x; verteces[4 * 5 + 4] = this->font.glyphs[glyph_index].UV.w;
-						verteces[5 * 5 + 3] = this->font.glyphs[glyph_index].UV.x; verteces[5 * 5 + 4] = this->font.glyphs[glyph_index].UV.y;
-					}
-					GL::glUnmapBuffer(GL::GL_ARRAY_BUFFER);
-					GL::glBindBuffer(GL::GL_ARRAY_BUFFER, 0);
-				}
-			}
 		} 
 
 };
