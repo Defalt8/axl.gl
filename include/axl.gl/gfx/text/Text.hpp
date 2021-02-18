@@ -34,9 +34,9 @@ class AXLGLCXXAPI Text : public ContextObject
 		bool render(const axl::gl::camera::Camera3Df* camera = 0) const;
 		void updateTransform();
 		// set methods
-		void setPosition(const axl::math::Vec3f& position);
-		void setScale(const axl::math::Vec3f& scale);
-		void setRotation(const axl::math::Vec3f& rotation);
+		void setPosition(const axl::math::Vec3f& position, bool update = true);
+		void setScale(const axl::math::Vec3f& scale, bool update = true);
+		void setRotation(const axl::math::Vec3f& rotation, bool update = true);
 		void setColor(const axl::math::Vec4f& color);
 		bool setText(const axl::util::WString& wstring);
 		void setFont(const Font* font);

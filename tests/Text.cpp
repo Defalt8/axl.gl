@@ -15,44 +15,79 @@
 #include <axl.math/mat/transform4.hpp>
 #include "Assert.hpp"
 #include "GLC.h"
+#include "File.hpp"
 
-class File {
-	public:
-		static axl::util::String getStringContent(const axl::util::String& filename)
-		{
-			axl::util::String content;
-			FILE* file = (FILE*)0;
-#			ifdef __STDC_WANT_SECURE_LIB__
-				fopen_s(&file, filename.cstr(), "r");
-#			else
-				fopen(filename.cstr(), "r");
-#			endif
-			if(file)
-			{
-				fseek(file, 0, SEEK_END);
-				long size = ftell(file);
-				fseek(file, 0, SEEK_SET);
-				if(content.resize(size))
-				{
-					size_t read_size = fread(content.str(), sizeof(axl::util::String::char_t), size, file);
-					content[read_size] = '\0';
-					content.length(true);
-				}
-				fclose(file);
-			}
-			return content;
-		}
-};
 
 namespace GL {
 	using namespace axl::glfl;
 	using namespace axl::glfl::core::GL;
 }
 
-bool loadTextShaders(axl::gl::gfx::Program& text_program, const axl::util::String& vertex_shader_file, const axl::util::String& fragment_shader_file)
+bool loadVFShaders(axl::gl::gfx::Program& program, const axl::util::String& vertex_shader_file, const axl::util::String& fragment_shader_file)
 {
-
-	return false;
+	axl::gl::Context *context = program.getContext();
+	if(!File::exists(vertex_shader_file))
+	{
+		fprintf(stderr, "File does not exist! \"%s\"\n", vertex_shader_file.cstr());
+		return false;
+	}
+	if(!File::exists(fragment_shader_file))
+	{
+		fprintf(stderr, "File does not exist! \"%s\"\n", fragment_shader_file.cstr());
+		return false;
+	}
+	if(!context || !context->isValid()) return false;
+	// VERTEX_SHADER
+	axl::gl::gfx::Shader vertex_shader(context, GL::GL_VERTEX_SHADER);
+	if(vertex_shader.create())
+	{
+		if(!vertex_shader.setSource(File::getStringContent(vertex_shader_file).cstr()) ||
+			!vertex_shader.compile()
+		)
+		{
+			fprintf(stderr, "* Failed to compile vertex shader.\n");
+			return false;	
+		}
+	}
+	if(!vertex_shader.isCompiled())
+	{
+		printf("VERTEX_SHADER_INFO_LOG:\n****\n%s****\n", vertex_shader.getInfoLog().cstr());
+	}
+	// FRAGMENT_SHADER
+	axl::gl::gfx::Shader fragment_shader(context, GL::GL_FRAGMENT_SHADER);
+	if(fragment_shader.create())
+	{
+		if(!fragment_shader.setSource(File::getStringContent(fragment_shader_file).cstr()) ||
+			!fragment_shader.compile()
+		)
+		{
+			fprintf(stderr, "* Failed to compile fragment shader.\n");
+			return false;	
+		}
+	}
+	if(!fragment_shader.isCompiled())
+	{
+		printf("FRAGMENT_SHADER_INFO_LOG:\n****\n%s****\n", fragment_shader.getInfoLog().cstr());
+	}
+	// Program
+	if(vertex_shader.isCompiled() && fragment_shader.isCompiled())
+	{
+		if(!program.isCreated()) program.create();
+		if(!program.isValid()) return false;
+		vertex_shader.attach(program);
+		fragment_shader.attach(program);
+		program.link();
+		vertex_shader.detach(program);
+		fragment_shader.detach(program);
+		if(!program.isLinked())
+		{
+			printf("PROGRAM_INFO_LOG:\n****\n%s****\n", program.getInfoLog().cstr());
+			return false;
+		}
+	}
+	vertex_shader.destroy();
+	fragment_shader.destroy();
+	return true;
 }
 
 class GameView : public axl::gl::View
@@ -62,7 +97,7 @@ class GameView : public axl::gl::View
 		axl::gl::camera::Camera3Df camera;
 		axl::gl::gfx::Program text_program;
 		axl::gl::gfx::Font font;
-		axl::gl::gfx::Text text;
+		axl::gl::gfx::Text text, status_text;
 		axl::glfl::GLuint vertex_array, vertex_buffer;
 	private:
 		Cursor NormalCursor;
@@ -79,6 +114,8 @@ class GameView : public axl::gl::View
 			projection(),
 			text_program(),
 			font(),
+			text(),
+			status_text(),
 			NormalCursor(CUR_CROSS),
 			key_Control(axl::gl::input::KeyCode::KEY_CONTROL),
 			key_Shift(axl::gl::input::KeyCode::KEY_SHIFT),
@@ -105,6 +142,9 @@ class GameView : public axl::gl::View
 			text.setContext(&this->main_context);
 			text.setFont(&this->font);
 			text.setProgram(&this->text_program);
+			status_text.setContext(&this->main_context);
+			status_text.setFont(&this->font);
+			status_text.setProgram(&this->text_program);
 			vertex_array = 0;
 			vertex_buffer = 0;
 			is_animating = false;
@@ -150,10 +190,8 @@ class GameView : public axl::gl::View
 				GL::glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
-			if(this->text.isValid())
-			{
-				this->text.render(&this->camera);
-			}
+			this->text.render(&this->camera);
+			this->status_text.render(&this->camera);
 		}
 
 		void onDisplayConfig(const axl::gl::Display& display)
@@ -168,82 +206,38 @@ class GameView : public axl::gl::View
 		bool onCreate(bool recreating)
 		{
 			axl::gl::Context::Config context_configs[] = {
-				axl::gl::Context::Config(1, 3, 3, axl::gl::Context::Config::GLP_CORE),
-				axl::gl::Context::Config(2, 4, 6, axl::gl::Context::Config::GLP_CORE),
-				axl::gl::Context::Config(3, 3, 3, axl::gl::Context::Config::GLP_CORE),
+				axl::gl::Context::Config(1, 4, 6, axl::gl::Context::Config::GLP_CORE),
+				axl::gl::Context::Config(2, 3, 3, axl::gl::Context::Config::GLP_CORE),
+				axl::gl::Context::Config(3, 3, 0, axl::gl::Context::Config::GLP_COMPATIBLITY),
 				axl::gl::Context::Config(4, 2, 1, axl::gl::Context::Config::GLP_COMPATIBLITY)
 			};
 			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
 			this->init();
 			// Create stuff here
-			{ // text_program
-				// VERTEX_SHADER
-				axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
-				if(vertex_shader.create())
-				{
-					axl::util::String vertex_code = File::getStringContent("tests/shaders/330/text_vuPVMs.vert");
-					vertex_shader.setSource(vertex_code.cstr());
-					vertex_shader.compile();
-				}
-				if(!vertex_shader.isCompiled())
-				{
-					axl::util::String info_log = vertex_shader.getInfoLog();
-					printf("VERTEX_SHADER_INFO_LOG:\n****\n%s****\n", info_log.cstr());
-				}
-				// FRAGMENT_SHADER
-				axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
-				if(fragment_shader.create())
-				{
-					axl::util::String fragment_code = File::getStringContent("tests/shaders/330/text_vuPVMs.frag");
-					fragment_shader.setSource(fragment_code.cstr());
-					fragment_shader.compile();
-				}
-				if(!fragment_shader.isCompiled())
-				{
-					axl::util::String info_log = fragment_shader.getInfoLog();
-					printf("FRAGMENT_SHADER_INFO_LOG:\n****\n%s****\n", info_log.cstr());
-				}
-				// Program
-				Assert(text_program.create());
-				Assert(text_program.isValid());
-				// attach shaders
-				if(vertex_shader.isCompiled() && fragment_shader.isCompiled())
-				{
-					Assert(vertex_shader.attach(text_program));
-					Assert(fragment_shader.attach(text_program));
-					Assert(text_program.link());
-					Assert(text_program.isLinked());
-					if(!text_program.isLinked())
-					{
-						axl::util::String info_log = text_program.getInfoLog();
-						printf("PROGRAM_INFO_LOG:\n****\n%s****\n", info_log.cstr());
-					}
-					Assert(vertex_shader.detach(text_program));
-					Assert(fragment_shader.detach(text_program));
-				}
-				else
-				{
-					text_program.destroy();
-				}
-				// destroy shaders
-				Assert(vertex_shader.destroy());
-				Assert(fragment_shader.destroy());
-			}
-			// create vertext array and vertex buffer objects
+			loadVFShaders(this->text_program, "tests/shaders/330/text_vuPVMs.vert", "tests/shaders/330/text_vuPVMs.frag");
 			if(this->font.create())
 			{
 				Assert(this->font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(64,64)));
 			}
 			if(this->text.create())
 			{
-				Assert(this->text.setText(L"Hello World!{\t36\t}\n"
-					"ABCDEFGHIJKLMNOPQRSTUVWXYZ\r\n"
-					"abcdefghijklmnopqrstuvwxyz\n"
-					"  0123456789\n"
-					"`~!@#$%^&*()_+-=[]{};':\".>/?\n"
-					L"The quick brown fox jumps over the lazy dog."
-				));
-				this->text.setPosition(axl::math::Vec3f((float)-this->size.x, (float)this->size.y - 150, 0.0f));
+				// Assert(this->text.setText(L"Hello World!{\t36\t}\n"
+				// 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ\r\n"
+				// 	"abcdefghijklmnopqrstuvwxyz\n"
+				// 	"  0123456789\n"
+				// 	"`~!@#$%^&*()_+-=[]{};':\".>/?\n"
+				// 	"The quick brown fox jumps over the lazy dog."
+				// ));
+				this->text.setText(File::getWStringContent("tests/Text.cpp"));
+				this->text.setPosition(axl::math::Vec3f((float)-this->size.x + 20, (float)this->size.y - 20, 0.0f), false);
+				this->text.setScale(axl::math::Vec3f::filled(0.4f));
+			}
+			if(this->status_text.create())
+			{
+				Assert(this->status_text.setText(L"FPS: -"));
+				this->status_text.setColor(axl::math::Vec4f(0.1f,0.1f,0.7f,0.7f));
+				this->status_text.setScale(axl::math::Vec3f::filled(0.55f), false);
+				this->status_text.setPosition(axl::math::Vec3f((float)this->size.x - 250, (float)this->size.y - 50, 0.0f));
 			}
 			return axl::gl::View::onCreate(recreating);
 		}
@@ -294,35 +288,10 @@ class GameView : public axl::gl::View
 			}
 			if(key_F5.isPressed() && no_modifiers)
 			{
-				axl::math::Vec4f char_uv(0.0f, 0.0f, 1.0f, 1.0f);
-				if(this->main_context.makeCurrent())
-				{
-					GL::glBindBuffer(GL::GL_ARRAY_BUFFER, this->vertex_buffer);
-					GL::GLfloat *verteces = (GL::GLfloat*)GL::glMapBuffer(GL::GL_ARRAY_BUFFER, GL::GL_WRITE_ONLY);
-					if(verteces)
-					{
-						verteces[0 * 5] = (float)-this->camera.viewport_size.x;
-						verteces[0 * 5 + 1] = (float)-this->camera.viewport_size.x;
-						verteces[1 * 5] = (float)this->camera.viewport_size.x;
-						verteces[1 * 5 + 1] = (float)-this->camera.viewport_size.x;
-						verteces[2 * 5] = (float)this->camera.viewport_size.x;
-						verteces[2 * 5 + 1] = (float)this->camera.viewport_size.x;
-						verteces[3 * 5] = (float)this->camera.viewport_size.x;
-						verteces[3 * 5 + 1] = (float)this->camera.viewport_size.x;
-						verteces[4 * 5] = (float)-this->camera.viewport_size.x;
-						verteces[4 * 5 + 1] = (float)this->camera.viewport_size.x;
-						verteces[5 * 5] = (float)-this->camera.viewport_size.x;
-						verteces[5 * 5 + 1] = (float)-this->camera.viewport_size.x;
-						verteces[0 * 5 + 3] = char_uv.x; verteces[0 * 5 + 4] = char_uv.y;
-						verteces[1 * 5 + 3] = char_uv.z; verteces[1 * 5 + 4] = char_uv.y;
-						verteces[2 * 5 + 3] = char_uv.z; verteces[2 * 5 + 4] = char_uv.w;
-						verteces[3 * 5 + 3] = char_uv.z; verteces[3 * 5 + 4] = char_uv.w;
-						verteces[4 * 5 + 3] = char_uv.x; verteces[4 * 5 + 4] = char_uv.w;
-						verteces[5 * 5 + 3] = char_uv.x; verteces[5 * 5 + 4] = char_uv.y;
-					}
-					GL::glUnmapBuffer(GL::GL_ARRAY_BUFFER);
-					GL::glBindBuffer(GL::GL_ARRAY_BUFFER, 0);
-				}
+				this->camera.position.set(0.0f);
+				this->text.setPosition(axl::math::Vec3f::filled(0.0f));
+				this->text.setScale(axl::math::Vec3f::filled(1.0f));
+				this->text.setRotation(axl::math::Vec3f::filled(0.0f));
 			}
 			if(down)
 			{
@@ -447,31 +416,43 @@ int main(int argc, char* argv[])
 				{
 					if(bk_control && (!bk_shift && !bk_alt))
 					{
-						view.camera.scale += 2.0f * (bk_up ? 1.0f : -1.0f) * delta_time;
-						view.camera.updateTransform();
+						axl::math::Vec3f text_scale = view.text.getScale();
+						float delta = 2.0f * (bk_up ? 1.0f : -1.0f) * delta_time;
+						view.text.setScale(text_scale + delta);
 					}
 					else if(no_modifiers)
 					{
+						axl::math::Vec3f text_position = view.text.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_up ? 1.0f : -1.0f) * delta_time;
-						view.camera.position.y += delta;
-						view.camera.target.y += delta;
-						view.camera.updateTransform();
+						view.text.setPosition(axl::math::Vec3f(text_position.x, text_position.y + delta, text_position.z));
 					}
 				}
 				if(bk_left ^ bk_right)
 				{
 					if(no_modifiers)
 					{
+						axl::math::Vec3f text_position = view.text.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_right ? 1.0f : -1.0f) * delta_time;
-						view.camera.position.x += delta;
-						view.camera.target.x += delta;
-						view.camera.updateTransform();
+						view.text.setPosition(axl::math::Vec3f(text_position.x + delta, text_position.y, text_position.z));
 					}
 				}
 				/// -- update
 				view.update();
 				/// -- render
+				static axl::util::uc::Clock frame_clock(200); // 200ms clock
+				static axl::util::uc::Time frame_time;
+				static int rendered_frames = 0;
 				view.render();
+				++rendered_frames;
+				if(frame_clock.checkAndSet(false)) // no first time
+				{
+					float fps = rendered_frames / frame_time.deltaTimef();
+					static axl::util::WString fps_string(256);
+					fps_string.format(L"FPS: %.1f", fps);
+					view.status_text.setText(fps_string);
+					frame_time.set();
+					rendered_frames = 0;
+				}
 				/// -- check events
 				Application::pollEvents(display);
 			}

@@ -107,7 +107,7 @@ bool Font::loadFromFile(const axl::util::String& filepath, const axl::math::Vec2
 	font_data->face = ftlib_face;
 	if(this->loadGlyphs(font_size, 0, -1))
 	{
-		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) / 2 + 1;
+		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) - 1;
 		this->font_size = font_size;
 		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
 		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_lod);
@@ -128,7 +128,7 @@ bool Font::setSize(const axl::math::Vec2i& font_size)
 	if(!font_data->face) return false;
 	if(this->loadGlyphs(font_size, 0, -1))
 	{
-		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) / 2 + 1;
+		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) - 1;
 		this->font_size = font_size;
 		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
 		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_lod);

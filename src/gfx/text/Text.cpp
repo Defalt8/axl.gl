@@ -151,23 +151,23 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 }
 void Text::updateTransform()
 {
-	this->text_transform = axl::math::Transform4::translateScale(this->text_position, this->text_scale) * axl::math::Transform4::rotateXYZ(this->text_rotation);
+	this->text_transform = axl::math::Transform4::scaleTranslate(this->text_scale, this->text_position) * axl::math::Transform4::rotateXYZ(this->text_rotation);
 }
 // set methods
-void Text::setPosition(const axl::math::Vec3f& p_position)
+void Text::setPosition(const axl::math::Vec3f& p_position, bool update)
 {
 	this->text_position = p_position;
-	this->updateTransform();
+	if(update) this->updateTransform();
 }
-void Text::setScale(const axl::math::Vec3f& p_scale)
+void Text::setScale(const axl::math::Vec3f& p_scale, bool update)
 {
 	this->text_scale = p_scale;
-	this->updateTransform();
+	if(update) this->updateTransform();
 }
-void Text::setRotation(const axl::math::Vec3f& p_rotation)
+void Text::setRotation(const axl::math::Vec3f& p_rotation, bool update)
 {
 	this->text_rotation = p_rotation;
-	this->updateTransform();
+	if(update) this->updateTransform();
 }
 void Text::setColor(const axl::math::Vec4f& p_color)
 {

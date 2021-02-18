@@ -15,34 +15,7 @@
 #include <axl.math/mat/transform4.hpp>
 #include "Assert.hpp"
 #include "GLC.h"
-
-class File {
-	public:
-		static axl::util::String getStringContent(const axl::util::String& filename)
-		{
-			axl::util::String content;
-			FILE* file = (FILE*)0;
-#			ifdef __STDC_WANT_SECURE_LIB__
-				fopen_s(&file, filename.cstr(), "r");
-#			else
-				fopen(filename.cstr(), "r");
-#			endif
-			if(file)
-			{
-				fseek(file, 0, SEEK_END);
-				long size = ftell(file);
-				fseek(file, 0, SEEK_SET);
-				if(content.resize(size))
-				{
-					size_t read_size = fread(content.str(), sizeof(axl::util::String::char_t), size, file);
-					content[read_size] = '\0';
-					content.length(true);
-				}
-				fclose(file);
-			}
-			return content;
-		}
-};
+#include "File.hpp"
 
 namespace GL {
 	using namespace axl::glfl;

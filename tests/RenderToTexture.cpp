@@ -64,7 +64,7 @@ class GameView : public axl::gl::View
 		void update()
 		{
 			if(!this->isValid() || this->is_paused) return;
-			this->theta += 45.0f * this->time.deltaTime();
+			this->theta += 45.0f * this->time.deltaTimef();
 			this->time.set();
 		}
 
