@@ -78,58 +78,38 @@ Other platforms will be implemented once the library is complete enough to be a 
 
 ### Header files
 
-- [axl.gl/platform.h]("include/axl.gl/platform.h") - Defines PLATFORM and ABI macros based on the building platform.
-- [axl.gl/lib.hpp]("include/axl.gl/lib.hpp") - Library base header. Declares VERSION and BUILD.
-- [include/axl.gl/Display.hpp]("include/axl.gl/Display.hpp") - Display class.
-- [include/axl.gl/Application.hpp]("include/axl.gl/Application.hpp") - Application functions.
-- [include/axl.gl/View.hpp]("include/axl.gl/View.hpp") - View class.
-- [include/axl.gl/Context.hpp]("include/axl.gl/Context.hpp") - OpenGL Context class.
-- [include/axl.gl/ContextObject.hpp]("include/axl.gl/ContextObject.hpp") - OpenGL context dependent class.
-- [include/axl.gl/gfx/texture/Texture.hpp]("include/axl.gl/gfx/texture/Texture.hpp") - Base texture abstract class.
-- [include/axl.gl/gfx/texture/Texture1D.hpp]("include/axl.gl/gfx/texture/Texture1D.hpp") - 1D texture derived class.
-- [include/axl.gl/gfx/texture/Texture2D.hpp]("include/axl.gl/gfx/texture/Texture2D.hpp") - 2D texture derived class.
-- [include/axl.gl/gfx/texture/Texture3D.hpp]("include/axl.gl/gfx/texture/Texture3D.hpp") - 3D texture derived class.
-- [include/axl.gl/gfx/textures.hpp]("include/axl.gl/gfx/textures.hpp") - Includes all headers under gfx/texture.
-- [include/axl.gl/gfx/buffer/FrameBuffer.hpp]("include/axl.gl/gfx/buffer/FrameBuffer.hpp") - An OpenGL FrameBuffer implementation class.
-- [include/axl.gl/gfx/buffer/RenderBuffer.hpp]("include/axl.gl/gfx/buffer/RenderBuffer.hpp") - An OpenGL RenderBuffer implementation class.
-- [include/axl.gl/input/KeyCodes.hpp]("include/axl.gl/input/KeyCodes.hpp") - Key code enumerations and functions.
-- [include/axl.gl/input/Keyboard.hpp]("include/axl.gl/input/Keyboard.hpp") - static Keyboard class methods and event listener.
-- [include/axl.gl/input/Mouse.hpp]("include/axl.gl/input/Mouse.hpp") - static Mouse class methods and event listener.
-- [include/axl.gl/input/Touch.hpp]("include/axl.gl/input/Touch.hpp") - static Touch class methods and event listener.
-- [include/axl.gl/input/Key.hpp]("include/axl.gl/input/Key.hpp") - Key class to handle key press and other key events.
-
-- [include/axl.gl/everything.hpp]("include/axl.gl/everything.hpp") - Includes every header in the library.
-- [include/axl.gl/lib.hpp]("include/axl.gl/lib.hpp") - Library base header. Declares VERSION and BUILD.
-- [include/axl.gl/platform.h]("include/axl.gl/platform.h") - Defines PLATFORM and ABI macros based on the building platform.
-- [include/axl.gl/Display.hpp]("include/axl.gl/Display.hpp") - Display class.
-- [include/axl.gl/Application.hpp]("include/axl.gl/Application.hpp") - Application functions.
-- [include/axl.gl/View.hpp]("include/axl.gl/View.hpp") - View class.
-- [include/axl.gl/Context.hpp]("include/axl.gl/Context.hpp") - OpenGL Context class.
-- [include/axl.gl/ContextObject.hpp]("include/axl.gl/ContextObject.hpp") - OpenGL ContextObject class.
-- [include/axl.gl/input/KeyCodes.hpp]("include/axl.gl/input/KeyCodes.hpp") - Key code enumerations and functions.
-- [include/axl.gl/input/Keyboard.hpp]("include/axl.gl/input/Keyboard.hpp") - static Keyboard class methods and event listener.
-- [include/axl.gl/input/Mouse.hpp]("include/axl.gl/input/Mouse.hpp") - static Mouse class methods and event listener.
-- [include/axl.gl/input/Touch.hpp]("include/axl.gl/input/Touch.hpp") - static Touch class methods and event listener.
-- [include/axl.gl/input/Key.hpp]("include/axl.gl/input/Key.hpp") - Key class to handle key press and other key events.
-- [include/axl.gl/inputs.hpp]("include/axl.gl/inputs.hpp") - Includes all headers under axl.gl/input.
-- [include/axl.gl/projection/Projection.hpp]("include/axl.gl/projection/Projection.hpp") - Base projection class
-- [include/axl.gl/projection/Orthographic.hpp]("include/axl.gl/projection/Orthographic.hpp") - Derived projection class. 
-- [include/axl.gl/projection/Perspective.hpp]("include/axl.gl/projection/Perspective.hpp") - Derived projection class. 
-- [include/axl.gl/projections.hpp]("include/axl.gl/projections.hpp") - Includes all headers under axl.gl/projection.
-- [include/axl.gl/camera/Camera3D.hpp]("include/axl.gl/camera/Camera3D.hpp") - A 3D Camera class.
-- [include/axl.gl/cameras.hpp]("include/axl.gl/cameras.hpp") - Includes all headers under axl.gl/camera.
-- [include/axl.gl/gfx/texture/Texture.hpp]("include/axl.gl/gfx/texture/Texture.hpp") - Base texture abstract class.
-- [include/axl.gl/gfx/texture/Texture1D.hpp]("include/axl.gl/gfx/texture/Texture1D.hpp") - Derived 1D texture class.
-- [include/axl.gl/gfx/texture/Texture2D.hpp]("include/axl.gl/gfx/texture/Texture2D.hpp") - Derived 2D texture class.
-- [include/axl.gl/gfx/texture/Texture3D.hpp]("include/axl.gl/gfx/texture/Texture3D.hpp") - Derived 3D texture class.
-- [include/axl.gl/gfx/textures.hpp]("include/axl.gl/gfx/textures.hpp") - Includes all headers under axl.gl/gfx/texture.
-- [include/axl.gl/gfx/buffer/FrameBuffer.hpp]("include/axl.gl/gfx/buffer/FrameBuffer.hpp") - OpenGL FrameBuffer class.
-- [include/axl.gl/gfx/buffer/RenderBuffer.hpp]("include/axl.gl/gfx/buffer/RenderBuffer.hpp") - OpenGL RenderBuffer class.
-- [include/axl.gl/gfx/buffers.hpp]("include/axl.gl/gfx/buffers.hpp") - Includes all headers under axl.gl/gfx/texture.
-- [include/axl.gl/gfx/shader/Shader.hpp]("include/axl.gl/gfx/shader/Shader.hpp") - OpenGL shader class.
-- [include/axl.gl/gfx/shader/Program.hpp]("include/axl.gl/gfx/shader/Program.hpp") - OpenGL program class.
-- [include/axl.gl/gfx/shaders.hpp]("include/axl.gl/gfx/shaders.hpp") - Includes all headers under axl.gl/gfx/shader.
-- [include/axl.gl/gfx/text/Font.hpp]("include/axl.gl/gfx/text/Font.hpp") - Font class. Texture atlas implementation. Requires Freetype2 library.
-- [include/axl.gl/gfx/text/Text.hpp]("include/axl.gl/gfx/text/Text.hpp") - Text class.
-- [include/axl.gl/gfx/text.hpp]("include/axl.gl/gfx/text.hpp") - Includes all headers under axl.gl/gfx/text.
-- [include/axl.gl/gfx.hpp]("include/axl.gl/gfx.hpp") - Includes all headers under axl.gl/gfx.
+- [include/axl.gl/everything.hpp](/include/axl.gl/everything.hpp) - Includes every header in the library.
+- [include/axl.gl/lib.hpp](/include/axl.gl/lib.hpp) - Library base header. Declares VERSION and BUILD.
+- [include/axl.gl/platform.h](/include/axl.gl/platform.h) - Defines PLATFORM and ABI macros based on the building platform.
+- [include/axl.gl/Display.hpp](/include/axl.gl/Display.hpp) - Display class.
+- [include/axl.gl/Application.hpp](/include/axl.gl/Application.hpp) - Application functions.
+- [include/axl.gl/View.hpp](/include/axl.gl/View.hpp) - View class.
+- [include/axl.gl/Context.hpp](/include/axl.gl/Context.hpp) - OpenGL Context class.
+- [include/axl.gl/ContextObject.hpp](/include/axl.gl/ContextObject.hpp) - OpenGL ContextObject class.
+- [include/axl.gl/input/KeyCodes.hpp](/include/axl.gl/input/KeyCodes.hpp) - Key code enumerations and functions.
+- [include/axl.gl/input/Keyboard.hpp](/include/axl.gl/input/Keyboard.hpp) - static Keyboard class methods and event listener.
+- [include/axl.gl/input/Mouse.hpp](/include/axl.gl/input/Mouse.hpp) - static Mouse class methods and event listener.
+- [include/axl.gl/input/Touch.hpp](/include/axl.gl/input/Touch.hpp) - static Touch class methods and event listener.
+- [include/axl.gl/input/Key.hpp](/include/axl.gl/input/Key.hpp) - Key class to handle key press and other key events.
+- [include/axl.gl/inputs.hpp](/include/axl.gl/inputs.hpp) - Includes all headers under axl.gl/input.
+- [include/axl.gl/projection/Projection.hpp](/include/axl.gl/projection/Projection.hpp) - Base projection class
+- [include/axl.gl/projection/Orthographic.hpp](/include/axl.gl/projection/Orthographic.hpp) - Derived projection class. 
+- [include/axl.gl/projection/Perspective.hpp](/include/axl.gl/projection/Perspective.hpp) - Derived projection class. 
+- [include/axl.gl/projections.hpp](/include/axl.gl/projections.hpp) - Includes all headers under axl.gl/projection.
+- [include/axl.gl/camera/Camera3D.hpp](/include/axl.gl/camera/Camera3D.hpp) - A 3D Camera class.
+- [include/axl.gl/cameras.hpp](/include/axl.gl/cameras.hpp) - Includes all headers under axl.gl/camera.
+- [include/axl.gl/gfx/texture/Texture.hpp](/include/axl.gl/gfx/texture/Texture.hpp) - Base texture abstract class.
+- [include/axl.gl/gfx/texture/Texture1D.hpp](/include/axl.gl/gfx/texture/Texture1D.hpp) - Derived 1D texture class.
+- [include/axl.gl/gfx/texture/Texture2D.hpp](/include/axl.gl/gfx/texture/Texture2D.hpp) - Derived 2D texture class.
+- [include/axl.gl/gfx/texture/Texture3D.hpp](/include/axl.gl/gfx/texture/Texture3D.hpp) - Derived 3D texture class.
+- [include/axl.gl/gfx/textures.hpp](/include/axl.gl/gfx/textures.hpp) - Includes all headers under axl.gl/gfx/texture.
+- [include/axl.gl/gfx/buffer/FrameBuffer.hpp](/include/axl.gl/gfx/buffer/FrameBuffer.hpp) - OpenGL FrameBuffer class.
+- [include/axl.gl/gfx/buffer/RenderBuffer.hpp](/include/axl.gl/gfx/buffer/RenderBuffer.hpp) - OpenGL RenderBuffer class.
+- [include/axl.gl/gfx/buffers.hpp](/include/axl.gl/gfx/buffers.hpp) - Includes all headers under axl.gl/gfx/texture.
+- [include/axl.gl/gfx/shader/Shader.hpp](/include/axl.gl/gfx/shader/Shader.hpp) - OpenGL shader class.
+- [include/axl.gl/gfx/shader/Program.hpp](/include/axl.gl/gfx/shader/Program.hpp) - OpenGL program class.
+- [include/axl.gl/gfx/shaders.hpp](/include/axl.gl/gfx/shaders.hpp) - Includes all headers under axl.gl/gfx/shader.
+- [include/axl.gl/gfx/text/Font.hpp](/include/axl.gl/gfx/text/Font.hpp) - Font class. Texture atlas implementation. Requires Freetype2 library.
+- [include/axl.gl/gfx/text/Text.hpp](/include/axl.gl/gfx/text/Text.hpp) - Text class.
+- [include/axl.gl/gfx/text.hpp](/include/axl.gl/gfx/text.hpp) - Includes all headers under axl.gl/gfx/text.
+- [include/axl.gl/gfx.hpp](/include/axl.gl/gfx.hpp) - Includes all headers under axl.gl/gfx.
