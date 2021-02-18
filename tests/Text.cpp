@@ -4,18 +4,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <axl.gl/everything.hpp>
+#include <axl.util/everything.hpp>
+#include <axl.math/everything.hpp>
 #include <axl.glfl/glCoreARB.hpp>
-#include <axl.util/uc/Clock.hpp>
-#include <axl.util/uc/Time.hpp>
-#include <axl.math/constants.hpp>
-#include <axl.math/angle.hpp>
-#include <axl.math/basic.hpp>
-#include <axl.math/util.hpp>
-#include <axl.math/mat.hpp>
-#include <axl.math/mat/transform4.hpp>
 #include "Assert.hpp"
 #include "GLC.h"
-#include "File.hpp"
 
 
 namespace GL {
@@ -26,12 +19,12 @@ namespace GL {
 bool loadVFShaders(axl::gl::gfx::Program& program, const axl::util::String& vertex_shader_file, const axl::util::String& fragment_shader_file)
 {
 	axl::gl::Context *context = program.getContext();
-	if(!File::exists(vertex_shader_file))
+	if(!axl::util::File::exists(vertex_shader_file))
 	{
 		fprintf(stderr, "File does not exist! \"%s\"\n", vertex_shader_file.cstr());
 		return false;
 	}
-	if(!File::exists(fragment_shader_file))
+	if(!axl::util::File::exists(fragment_shader_file))
 	{
 		fprintf(stderr, "File does not exist! \"%s\"\n", fragment_shader_file.cstr());
 		return false;
@@ -41,7 +34,7 @@ bool loadVFShaders(axl::gl::gfx::Program& program, const axl::util::String& vert
 	axl::gl::gfx::Shader vertex_shader(context, GL::GL_VERTEX_SHADER);
 	if(vertex_shader.create())
 	{
-		if(!vertex_shader.setSource(File::getStringContent(vertex_shader_file).cstr()) ||
+		if(!vertex_shader.setSource(axl::util::File::getStringContent(vertex_shader_file).cstr()) ||
 			!vertex_shader.compile()
 		)
 		{
@@ -57,7 +50,7 @@ bool loadVFShaders(axl::gl::gfx::Program& program, const axl::util::String& vert
 	axl::gl::gfx::Shader fragment_shader(context, GL::GL_FRAGMENT_SHADER);
 	if(fragment_shader.create())
 	{
-		if(!fragment_shader.setSource(File::getStringContent(fragment_shader_file).cstr()) ||
+		if(!fragment_shader.setSource(axl::util::File::getStringContent(fragment_shader_file).cstr()) ||
 			!fragment_shader.compile()
 		)
 		{
@@ -159,8 +152,8 @@ class GameView : public axl::gl::View
 			// update code
 			if(this->is_animating)
 			{
-				float C1 = Util::map(sin(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI), -1.0f, 1.0f, 0.0f, 1.0f);
-				float C2 = Util::map(cos(ctime.deltaTimef() * axl::math::Constants::F_QUARTER_PI), -1.0f, 1.0f, 0.0f, 1.0f);
+				float C1 = map(axl::math::sin(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI), -1.0f, 1.0f, 0.0f, 1.0f);
+				float C2 = map(axl::math::cos(ctime.deltaTimef() * axl::math::Constants::F_QUARTER_PI), -1.0f, 1.0f, 0.0f, 1.0f);
 				this->text.setColor(Vec4f(C1,C2,1.0f-C1,1.0f));
 				// this->text.setRotation(axl::math::Vec3f(0.0f, 0.0f, ctime.deltaTimef() * Constants::F_HALF_PI));
 			}
@@ -228,16 +221,16 @@ class GameView : public axl::gl::View
 				// 	"`~!@#$%^&*()_+-=[]{};':\".>/?\n"
 				// 	"The quick brown fox jumps over the lazy dog."
 				// ));
-				this->text.setText(File::getWStringContent("tests/Text.cpp"));
+				this->text.setText(axl::util::File::getWStringContent("tests/Text.cpp"));
 				this->text.setPosition(axl::math::Vec3f((float)-this->size.x + 20, (float)this->size.y - 20, 0.0f), false);
 				this->text.setScale(axl::math::Vec3f::filled(0.4f));
 			}
 			if(this->status_text.create())
 			{
-				Assert(this->status_text.setText(L"FPS: -"));
+				Assert(this->status_text.setText(L"FPS: -\nFontSize: -,-\nFontScale: -"));
 				this->status_text.setColor(axl::math::Vec4f(0.1f,0.1f,0.7f,0.7f));
-				this->status_text.setScale(axl::math::Vec3f::filled(0.55f), false);
-				this->status_text.setPosition(axl::math::Vec3f((float)this->size.x - 250, (float)this->size.y - 50, 0.0f));
+				this->status_text.setScale(axl::math::Vec3f::filled(0.45f), false);
+				this->status_text.setPosition(axl::math::Vec3f((float)this->size.x - 300, (float)this->size.y - 50, 0.0f));
 			}
 			return axl::gl::View::onCreate(recreating);
 		}
@@ -262,6 +255,7 @@ class GameView : public axl::gl::View
 					((axl::gl::projection::Orthographicf*)this->camera.projection)->set((float)-width, (float)width, (float)-height, (float)height, 0.01f, 1000.0f);
 				}
 				this->camera.projection->updateTransform();
+				this->status_text.setPosition(axl::math::Vec3f((float)this->size.x - 300, (float)this->size.y - 50, 0.0f));
 			}
 			this->update();
 			this->render();
@@ -322,6 +316,7 @@ class GameView : public axl::gl::View
 						if(bk_control && (!bk_shift && !bk_alt))
 						{
 							this->font.setSize(axl::math::Vec2i::filled(this->font.size.x + size_delta));
+							this->status_text.setScale(axl::math::Vec3f::filled(0.45f*(float)64.0f/this->font.size.x));
 							size_delta = 0;
 						}
 						break;
@@ -417,7 +412,7 @@ int main(int argc, char* argv[])
 					if(bk_control && (!bk_shift && !bk_alt))
 					{
 						axl::math::Vec3f text_scale = view.text.getScale();
-						float delta = 2.0f * (bk_up ? 1.0f : -1.0f) * delta_time;
+						float delta = 0.8f * (bk_up ? 1.0f : -1.0f) * delta_time;
 						view.text.setScale(text_scale + delta);
 					}
 					else if(no_modifiers)
@@ -448,7 +443,7 @@ int main(int argc, char* argv[])
 				{
 					float fps = rendered_frames / frame_time.deltaTimef();
 					static axl::util::WString fps_string(256);
-					fps_string.format(L"FPS: %.1f", fps);
+					fps_string.format(L"FPS: %.1f\nFontSize: %d,%d", fps, view.font.size.x, view.font.size.y);
 					view.status_text.setText(fps_string);
 					frame_time.set();
 					rendered_frames = 0;

@@ -4,14 +4,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <axl.gl/everything.hpp>
+#include <axl.util/everything.hpp>
+#include <axl.math/everything.hpp>
 #include <axl.glfl/glCoreARB.hpp>
-#include <axl.util/uc/Clock.hpp>
-#include <axl.util/uc/Time.hpp>
-#include <axl.math/constants.hpp>
-#include <axl.math/angle.hpp>
-#include <axl.math/basic.hpp>
-#include <axl.math/util.hpp>
-#include <axl.math/mat/transform4.hpp>
 #include <gl/GL.h>
 #include "Assert.hpp"
 #include "GLC.h"
@@ -64,7 +59,7 @@ class GameView : public axl::gl::View
 			using namespace axl::math;
 			this->theta += 45.0f * this->time.deltaTimef();
 			if(this->enable_roll) this->camera.roll_angle += -Angle::degToRad(30.0) * this->time.deltaTime();
-			double daz = Util::map(axl::math::sin(Constants::D_QUARTER_PI * this->ctime.deltaTime()), -1.0, 1.0, 10.0, 45.0);
+			double daz = map(axl::math::sin(Constants::D_QUARTER_PI * this->ctime.deltaTime()), -1.0, 1.0, 10.0, 45.0);
 			Vec3d pos(0.0, 0.0, 4.0);
 			pos.rotateX(Angle::degToRad(-daz));
 			pos.rotateY(Angle::degToRad(this->theta));
@@ -404,7 +399,7 @@ int main(int argc, char* argv[])
 				}
 				if(key_O.isDown()) {
 					double factor = (b_kcontrol ? -1.0 : 1.0) * (b_kshift ? 1.0 : 5.0);
-					view.fov = axl::math::Util::clamp(view.fov + factor * 10.0 * (double)time0.deltaTime(), 1.0, 179.0);
+					view.fov = axl::math::clamp(view.fov + factor * 10.0 * (double)time0.deltaTime(), 1.0, 179.0);
 					view.update_projection();
 					printf("FOV: %6.1lf\r", view.fov);
 				}

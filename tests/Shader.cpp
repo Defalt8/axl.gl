@@ -4,18 +4,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <axl.gl/everything.hpp>
+#include <axl.util/everything.hpp>
+#include <axl.math/everything.hpp>
 #include <axl.glfl/glCoreARB.hpp>
-#include <axl.util/uc/Clock.hpp>
-#include <axl.util/uc/Time.hpp>
-#include <axl.math/constants.hpp>
-#include <axl.math/angle.hpp>
-#include <axl.math/basic.hpp>
-#include <axl.math/util.hpp>
-#include <axl.math/mat.hpp>
-#include <axl.math/mat/transform4.hpp>
 #include "Assert.hpp"
 #include "GLC.h"
-#include "File.hpp"
 
 namespace GL = axl::glfl::core::GL;
 
@@ -86,7 +79,7 @@ class GameView : public axl::gl::View
 			if(this->is_animating)
 			{
 				this->model_transform = Transform4::scale(Vec3f::filled(0.7f)) * Transform4::rotateZ(ctime.deltaTimef() * Constants::F_QUARTER_PI);
-				float color_value = Util::map(sin(ctime.deltaTimef() * Constants::F_HALF_PI), -1.0f, 1.0f, 0.0f, 1.0f);
+				float color_value = map(axl::math::sin(ctime.deltaTimef() * Constants::F_HALF_PI), -1.0f, 1.0f, 0.0f, 1.0f);
 				this->color.set(color_value, 0.2f, 1.0f-color_value, 1.0f);
 			}
 			this->time.set();
@@ -139,7 +132,7 @@ class GameView : public axl::gl::View
 			axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
 			if(vertex_shader.create())
 			{
-				vertex_shader.setSource(File::getStringContent(vertex_shader_file));
+				vertex_shader.setSource(axl::util::File::getStringContent(vertex_shader_file));
 				vertex_shader.compile();
 				if(!vertex_shader.isCompiled())
 					fprintf(stderr, "VERTEX_SHADER_INFO_LOG:\n****\n%s****\n", vertex_shader.getInfoLog().cstr());
@@ -148,7 +141,7 @@ class GameView : public axl::gl::View
 			axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
 			if(fragment_shader.create())
 			{
-				fragment_shader.setSource(File::getStringContent(fragment_shader_file));
+				fragment_shader.setSource(axl::util::File::getStringContent(fragment_shader_file));
 				fragment_shader.compile();
 				if(!fragment_shader.isCompiled())
 					fprintf(stderr, "FRAGMENT_SHADER_INFO_LOG:\n****\n%s****\n", fragment_shader.getInfoLog().cstr());

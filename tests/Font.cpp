@@ -4,18 +4,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <axl.gl/everything.hpp>
+#include <axl.util/everything.hpp>
+#include <axl.math/everything.hpp>
 #include <axl.glfl/glCoreARB.hpp>
-#include <axl.util/uc/Clock.hpp>
-#include <axl.util/uc/Time.hpp>
-#include <axl.math/constants.hpp>
-#include <axl.math/angle.hpp>
-#include <axl.math/basic.hpp>
-#include <axl.math/util.hpp>
-#include <axl.math/mat.hpp>
-#include <axl.math/mat/transform4.hpp>
 #include "Assert.hpp"
 #include "GLC.h"
-#include "File.hpp"
 
 namespace GL {
 	using namespace axl::glfl;
@@ -161,7 +154,7 @@ class GameView : public axl::gl::View
 				axl::gl::gfx::Shader vertex_shader(&this->main_context, GL::GL_VERTEX_SHADER);
 				if(vertex_shader.create())
 				{
-					axl::util::String vertex_code = File::getStringContent("tests/shaders/330/text_vpvms.vert");
+					axl::util::String vertex_code = axl::util::File::getStringContent("tests/shaders/330/text_vpvms.vert");
 					vertex_shader.setSource(vertex_code.cstr());
 					vertex_shader.compile();
 				}
@@ -174,7 +167,7 @@ class GameView : public axl::gl::View
 				axl::gl::gfx::Shader fragment_shader(&this->main_context, GL::GL_FRAGMENT_SHADER);
 				if(fragment_shader.create())
 				{
-					axl::util::String fragment_code = File::getStringContent("tests/shaders/330/text_vpvms.frag");
+					axl::util::String fragment_code = axl::util::File::getStringContent("tests/shaders/330/text_vpvms.frag");
 					fragment_shader.setSource(fragment_code.cstr());
 					fragment_shader.compile();
 				}

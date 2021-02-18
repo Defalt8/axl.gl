@@ -103,7 +103,7 @@ class GameView : public axl::gl::View
 				}
 				else
 				{
-					double my = axl::math::Util::map(y, -1.0, 1.0, 0.0, 1.0);
+					double my = axl::math::map(y, -1.0, 1.0, 0.0, 1.0);
 					glBegin(GL_QUADS);
 						glTexCoord3d(txr_min, my, txr_min); glVertex3d(-1.0, y, -1.0);
 						glTexCoord3d(txr_max, my, txr_min); glVertex3d( 1.0, y, -1.0);

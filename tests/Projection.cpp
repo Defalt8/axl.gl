@@ -342,7 +342,7 @@ int main(int argc, char* argv[])
 				static axl::util::uc::Time time0;
 				if(key_O.isDown()) {
 					double factor = (key_Control.isDown() ? -1.0 : 1.0) * (key_Shift.isDown() ? 1.0 : 5.0);
-					view.fov = axl::math::Util::clamp(view.fov + factor * 10.0 * (double)time0.deltaTime(), 1.0, 179.0);
+					view.fov = axl::math::clamp(view.fov + factor * 10.0 * (double)time0.deltaTime(), 1.0, 179.0);
 					view.update_projection();
 					printf("FOV: %6.1lf\r", view.fov);
 				}
