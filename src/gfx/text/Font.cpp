@@ -107,7 +107,7 @@ bool Font::loadFromFile(const axl::util::String& filepath, const axl::math::Vec2
 	font_data->face = ftlib_face;
 	if(this->loadGlyphs(font_size, 0, -1))
 	{
-		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) / 2;
+		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) / 2 + 1;
 		this->font_size = font_size;
 		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
 		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_lod);
@@ -128,7 +128,7 @@ bool Font::setSize(const axl::math::Vec2i& font_size)
 	if(!font_data->face) return false;
 	if(this->loadGlyphs(font_size, 0, -1))
 	{
-		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) / 2;
+		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) / 2 + 1;
 		this->font_size = font_size;
 		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
 		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_lod);
@@ -205,10 +205,10 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 					this->font_glyphs[glyph_index].vertBearingY = (short)(font_data->face->glyph->metrics.vertBearingY / 64);
 					this->font_glyphs[glyph_index].horiAdvance = (short)(font_data->face->glyph->metrics.horiAdvance / 64);
 					this->font_glyphs[glyph_index].vertAdvance = (short)(font_data->face->glyph->metrics.vertAdvance / 64);
-					this->font_glyphs[glyph_index].UV.x = (float)(glyph_index % x_count) / x_count - (float)1.f / font_size.x / width;
-					this->font_glyphs[glyph_index].UV.y = (float)(glyph_index / x_count) / y_count - (float)1.f / font_size.y / height;
-					this->font_glyphs[glyph_index].UV.z = this->font_glyphs[glyph_index].UV.x + (float)(font_size.x-2) / (width);
-					this->font_glyphs[glyph_index].UV.w = this->font_glyphs[glyph_index].UV.y + (float)(font_size.y-2) / (height);
+					this->font_glyphs[glyph_index].UV.x = (float)(glyph_index % x_count) / x_count - (float)1.f / ((float)font_size.x * width);
+					this->font_glyphs[glyph_index].UV.y = (float)(glyph_index / x_count) / y_count - (float)1.f / ((float)font_size.y * height);
+					this->font_glyphs[glyph_index].UV.z = this->font_glyphs[glyph_index].UV.x + (float)(this->font_glyphs[glyph_index].width + 4) / (width);
+					this->font_glyphs[glyph_index].UV.w = this->font_glyphs[glyph_index].UV.y + (float)(this->font_glyphs[glyph_index].height + 4) / (height);
 				}
 				if(font_data->face->glyph->format == FT_GLYPH_FORMAT_BITMAP)
 				{
