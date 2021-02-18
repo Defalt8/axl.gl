@@ -151,7 +151,7 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 }
 void Text::updateTransform()
 {
-	this->text_transform = axl::math::Transform4::translateScale(this->text_position, this->text_scale) * axl::math::Transform4::rotateZ(this->text_rotation.z);
+	this->text_transform = axl::math::Transform4::translateScale(this->text_position, this->text_scale) * axl::math::Transform4::rotateXYZ(this->text_rotation);
 }
 // set methods
 void Text::setPosition(const axl::math::Vec3f& p_position)

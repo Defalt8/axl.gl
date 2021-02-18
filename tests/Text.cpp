@@ -115,10 +115,14 @@ class GameView : public axl::gl::View
 
 		void update()
 		{
+			using namespace axl::math;
 			// update code
 			if(this->is_animating)
 			{
-				// model_transform = axl::math::Transform4::scale(axl::math::Vec3f::filled(0.7f)) * axl::math::Transform4::rotateZ(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI);
+				float C1 = Util::map(sin(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI), -1.0f, 1.0f, 0.0f, 1.0f);
+				float C2 = Util::map(cos(ctime.deltaTimef() * axl::math::Constants::F_QUARTER_PI), -1.0f, 1.0f, 0.0f, 1.0f);
+				this->text.setColor(Vec4f(C1,C2,1.0f-C1,1.0f));
+				// this->text.setRotation(axl::math::Vec3f(0.0f, 0.0f, ctime.deltaTimef() * Constants::F_HALF_PI));
 			}
 			this->time.set();
 		}
