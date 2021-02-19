@@ -17,11 +17,10 @@ namespace axl {
 namespace gl {
 namespace Application {
 	
-bool APP_IS_QUITTING, ON_QUIT_CALLED = false;
+bool APP_IS_QUITTING, ON_QUIT_CALLED = false, ON_EXIT_CALLED = false;
 const bool& IS_QUITTING = APP_IS_QUITTING;
 void (*onQuit) (int quit_code) = 0;
 void (*onExit) (int exit_code) = 0;
-
 
 bool init()
 {
@@ -34,15 +33,22 @@ bool init()
 }
 void quit(int quit_code)
 {
-	ON_QUIT_CALLED = true;
 	APP_IS_QUITTING = true;
 	PostQuitMessage(quit_code);
-	if (onQuit) onQuit(quit_code);
+	if(!ON_QUIT_CALLED && onQuit)
+	{
+		ON_QUIT_CALLED = true;
+		onQuit(quit_code);
+	}
 }
 void exit(int exit_code)
 {
 	if(!ON_QUIT_CALLED) quit(exit_code);
-	if(onExit) onExit(exit_code);
+	if(!ON_EXIT_CALLED && onExit)
+	{
+		ON_EXIT_CALLED = true;
+		onExit(exit_code);
+	}
 	std::exit(exit_code);
 }
 

@@ -173,6 +173,8 @@ bool View::create(Display& display, bool recreate, const Config* configs_, int c
 		((ViewData*)m_reserved)->hwnd = hwnd;
 		((ViewData*)m_reserved)->hdc = hdc;
 		((ViewData*)m_reserved)->style = style;
+		((ViewData*)m_reserved)->destroying = false;
+		((ViewData*)m_reserved)->destroy_from_message = false;
 		if(!((ViewData*)m_reserved)->hcursor) setCursor(m_cursor);
 		if(((ViewData*)m_reserved)->hwnd)
 		{
@@ -282,9 +284,10 @@ bool View::create(Display& display, bool recreate, const Config* configs_, int c
 
 void View::destroy()
 {
-	if(m_reserved)
+	if(m_reserved && !((ViewData*)m_reserved)->destroying)
 	{
-		if(this->isValid()) this->onDestroy(false);
+		((ViewData*)m_reserved)->destroying = true;
+		if(((ViewData*)m_reserved)->hdc) this->onDestroy(false);
 		while(!this->m_contexts.isEmpty())
 		{
 			Context* contexts = this->m_contexts.removeFirst();
@@ -295,14 +298,11 @@ void View::destroy()
 		{
 			ReleaseDC(((ViewData*)m_reserved)->hwnd, ((ViewData*)m_reserved)->hdc);
 			((ViewData*)m_reserved)->hdc = NULL;
-			if(!((ViewData*)m_reserved)->from_message)
-			{
-				((ViewData*)m_reserved)->from_message = true;
+			if(!((ViewData*)m_reserved)->destroy_from_message)
 				DestroyWindow(((ViewData*)m_reserved)->hwnd);
-			}
 			((ViewData*)m_reserved)->hwnd = NULL;
-			((ViewData*)m_reserved)->from_message = false;
 		}
+		((ViewData*)m_reserved)->destroying = false;
 	}
 }
 
@@ -831,14 +831,11 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 		case WM_DESTROY:
 			if(view && view->isValid())
 			{
-				if(((ViewData*)view->reserved)->hdc)
+				if(!((ViewData*)view->reserved)->destroying)
 				{
-					if(!((ViewData*)view->reserved)->from_message)
-					{
-						((ViewData*)view->reserved)->from_message = true;
-						view->destroy();
-					}
-					((ViewData*)view->reserved)->from_message = false;
+					((ViewData*)view->reserved)->destroy_from_message = true;
+					view->destroy();
+					((ViewData*)view->reserved)->destroy_from_message = false;
 				}
 			}
 			break;
