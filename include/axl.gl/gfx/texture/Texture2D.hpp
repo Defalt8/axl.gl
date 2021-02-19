@@ -30,7 +30,7 @@ class AXLGLCXXAPI Texture2D : public Texture
 		bool allocate(axl::glfl::GLint level, axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLint internal_format, axl::glfl::GLint border = 0);
 		bool setImage(axl::glfl::GLint level, axl::glfl::GLint x_offset, axl::glfl::GLint y_offset, axl::glfl::GLsizei width, axl::glfl::GLsizei height, axl::glfl::GLenum format, axl::glfl::GLenum data_type, const axl::glfl::GLvoid* in_image_data, axl::glfl::GLint pixel_alignment = 4);
 		bool getImage(axl::glfl::GLint level, axl::glfl::GLenum format, axl::glfl::GLenum data_type, axl::glfl::GLvoid* out_image_data, axl::glfl::GLint pixel_alignment = 4);
-		bool generateMipmaps();
+		bool generateMipmaps(axl::glfl::GLuint max_level = 0);
 		axl::math::Vec2i getSize(axl::glfl::GLint level = 0) const;
 };
 

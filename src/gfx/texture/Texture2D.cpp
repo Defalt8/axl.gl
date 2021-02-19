@@ -232,11 +232,6 @@ bool Texture2D::allocate(axl::glfl::GLint level, axl::glfl::GLsizei width, axl::
 		case GL_COMPRESSED_SIGNED_RED_RGTC1: format = GL_RED; break;
 	}
 	glTexImage2D(GL_TEXTURE_2D, level, internal_format, width, height, border, format, GL_UNSIGNED_BYTE, (const void*)0);
-	if(level == 0)
-	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, (axl::glfl::GLsizei)axl::math::log2((float)(width >= height ? width : height)));
-	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return glGetError() == GL_NO_ERROR;
 }
@@ -261,11 +256,25 @@ bool Texture2D::getImage(axl::glfl::GLint level, axl::glfl::GLenum format, axl::
 	axl::glfl::GLenum err = glGetError(); 
 	return err == GL_NO_ERROR;
 }
-bool Texture2D::generateMipmaps()
+bool Texture2D::generateMipmaps(axl::glfl::GLuint max_level)
 {
 	using namespace GL;
 	using namespace axl::glfl::core::GL3;
 	if(!GL_VERSION_3_0 || !this->bind()) return false;
+	if(max_level == 0)
+	{
+		int width, height;
+		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WIDTH, &width);
+		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_HEIGHT, &height);
+		axl::glfl::GLint max_level = (axl::glfl::GLint)axl::math::log2((float)(width >= height ? width : height));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, max_level);
+	}
+	else
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, (axl::glfl::GLint)max_level);
+	}
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return glGetError() == GL_NO_ERROR;
