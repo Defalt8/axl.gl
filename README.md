@@ -94,8 +94,8 @@ Other platforms will be implemented once the library is complete enough to be a 
 - [include/axl.gl/input/Key.hpp](/include/axl.gl/input/Key.hpp) - Key class to handle key press and other key events.
 - [include/axl.gl/inputs.hpp](/include/axl.gl/inputs.hpp) - Includes all headers under axl.gl/input.
 - [include/axl.gl/projection/Projection.hpp](/include/axl.gl/projection/Projection.hpp) - Base projection class
-- [include/axl.gl/projection/Orthographic.hpp](/include/axl.gl/projection/Orthographic.hpp) - Derived projection class. 
-- [include/axl.gl/projection/Perspective.hpp](/include/axl.gl/projection/Perspective.hpp) - Derived projection class. 
+- [include/axl.gl/projection/Orthographic.hpp](/include/axl.gl/projection/Orthographic.hpp) - Derived projection class.
+- [include/axl.gl/projection/Perspective.hpp](/include/axl.gl/projection/Perspective.hpp) - Derived projection class.
 - [include/axl.gl/projections.hpp](/include/axl.gl/projections.hpp) - Includes all headers under axl.gl/projection.
 - [include/axl.gl/camera/Camera3D.hpp](/include/axl.gl/camera/Camera3D.hpp) - A 3D Camera class.
 - [include/axl.gl/cameras.hpp](/include/axl.gl/cameras.hpp) - Includes all headers under axl.gl/camera.
