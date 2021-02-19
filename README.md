@@ -19,6 +19,7 @@ Other platforms will be implemented once the library is complete enough to be a 
 - **Depends on**
   - *{ `axl.glfl` } -- The C++ OpenGL function loader library.*
   - *The standard C library.*
+  - *[Freetype2]("https://www.freetype.org/") library*.
   - *OpenGL library*: { `opengl32` } on windows and { `GL` } on linux.
   - *Platform specific libraries:* { `gdi32`, `user32` } on windows, { `X11` } on linux.
 
