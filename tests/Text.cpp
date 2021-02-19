@@ -1,5 +1,9 @@
+/******************************
+ * axl::gl::gfx::Text test    *
+ *                            *
+ * @author Natnael Eshetu     *
+ ******************************/
 
-#include <windows.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -22,7 +26,7 @@ class GameView : public axl::gl::View
 		axl::gl::Context main_context;
 		axl::gl::camera::Camera3Df camera;
 		axl::gl::gfx::Program text_program;
-		axl::gl::gfx::Font font;
+		axl::gl::gfx::Font font, font1, font2;
 		axl::gl::gfx::Text text, status_text;
 	private:
 		Cursor NormalCursor;
@@ -38,7 +42,6 @@ class GameView : public axl::gl::View
 			camera(),
 			projection(),
 			text_program(),
-			font(),
 			text(),
 			status_text(),
 			NormalCursor(CUR_CROSS),
@@ -64,11 +67,13 @@ class GameView : public axl::gl::View
 			this->is_animating = false;
 			text_program.setContext(&this->main_context);
 			font.setContext(&this->main_context);
+			font1.setContext(&this->main_context);
+			font2.setContext(&this->main_context);
 			text.setContext(&this->main_context);
 			text.setFont(&this->font);
 			text.setProgram(&this->text_program);
 			status_text.setContext(&this->main_context);
-			status_text.setFont(&this->font);
+			status_text.setFont(&this->font2);
 			status_text.setProgram(&this->text_program);
 			is_animating = false;
 			size_delta = 0;
@@ -85,7 +90,6 @@ class GameView : public axl::gl::View
 				float C1 = map(axl::math::sin(ctime.deltaTimef() * axl::math::Constants::F_HALF_PI), -1.0f, 1.0f, 0.0f, 1.0f);
 				float C2 = map(axl::math::cos(ctime.deltaTimef() * axl::math::Constants::F_QUARTER_PI), -1.0f, 1.0f, 0.0f, 1.0f);
 				this->text.setColor(Vec4f(C1,C2,1.0f-C1,1.0f));
-				// this->text.setRotation(axl::math::Vec3f(0.0f, 0.0f, ctime.deltaTimef() * Constants::F_HALF_PI));
 			}
 			this->time.set();
 		}
@@ -101,6 +105,7 @@ class GameView : public axl::gl::View
 			this->render(true);
 			this->swap();
 			
+			GL::glFinish();
 			GL::glDisable(GL::GL_BLEND);
 			GL::glDisable(GL::GL_DEPTH_TEST);
 		}
@@ -110,7 +115,7 @@ class GameView : public axl::gl::View
 			if(!this->camera.makeCurrent(&this->main_context)) return;
 			if(p_clear)
 			{
-				GL::glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
+				GL::glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
 			this->text.render(&this->camera);
@@ -140,28 +145,27 @@ class GameView : public axl::gl::View
 			GL::loadVFShaders(this->text_program, "tests/shaders/330/text_vuPVMs.vert", "tests/shaders/330/text_vuPVMs.frag");
 			if(this->font.create())
 			{
-				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(64,64)));
+				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(14,14)));
+			}
+			if(this->font1.create())
+			{
+				Assert(this->font1.loadFromFile("/Windows/Fonts/impact.ttf", axl::math::Vec2i(14,14)));
+			}
+			if(this->font2.create())
+			{
+				Assert(this->font2.loadFromFile("/Windows/Fonts/consolab.ttf", axl::math::Vec2i(11,11)));
 			}
 			if(this->text.create())
 			{
-				// Assert(this->text.setText(L"Hello World!{\t36\t}\n"
-				// 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ\r\n"
-				// 	"abcdefghijklmnopqrstuvwxyz\n"
-				// 	"  0123456789\n"
-				// 	"`~!@#$%^&*()_+-=[]{};':\".>/?\n"
-				// 	"The quick brown fox jumps over the lazy dog."
-				// ));
-				this->text.setText(axl::util::File::getWStringContent("tests/Text.cpp"));
-				this->text.setPosition(axl::math::Vec3f((float)-this->size.x + 20, (float)this->size.y - 20, 0.0f), false);
-				this->text.setScale(axl::math::Vec3f::filled(0.4f));
+				this->text.setText(axl::util::File::getWStringContent("tests/sample_text.txt"));
+				this->text.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
+				this->text.setColor(axl::math::Vec4f(0.2f,0.79f,0.5f,1.0f));
 			}
 			if(this->status_text.create())
 			{
 				Assert(this->status_text.setStorageSize(128));
-				Assert(this->status_text.setText(L"FPS: -\nFontSize: -,-\nFontScale: -"));
-				this->status_text.setColor(axl::math::Vec4f(0.1f,0.1f,0.7f,0.7f));
-				this->status_text.setScale(axl::math::Vec3f::filled(0.45f), false);
-				this->status_text.setPosition(axl::math::Vec3f((float)this->size.x - 300, (float)this->size.y - 50, 0.1f));
+				Assert(this->status_text.setText(L"{TODO:status}"));
+				this->status_text.setColor(axl::math::Vec4f(0.9f,0.1f,0.9f,0.9f));
 			}
 			return axl::gl::View::onCreate(recreating);
 		}
@@ -183,10 +187,10 @@ class GameView : public axl::gl::View
 				float aspect_ratio = (float)this->camera.viewport_size.x / this->camera.viewport_size.y;
 				if(this->camera.projection->type == axl::gl::projection::Projectionf::Type::PT_ORTHOGRAPHIC)
 				{
-					((axl::gl::projection::Orthographicf*)this->camera.projection)->set((float)-width, (float)width, (float)-height, (float)height, 0.01f, 1000.0f);
+					((axl::gl::projection::Orthographicf*)this->camera.projection)->set(0.0f, (float)width, 0.0f, (float)height, 0.01f, 1000.0f);
 				}
 				this->camera.projection->updateTransform();
-				this->status_text.setPosition(axl::math::Vec3f((float)this->size.x - 300, (float)this->size.y - 50, 0.0f));
+				this->status_text.setPosition(axl::math::Vec3f((float)this->camera.viewport_size.x - 160.0f, (float)this->camera.viewport_size.y - 20.0f, 0.0f));
 			}
 			this->update();
 			this->render();
@@ -214,7 +218,7 @@ class GameView : public axl::gl::View
 			if(key_F5.isPressed() && no_modifiers)
 			{
 				this->camera.position.set(0.0f);
-				this->text.setPosition(axl::math::Vec3f::filled(0.0f));
+				this->text.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
 				this->text.setScale(axl::math::Vec3f::filled(1.0f));
 				this->text.setRotation(axl::math::Vec3f::filled(0.0f));
 			}
@@ -242,11 +246,21 @@ class GameView : public axl::gl::View
 			{
 				switch (key)
 				{
+					case KeyCode::KEY_1:
+						this->text.setFont(&this->font);
+						break;
+					case KeyCode::KEY_2:
+						this->text.setFont(&this->font1);
+						break;
 					case KeyCode::KEY_CONTROL:
 						if(size_delta != 0)
 						{
-							this->font.setSize(axl::math::Vec2i::filled(this->font.size.x + size_delta));
-							this->status_text.setScale(axl::math::Vec3f::filled(0.45f*(float)64.0f/this->font.size.x));
+							axl::gl::gfx::Font* current_font = const_cast<axl::gl::gfx::Font*>(this->text.getFont());
+							if(current_font)
+							{
+								current_font->setSize(axl::math::Vec2i::filled(this->font.size.x + size_delta));
+								this->text.updateBuffers();
+							}
 							size_delta = 0;
 						}
 						break;
@@ -271,7 +285,7 @@ class GameView : public axl::gl::View
  * 
  *****/
 const GameView::Config view_configs[] = {
-	GameView::Config(1, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 16, true, false),
+	GameView::Config(1, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 4, true, false),
 	GameView::Config(2, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 8, true, false),
 	GameView::Config(3, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 4, true, false),
 	GameView::Config(4, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 2, true, false),
@@ -281,17 +295,14 @@ const GameView::Config view_configs[] = {
 	GameView::Config(8, GameView::Config::PT_RGBA, 32,8,8,8,8, 0,0, 0, false, false),
 	GameView::Config(9, GameView::Config::PT_RGB, 24,8,8,8,0, 0,0, 0, false, false),
 };
-axl::gl::Display display;
 
-void onQuit(int quit_code)
-{
-	display.close();
-	axl::gl::gfx::Font::cleanup();
-}
+axl::gl::Display display;
 
 void onExit(int exit_code)
 {
+	display.close();
 	axl::gl::View::cleanup();
+	axl::gl::gfx::Font::cleanup();
 	axl::gl::Display::restoreSettings();
 	if (axl::Assert::NUM_FAILED_ASSERTIONS) puts("----------------------------------------");
 	printf("%c> %d/%d Passed!\n", (axl::Assert::NUM_FAILED_ASSERTIONS ? '*' : '\r'), (axl::Assert::NUM_TOTAL_ASSERTIONS - axl::Assert::NUM_FAILED_ASSERTIONS), axl::Assert::NUM_TOTAL_ASSERTIONS);
@@ -308,7 +319,6 @@ int main(int argc, char* argv[])
 	{
 		Assertve(axl::glfl::core::load(), verbose);
 		Application::onExit = onExit;
-		Application::onQuit = onQuit;
 		Assertve(Application::init(), verbose);
 		Assertve(display.isOpen(), verbose);
 
@@ -322,8 +332,7 @@ int main(int argc, char* argv[])
 		if(view.isValid())
 		{
 			printf(".. Context.Config %d selected. %d.%d\n", view.main_context.config.id, view.main_context.config.major_version, view.main_context.config.minor_version);
-			Assertv(view.main_context.makeCurrent(), verbose);
-			Assertv(view.main_context.isCurrent(), verbose);
+			view.main_context.setVSync(false);
 			Assertve(view.show(GameView::SM_SHOW), verbose);
 			///
 			axl::util::uc::Time time;
@@ -372,8 +381,18 @@ int main(int argc, char* argv[])
 				if(frame_clock.checkAndSet(false)) // no first time
 				{
 					float fps = rendered_frames / frame_time.deltaTimef();
-					static axl::util::WString fps_string(256);
-					fps_string.format(L"FPS: %.1f\nFontSize: %d,%d", fps, view.font.size.x, view.font.size.y);
+					static axl::util::WString fps_string(512);
+					const axl::gl::gfx::Font *current_font = view.text.getFont();
+					axl::math::Vec2i font_size = current_font ? current_font->size : axl::math::Vec2i(0,0);
+					axl::math::Vec3f text_scale = view.text.getScale();
+					axl::math::Vec2i texture_size = current_font ? current_font->texture.getSize() : axl::math::Vec2i(0,0);
+					unsigned int glyph_count = current_font ? current_font->glyphs.count() : 0;
+					fps_string.format(L"FPS: %.1f\nFontSize: %d,%d\nTextScale: %.1f,%.1f,%.1f\nTextureSize: %d,%d\nTextLength: %u\nGlyphCount:%u", 
+						fps, font_size.x, font_size.y, 
+						text_scale.x, text_scale.y, text_scale.z,
+						texture_size.x, texture_size.y, 
+						view.text.getText().length(), glyph_count
+					);
 					view.status_text.setText(fps_string);
 					frame_time.set();
 					rendered_frames = 0;

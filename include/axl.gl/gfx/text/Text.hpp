@@ -33,6 +33,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		bool isValid() const;
 		bool render(const axl::gl::camera::Camera3Df* camera = 0) const;
 		void updateTransform();
+		void updateBuffers();
 		// set methods
 		void setPosition(const axl::math::Vec3f& position, bool update = true);
 		void setScale(const axl::math::Vec3f& scale, bool update = true);
@@ -56,7 +57,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		Orientation getOrientation() const;
 		AlignmentFlag getAlignment() const;
 	protected:
-		bool updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed = false);
+		bool updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed = false, bool font_changed = false);
 	protected:
 		axl::math::Vec3f text_position;
 		axl::math::Vec3f text_scale;
@@ -79,6 +80,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		axl::glfl::GLint uniform_location_view_matrix;
 		axl::glfl::GLint uniform_location_model_matrix;
 		axl::glfl::GLint uniform_location_text_color;
+		axl::math::Vec2i rec_font_size;
 };
 
 } // namespace axl.gl.gfx

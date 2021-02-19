@@ -70,14 +70,6 @@ bool Text::icreate()
 		return false;
 	}
 	this->setProgram(this->text_program);
-	if(this->attribute_location_position == -1 || this->attribute_location_UV == -1 || 
-		this->uniform_location_projection_matrix == -1 || this->uniform_location_view_matrix == -1 || 
-		this->uniform_location_model_matrix == -1
-	)
-	{
-		this->idestroy();
-		return false;
-	}
 	return glGetError() == GL_NO_ERROR;
 }
 bool Text::idestroy()
@@ -112,7 +104,8 @@ bool Text::isValid() const
 {
 	return this->ctx_context && this->text_font && this->text_program && 
 		   this->ctx_context->isValid() && this->text_font->isValid() && this->text_program->isValid() && 
-		   this->vertex_array_id != -1 && this->vertex_buffer_id != -1 && this->element_array_id != -1;
+		   this->vertex_array_id != -1 && this->vertex_buffer_id != -1 && this->element_array_id != -1 &&
+		   this->attribute_location_position != -1 && this->attribute_location_UV != -1;
 }
 bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 {
@@ -128,7 +121,8 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 		}
 		this->text_program->setUniformMat4fv(uniform_location_model_matrix, this->text_transform.values);
 		this->text_program->setUniform4fv(uniform_location_text_color, &this->text_color.x);
-		if(!this->text_font->texture.bind() || !this->text_program->use()) return false;
+		if(!this->text_font->texture.bind() || !this->text_program->use())
+			return false;
 		GLCLEARERROR();
 		glBindVertexArray(this->vertex_array_id);
 		glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer_id);
@@ -152,6 +146,10 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 void Text::updateTransform()
 {
 	this->text_transform = axl::math::Transform4::scaleTranslate(this->text_scale, this->text_position) * axl::math::Transform4::rotateXYZ(this->text_rotation);
+}
+void Text::updateBuffers()
+{
+	if(this->isValid()) this->updateBuffers(this->text_wstring, false, this->text_font ? this->text_font->size != this->rec_font_size : false);
 }
 // set methods
 void Text::setPosition(const axl::math::Vec3f& p_position, bool update)
@@ -192,6 +190,9 @@ bool Text::setText(const axl::util::WString& p_wstring)
 void Text::setFont(const Font* p_font)
 {
 	this->text_font = p_font;
+	if(p_font)
+		this->rec_font_size = p_font->size;
+	this->updateBuffers(this->text_wstring, false, true);
 }
 void Text::setProgram(const axl::gl::gfx::Program* text_shader_program)
 {
@@ -264,133 +265,134 @@ Text::AlignmentFlag Text::getAlignment() const
 {
 	return this->text_alignment;
 }
-bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed)
+bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed, bool font_changed)
 {
 	using namespace GL;
+	if(!this->isValid()) return false;
 	const bool text_changed = &p_wstring != &this->text_wstring;
 	unsigned int text_length = this->text_wstring.length(), actual_length = 0;
+	for(unsigned int i = 0; i < text_length; ++i)
+	{
+		switch(this->text_wstring[i])
+		{
+			case L'\n':
+			case L'\r':
+			case L'\t':
+			case L'\0':
+				continue;
+			default:
+				++actual_length;
+				continue;
+		}
+	}
+	this->actual_text_length = actual_length;
+	const unsigned int text_count = this->text_wstring.size() - 1;
+	const unsigned int vertex_count = 16 * text_count, indeces_count = 6 * text_count;
+	GLCLEARERROR();
+	glBindVertexArray(this->vertex_array_id);
+	glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer_id);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->element_array_id);
+	if(text_size_changed)
+	{
+		glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLfloat) * vertex_count), 0, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLuint) * indeces_count), 0, GL_DYNAMIC_DRAW);
+		if(glGetError() != GL_NO_ERROR)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+			return false;
+		}
+		const GLsizei stride = (GLsizei)(sizeof(GLfloat) * 4);
+		glEnableVertexAttribArray(this->attribute_location_position);
+		glEnableVertexAttribArray(this->attribute_location_UV);
+		glVertexAttribPointer(this->attribute_location_position, 2, GL_FLOAT, GL_FALSE, stride, 0);
+		glVertexAttribPointer(this->attribute_location_UV, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(sizeof(GLfloat) * 2));
+	}
+	if((text_changed && text_length > 0) || font_changed)
+	{
+		GLfloat* buffer = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		GLuint* indeces = (GLuint*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+		if(!buffer || !indeces)
+		{
+			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+			glUnmapBuffer(GL_ARRAY_BUFFER);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+			return false;
+		}
+		GLfloat horizontal_advance = 0.0f, vertical_advance = (GLfloat)-this->text_font->size.y;
+		const unsigned int space_glyph_index = this->text_font->getCharIndex(L' ');
+		const GLfloat space_advance = (GLfloat)(space_glyph_index == -1 ? this->text_font->size.x : this->text_font->glyphs[space_glyph_index].horiAdvance);
+		const GLfloat tab_advance = space_advance * 4.0f;
+		unsigned int skipped_chars_count = 0;
 		for(unsigned int i = 0; i < text_length; ++i)
 		{
 			switch(this->text_wstring[i])
 			{
 				case L'\n':
+					if(this->text_orientation == TOR_HORIZONTAL)
+					{
+						horizontal_advance = 0;
+						vertical_advance -= this->text_font->size.y + 2;
+					}
+					++skipped_chars_count;
+					continue;
 				case L'\r':
+					if(this->text_orientation == TOR_HORIZONTAL)
+					{
+						horizontal_advance = 0;
+					}
+					++skipped_chars_count;
+					continue;
 				case L'\t':
-				case L'\0':
-					continue;
-				default:
-					++actual_length;
+					horizontal_advance += tab_advance;
+					++skipped_chars_count;
 					continue;
 			}
+			const unsigned int i_actual = i - skipped_chars_count;
+			const unsigned int base_vertex_index = i_actual * 16, base_indeces_index = i_actual * 6, vertex_indeces_index = i_actual * 4;
+			const unsigned int glyph_index = this->text_font->getCharIndex(this->text_wstring[i]);
+			const axl::gl::gfx::Font::GlyphData& glyph = this->text_font->glyphs[glyph_index];
+			const axl::math::Vec2f offset((float)(horizontal_advance + glyph.horiBearingX), (float)(vertical_advance + glyph.horiBearingY));
+			const axl::math::Vec2f offsetted_size((float)(offset.x + glyph.width), (float)(offset.y + glyph.height));
+			const axl::math::Vec4f& UV = glyph.UV;
+			horizontal_advance += (GLfloat)glyph.horiAdvance;
+
+			buffer[base_vertex_index] = offset.x;
+			buffer[base_vertex_index + 1] = offset.y;
+			buffer[base_vertex_index + 2] = UV.x;
+			buffer[base_vertex_index + 3] = UV.y;
+
+			buffer[base_vertex_index + 4] = offsetted_size.x;
+			buffer[base_vertex_index + 5] = offset.y;
+			buffer[base_vertex_index + 6] = UV.z;
+			buffer[base_vertex_index + 7] = UV.y;
+
+			buffer[base_vertex_index + 8] = offsetted_size.x;
+			buffer[base_vertex_index + 9] = offsetted_size.y;
+			buffer[base_vertex_index + 10] = UV.z;
+			buffer[base_vertex_index + 11] = UV.w;
+
+			buffer[base_vertex_index + 12] = offset.x;
+			buffer[base_vertex_index + 13] = offsetted_size.y;
+			buffer[base_vertex_index + 14] = UV.x;
+			buffer[base_vertex_index + 15] = UV.w;
+			
+			indeces[base_indeces_index] = vertex_indeces_index;
+			indeces[base_indeces_index + 1] = vertex_indeces_index + 1;
+			indeces[base_indeces_index + 2] = vertex_indeces_index + 2;
+			indeces[base_indeces_index + 3] = vertex_indeces_index + 2;
+			indeces[base_indeces_index + 4] = vertex_indeces_index + 3;
+			indeces[base_indeces_index + 5] = vertex_indeces_index;
 		}
-		this->actual_text_length = actual_length;
-		const unsigned int text_count = this->text_wstring.size() - 1;
-		const unsigned int vertex_count = 16 * text_count, indeces_count = 6 * text_count;
-		GLCLEARERROR();
-		glBindVertexArray(this->vertex_array_id);
-		glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer_id);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->element_array_id);
-		if(text_size_changed)
-		{
-			glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLfloat) * vertex_count), 0, GL_DYNAMIC_DRAW);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLuint) * indeces_count), 0, GL_DYNAMIC_DRAW);
-			if(glGetError() != GL_NO_ERROR)
-			{
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-				glBindVertexArray(0);
-				return false;
-			}
-			const GLsizei stride = (GLsizei)(sizeof(GLfloat) * 4);
-			glEnableVertexAttribArray(this->attribute_location_position);
-			glEnableVertexAttribArray(this->attribute_location_UV);
-			glVertexAttribPointer(this->attribute_location_position, 2, GL_FLOAT, GL_FALSE, stride, 0);
-			glVertexAttribPointer(this->attribute_location_UV, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(sizeof(GLfloat) * 2));
-		}
-		if(text_changed && text_length > 0)
-		{
-			GLfloat* buffer = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-			GLuint* indeces = (GLuint*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-			if(!buffer || !indeces)
-			{
-				glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-				glUnmapBuffer(GL_ARRAY_BUFFER);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-				glBindVertexArray(0);
-				return false;
-			}
-			GLfloat horizontal_advance = 0.0f, vertical_advance = 0.0f;
-			const unsigned int space_glyph_index = this->text_font->getCharIndex(L' ');
-			const GLfloat space_advance = (GLfloat)(space_glyph_index == -1 ? this->text_font->size.x : this->text_font->glyphs[space_glyph_index].horiAdvance);
-			const GLfloat tab_advance = space_advance * 4.0f;
-			unsigned int skipped_chars_count = 0;
-			for(unsigned int i = 0; i < text_length; ++i)
-			{
-				switch(this->text_wstring[i])
-				{
-					case L'\n':
-						if(this->text_orientation == TOR_HORIZONTAL)
-						{
-							horizontal_advance = 0;
-							vertical_advance -= this->text_font->size.y;
-						}
-						++skipped_chars_count;
-						continue;
-					case L'\r':
-						if(this->text_orientation == TOR_HORIZONTAL)
-						{
-							horizontal_advance = 0;
-						}
-						++skipped_chars_count;
-						continue;
-					case L'\t':
-						horizontal_advance += tab_advance;
-						++skipped_chars_count;
-						continue;
-				}
-				const unsigned int i_actual = i - skipped_chars_count;
-				const unsigned int base_vertex_index = i_actual * 16, base_indeces_index = i_actual * 6, vertex_indeces_index = i_actual * 4;
-				const unsigned int glyph_index = this->text_font->getCharIndex(this->text_wstring[i]);
-				const axl::gl::gfx::Font::GlyphData& glyph = this->text_font->glyphs[glyph_index];
-				const axl::math::Vec2f offset((float)(horizontal_advance + glyph.horiBearingX), (float)(vertical_advance + glyph.horiBearingY));
-				const axl::math::Vec2f offsetted_size((float)(offset.x + glyph.width), (float)(offset.y + glyph.height));
-				const axl::math::Vec4f& UV = glyph.UV;
-				horizontal_advance += (GLfloat)glyph.horiAdvance;
-
-				buffer[base_vertex_index] = offset.x;
-				buffer[base_vertex_index + 1] = offset.y;
-				buffer[base_vertex_index + 2] = UV.x;
-				buffer[base_vertex_index + 3] = UV.y;
-
-				buffer[base_vertex_index + 4] = offsetted_size.x;
-				buffer[base_vertex_index + 5] = offset.y;
-				buffer[base_vertex_index + 6] = UV.z;
-				buffer[base_vertex_index + 7] = UV.y;
-
-				buffer[base_vertex_index + 8] = offsetted_size.x;
-				buffer[base_vertex_index + 9] = offsetted_size.y;
-				buffer[base_vertex_index + 10] = UV.z;
-				buffer[base_vertex_index + 11] = UV.w;
-
-				buffer[base_vertex_index + 12] = offset.x;
-				buffer[base_vertex_index + 13] = offsetted_size.y;
-				buffer[base_vertex_index + 14] = UV.x;
-				buffer[base_vertex_index + 15] = UV.w;
-				
-				indeces[base_indeces_index] = vertex_indeces_index;
-				indeces[base_indeces_index + 1] = vertex_indeces_index + 1;
-				indeces[base_indeces_index + 2] = vertex_indeces_index + 2;
-				indeces[base_indeces_index + 3] = vertex_indeces_index + 2;
-				indeces[base_indeces_index + 4] = vertex_indeces_index + 3;
-				indeces[base_indeces_index + 5] = vertex_indeces_index;
-			}
-			glUnmapBuffer(GL_ARRAY_BUFFER);
-			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-		}
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+	}
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 	return glGetError() == GL_NO_ERROR;
 }
 

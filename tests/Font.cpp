@@ -225,13 +225,15 @@ class GameView : public axl::gl::View
 					GL::GLfloat tmaxx = char_uv.z;
 					GL::GLfloat tminy = char_uv.y;
 					GL::GLfloat tmaxy = char_uv.w;
+					float left = (float)-this->camera.viewport_size.y / 2.0f, right = (float)this->camera.viewport_size.y / 2.0f;
+					float bottom = (float)-this->camera.viewport_size.y / 2.0f, top = (float)this->camera.viewport_size.y / 2.0f;
 					const axl::glfl::GLfloat vertices[] = {
-						-(float)this->size.y, -(float)this->size.y, 0.0, tminx, tminy,
-						 (float)this->size.y, -(float)this->size.y, 0.0, tmaxx, tminy,
-						 (float)this->size.y,  (float)this->size.y, 0.0, tmaxx, tmaxy,
-						 (float)this->size.y,  (float)this->size.y, 0.0, tmaxx, tmaxy,
-						-(float)this->size.y,  (float)this->size.y, 0.0, tminx, tmaxy,
-						-(float)this->size.y, -(float)this->size.y, 0.0, tminx, tminy,
+						left, bottom, 0.0, tminx, tminy,
+						right, bottom, 0.0, tmaxx, tminy,
+						right, top, 0.0, tmaxx, tmaxy,
+						right, top, 0.0, tmaxx, tmaxy,
+						left, top, 0.0, tminx, tmaxy,
+						left, bottom, 0.0, tminx, tminy,
 					};
 					GLC(GL::glBindVertexArray(vertex_array));
 					GLC(GL::glBindBuffer(GL::GL_ARRAY_BUFFER, vertex_buffer));
@@ -278,7 +280,9 @@ class GameView : public axl::gl::View
 				float aspect_ratio = (float)this->camera.viewport_size.x / this->camera.viewport_size.y;
 				if(this->camera.projection->type == axl::gl::projection::Projectionf::Type::PT_ORTHOGRAPHIC)
 				{
-					((axl::gl::projection::Orthographicf*)this->camera.projection)->set((float)-width, (float)width, (float)-height, (float)height, 0.01f, 1000.0f);
+					float left = (float)-this->camera.viewport_size.x / 2.0f, right = (float)this->camera.viewport_size.x / 2.0f;
+					float bottom = (float)-this->camera.viewport_size.y / 2.0f, top = (float)this->camera.viewport_size.y / 2.0f;
+					((axl::gl::projection::Orthographicf*)this->camera.projection)->set(left, right, bottom, top, 0.01f, 1000.0f);
 				}
 				this->camera.projection->updateTransform();
 			}
@@ -314,18 +318,14 @@ class GameView : public axl::gl::View
 					GL::GLfloat *verteces = (GL::GLfloat*)GL::glMapBuffer(GL::GL_ARRAY_BUFFER, GL::GL_WRITE_ONLY);
 					if(verteces)
 					{
-						verteces[0 * 5] = (float)-this->camera.viewport_size.x;
-						verteces[0 * 5 + 1] = (float)-this->camera.viewport_size.x;
-						verteces[1 * 5] = (float)this->camera.viewport_size.x;
-						verteces[1 * 5 + 1] = (float)-this->camera.viewport_size.x;
-						verteces[2 * 5] = (float)this->camera.viewport_size.x;
-						verteces[2 * 5 + 1] = (float)this->camera.viewport_size.x;
-						verteces[3 * 5] = (float)this->camera.viewport_size.x;
-						verteces[3 * 5 + 1] = (float)this->camera.viewport_size.x;
-						verteces[4 * 5] = (float)-this->camera.viewport_size.x;
-						verteces[4 * 5 + 1] = (float)this->camera.viewport_size.x;
-						verteces[5 * 5] = (float)-this->camera.viewport_size.x;
-						verteces[5 * 5 + 1] = (float)-this->camera.viewport_size.x;
+						float left = (float)-this->camera.viewport_size.y / 2.0f, right = (float)this->camera.viewport_size.y / 2.0f;
+						float bottom = (float)-this->camera.viewport_size.y / 2.0f, top = (float)this->camera.viewport_size.y / 2.0f;
+						verteces[0 * 5] = left; verteces[0 * 5 + 1] = bottom;
+						verteces[1 * 5] = right; verteces[1 * 5 + 1] = bottom;
+						verteces[2 * 5] = right; verteces[2 * 5 + 1] = top;
+						verteces[3 * 5] = right; verteces[3 * 5 + 1] = top;
+						verteces[4 * 5] = left; verteces[4 * 5 + 1] = top;
+						verteces[5 * 5] = left; verteces[5 * 5 + 1] = bottom;
 						verteces[0 * 5 + 3] = char_uv.x; verteces[0 * 5 + 4] = char_uv.y;
 						verteces[1 * 5 + 3] = char_uv.z; verteces[1 * 5 + 4] = char_uv.y;
 						verteces[2 * 5 + 3] = char_uv.z; verteces[2 * 5 + 4] = char_uv.w;
@@ -487,14 +487,10 @@ const GameView::Config view_configs[] = {
 };
 axl::gl::Display display;
 
-void onQuit(int quit_code)
+void onExit(int exit_code)
 {
 	display.close();
 	axl::gl::gfx::Font::cleanup();
-}
-
-void onExit(int exit_code)
-{
 	axl::gl::View::cleanup();
 	axl::gl::Display::restoreSettings();
 	if (axl::Assert::NUM_FAILED_ASSERTIONS) puts("----------------------------------------");
@@ -512,7 +508,6 @@ int main(int argc, char* argv[])
 	{
 		Assertve(axl::glfl::core::load(), verbose);
 		Application::onExit = onExit;
-		Application::onQuit = onQuit;
 		Assertve(Application::init(), verbose);
 		Assertve(display.isOpen(), verbose);
 

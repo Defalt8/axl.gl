@@ -71,7 +71,7 @@ bool Font::icreate()
 {
 	if(!Font::init() || !this->font_reserved) return false;
 	this->font_texture.setContext(this->ctx_context);
-	return this->font_texture.create() && this->font_texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR) && this->font_texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR);
+	return this->font_texture.create();
 }
 
 bool Font::idestroy()
@@ -92,12 +92,12 @@ bool Font::idestroy()
 
 bool Font::isValid() const
 {
-	return this->font_texture.isValid() && this->font_reserved && (this->font_glyphs.count() == ((FontData*)font_reserved)->glyph_count);
+	return this->font_texture.isValid() && this->font_reserved && ((FontData*)font_reserved)->glyph_count > 0 && (this->font_glyphs.count() == ((FontData*)font_reserved)->glyph_count);
 }
 
 bool Font::loadFromFile(const axl::util::String& filepath, const axl::math::Vec2i& font_size)
 {
-	if(font_size.x <= 0 || font_size.y <= 0 || !Font::init() || !this->isValid()) return false;
+	if(!this->font_reserved || font_size.x <= 0 || font_size.y <= 0 || !Font::init() || !this->isCreated() || !this->font_texture.isValid()) return false;
 	FontData* font_data = (FontData*)font_reserved;
 	FT_Face ftlib_face;
 	if(FT_New_Face(ftlib_library, filepath.cstr(), 0, &ftlib_face) != FT_Err_Ok || !ftlib_face) return false;
@@ -115,8 +115,6 @@ bool Font::loadFromFile(const axl::util::String& filepath, const axl::math::Vec2
 	{
 		GL::GLint max_level = (GL::GLint)axl::math::log2((float)font_size.x) - 1;
 		this->font_size = font_size;
-		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_level);
-		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LEVEL, max_level);
 		for(GL::GLint i = 1; i <= max_level; ++i)
 		{
 			if(!this->loadGlyphs(font_size, i, -1))
@@ -126,8 +124,6 @@ bool Font::loadFromFile(const axl::util::String& filepath, const axl::math::Vec2
 				break;
 			}
 		}
-		this->font_texture.setParamf(GL::GL_TEXTURE_LOD_BIAS, 0.0f);
-		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
 		this->font_texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR_MIPMAP_NEAREST);
 		this->font_texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR);
 		return true;
@@ -144,8 +140,6 @@ bool Font::setSize(const axl::math::Vec2i& font_size)
 	{
 		GL::GLint max_level = (GL::GLint)axl::math::log2((float)font_size.x) - 1;
 		this->font_size = font_size;
-		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_level);
-		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LEVEL, max_level);
 		for(GL::GLint i = 1; i <= max_level; ++i)
 		{
 			if(!this->loadGlyphs(font_size, i, -1))
@@ -155,8 +149,6 @@ bool Font::setSize(const axl::math::Vec2i& font_size)
 				break;
 			}
 		}
-		this->font_texture.setParamf(GL::GL_TEXTURE_LOD_BIAS, 0.0f);
-		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
 		this->font_texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR_MIPMAP_NEAREST);
 		this->font_texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR);
 		return true;
@@ -178,7 +170,7 @@ unsigned int Font::getCharIndex(axl::util::WString::char_t unicode_char) const
 
 bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned long count)
 {
-	if(!Font::init() || !this->isValid()) return false;
+	if(!this->font_reserved || !Font::init() || !this->font_texture.isValid()) return false;
 	FontData* font_data = (FontData*)font_reserved;
 	if(!font_data->face) return false;
 	FT_Long num_glyphs;
@@ -213,7 +205,7 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 	}
 	float glyph_size_x = (float)atlas_width / x_count;
 	float glyph_size_y = (float)atlas_height / y_count;
-	if(glyph_size_x <= 10 || glyph_size_y <= 10) return false;
+	if(glyph_size_x <= 4 || glyph_size_y <= 4) return false;
 	if(FT_Set_Pixel_Sizes(font_data->face, (FT_UInt)(glyph_size_x - 2), (FT_UInt)(glyph_size_y - 2)) != FT_Err_Ok) return false;
 	GL::GLsizei glyph_size = ((GL::GLsizei)glyph_size_x) * ((GL::GLsizei)glyph_size_y);
 	if(!this->font_texture.allocate(level, atlas_width, atlas_height, GL::GL_R8)) return false;
@@ -225,7 +217,7 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 		for(int i = 0; i < x_count; ++i)
 		{
 			if(glyph_index >= num_glyphs) break;
-			if(FT_Load_Glyph(font_data->face, glyph_index, FT_LOAD_TARGET_LIGHT|FT_LOAD_IGNORE_TRANSFORM|FT_LOAD_RENDER) == FT_Err_Ok)
+			if(FT_Load_Glyph(font_data->face, glyph_index, FT_LOAD_RENDER) == FT_Err_Ok)
 			{
 				if(level == 0)
 				{
