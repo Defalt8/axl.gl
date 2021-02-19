@@ -38,6 +38,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		void setScale(const axl::math::Vec3f& scale, bool update = true);
 		void setRotation(const axl::math::Vec3f& rotation, bool update = true);
 		void setColor(const axl::math::Vec4f& color);
+		bool setStorageSize(axl::util::size_t size);
 		bool setText(const axl::util::WString& wstring);
 		void setFont(const Font* font);
 		void setProgram(const axl::gl::gfx::Program* text_shader_program);
@@ -54,6 +55,8 @@ class AXLGLCXXAPI Text : public ContextObject
 		const axl::gl::gfx::Program* getProgram() const;
 		Orientation getOrientation() const;
 		AlignmentFlag getAlignment() const;
+	protected:
+		bool updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed = false);
 	protected:
 		axl::math::Vec3f text_position;
 		axl::math::Vec3f text_scale;

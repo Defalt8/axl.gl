@@ -210,7 +210,7 @@ class GameView : public axl::gl::View
 			axl::math::Vec4f char_uv;
 			if(this->font.create())
 			{
-				Assert(this->font.loadFromFile("../../common/fonts/webdings.ttf", axl::math::Vec2i(64,64)));
+				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(64,64)));
 				char_uv.set(0.0, 0.0, 1.0, 1.0);
 			}
 			if(this->main_context.makeCurrent())
@@ -377,18 +377,20 @@ class GameView : public axl::gl::View
 							GL::GLfloat *verteces = (GL::GLfloat*)GL::glMapBuffer(GL::GL_ARRAY_BUFFER, GL::GL_WRITE_ONLY);
 							if(verteces)
 							{
+								float sz_x = this->font.glyphs[glyph_index].width;
+								float sz_y = this->font.glyphs[glyph_index].height;
 								float x_off = (float)this->font.glyphs[glyph_index].horiBearingX;
-								float y_off = (float)this->font.glyphs[glyph_index].horiBearingY - this->font.glyphs[glyph_index].height;
+								float y_off = (float)this->font.glyphs[glyph_index].horiBearingY;
 								verteces[0 * 5] = x_off;
 								verteces[0 * 5 + 1] = y_off;
-								verteces[1 * 5] = x_off + this->font.size.x;
+								verteces[1 * 5] = x_off + sz_x;
 								verteces[1 * 5 + 1] = y_off;
-								verteces[2 * 5] = x_off + this->font.size.x;
-								verteces[2 * 5 + 1] = y_off + this->font.size.y;
-								verteces[3 * 5] = x_off + this->font.size.x;
-								verteces[3 * 5 + 1] = y_off + this->font.size.y;
+								verteces[2 * 5] = x_off + sz_x;
+								verteces[2 * 5 + 1] = y_off + sz_y;
+								verteces[3 * 5] = x_off + sz_x;
+								verteces[3 * 5 + 1] = y_off + sz_y;
 								verteces[4 * 5] = x_off;
-								verteces[4 * 5 + 1] = y_off + this->font.size.y;
+								verteces[4 * 5 + 1] = y_off + sz_y;
 								verteces[5 * 5] = x_off;
 								verteces[5 * 5 + 1] = y_off;
 								verteces[0 * 5 + 3] = this->font.glyphs[glyph_index].UV.x; verteces[0 * 5 + 4] = this->font.glyphs[glyph_index].UV.y;
@@ -408,9 +410,8 @@ class GameView : public axl::gl::View
 			{
 				switch (key)
 				{
-					case KeyCode::KEY_OPENBRACE:
-					case KeyCode::KEY_CLOSEBRACE:
-						if(bk_control && (!bk_shift && !bk_alt))
+					case KeyCode::KEY_CONTROL:
+						if(size_delta != 0)
 						{
 							this->font.setSize(axl::math::Vec2i::filled(this->font.size.x + size_delta));
 							size_delta = 0;
@@ -438,18 +439,20 @@ class GameView : public axl::gl::View
 					GL::GLfloat *verteces = (GL::GLfloat*)GL::glMapBuffer(GL::GL_ARRAY_BUFFER, GL::GL_WRITE_ONLY);
 					if(verteces)
 					{
+						float sz_x = this->font.glyphs[glyph_index].width;
+						float sz_y = this->font.glyphs[glyph_index].height;
 						float x_off = (float)this->font.glyphs[glyph_index].horiBearingX;
-						float y_off = (float)this->font.glyphs[glyph_index].horiBearingY - this->font.glyphs[glyph_index].height;
+						float y_off = (float)this->font.glyphs[glyph_index].horiBearingY;
 						verteces[0 * 5] = x_off;
 						 verteces[0 * 5 + 1] = y_off;
-						verteces[1 * 5] = x_off + this->font.size.x;
+						verteces[1 * 5] = x_off + sz_x;
 						 verteces[1 * 5 + 1] = y_off;
-						verteces[2 * 5] = x_off + this->font.size.x;
-						 verteces[2 * 5 + 1] = y_off + this->font.size.y;
-						verteces[3 * 5] = x_off + this->font.size.x;
-						 verteces[3 * 5 + 1] = y_off + this->font.size.y;
+						verteces[2 * 5] = x_off + sz_x;
+						 verteces[2 * 5 + 1] = y_off + sz_y;
+						verteces[3 * 5] = x_off + sz_x;
+						 verteces[3 * 5 + 1] = y_off + sz_y;
 						verteces[4 * 5] = x_off;
-						 verteces[4 * 5 + 1] = y_off + this->font.size.y;
+						 verteces[4 * 5 + 1] = y_off + sz_y;
 						verteces[5 * 5] = x_off;
 						 verteces[5 * 5 + 1] = y_off;
 						verteces[0 * 5 + 3] = this->font.glyphs[glyph_index].UV.x; verteces[0 * 5 + 4] = this->font.glyphs[glyph_index].UV.y;

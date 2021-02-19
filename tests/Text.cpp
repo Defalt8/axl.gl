@@ -7,80 +7,13 @@
 #include <axl.util/everything.hpp>
 #include <axl.math/everything.hpp>
 #include <axl.glfl/glCoreARB.hpp>
+#include "GL.hpp"
 #include "Assert.hpp"
-#include "GLC.h"
 
 
 namespace GL {
 	using namespace axl::glfl;
 	using namespace axl::glfl::core::GL;
-}
-
-bool loadVFShaders(axl::gl::gfx::Program& program, const axl::util::String& vertex_shader_file, const axl::util::String& fragment_shader_file)
-{
-	axl::gl::Context *context = program.getContext();
-	if(!axl::util::File::exists(vertex_shader_file))
-	{
-		fprintf(stderr, "File does not exist! \"%s\"\n", vertex_shader_file.cstr());
-		return false;
-	}
-	if(!axl::util::File::exists(fragment_shader_file))
-	{
-		fprintf(stderr, "File does not exist! \"%s\"\n", fragment_shader_file.cstr());
-		return false;
-	}
-	if(!context || !context->isValid()) return false;
-	// VERTEX_SHADER
-	axl::gl::gfx::Shader vertex_shader(context, GL::GL_VERTEX_SHADER);
-	if(vertex_shader.create())
-	{
-		if(!vertex_shader.setSource(axl::util::File::getStringContent(vertex_shader_file).cstr()) ||
-			!vertex_shader.compile()
-		)
-		{
-			fprintf(stderr, "* Failed to compile vertex shader.\n");
-			return false;	
-		}
-	}
-	if(!vertex_shader.isCompiled())
-	{
-		printf("VERTEX_SHADER_INFO_LOG:\n****\n%s****\n", vertex_shader.getInfoLog().cstr());
-	}
-	// FRAGMENT_SHADER
-	axl::gl::gfx::Shader fragment_shader(context, GL::GL_FRAGMENT_SHADER);
-	if(fragment_shader.create())
-	{
-		if(!fragment_shader.setSource(axl::util::File::getStringContent(fragment_shader_file).cstr()) ||
-			!fragment_shader.compile()
-		)
-		{
-			fprintf(stderr, "* Failed to compile fragment shader.\n");
-			return false;	
-		}
-	}
-	if(!fragment_shader.isCompiled())
-	{
-		printf("FRAGMENT_SHADER_INFO_LOG:\n****\n%s****\n", fragment_shader.getInfoLog().cstr());
-	}
-	// Program
-	if(vertex_shader.isCompiled() && fragment_shader.isCompiled())
-	{
-		if(!program.isCreated()) program.create();
-		if(!program.isValid()) return false;
-		vertex_shader.attach(program);
-		fragment_shader.attach(program);
-		program.link();
-		vertex_shader.detach(program);
-		fragment_shader.detach(program);
-		if(!program.isLinked())
-		{
-			printf("PROGRAM_INFO_LOG:\n****\n%s****\n", program.getInfoLog().cstr());
-			return false;
-		}
-	}
-	vertex_shader.destroy();
-	fragment_shader.destroy();
-	return true;
 }
 
 class GameView : public axl::gl::View
@@ -91,7 +24,6 @@ class GameView : public axl::gl::View
 		axl::gl::gfx::Program text_program;
 		axl::gl::gfx::Font font;
 		axl::gl::gfx::Text text, status_text;
-		axl::glfl::GLuint vertex_array, vertex_buffer;
 	private:
 		Cursor NormalCursor;
 		axl::util::uc::Time time, ctime;
@@ -138,8 +70,6 @@ class GameView : public axl::gl::View
 			status_text.setContext(&this->main_context);
 			status_text.setFont(&this->font);
 			status_text.setProgram(&this->text_program);
-			vertex_array = 0;
-			vertex_buffer = 0;
 			is_animating = false;
 			size_delta = 0;
 			time.set();
@@ -207,10 +137,10 @@ class GameView : public axl::gl::View
 			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
 			this->init();
 			// Create stuff here
-			loadVFShaders(this->text_program, "tests/shaders/330/text_vuPVMs.vert", "tests/shaders/330/text_vuPVMs.frag");
+			GL::loadVFShaders(this->text_program, "tests/shaders/330/text_vuPVMs.vert", "tests/shaders/330/text_vuPVMs.frag");
 			if(this->font.create())
 			{
-				Assert(this->font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(64,64)));
+				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(64,64)));
 			}
 			if(this->text.create())
 			{
@@ -227,10 +157,11 @@ class GameView : public axl::gl::View
 			}
 			if(this->status_text.create())
 			{
+				Assert(this->status_text.setStorageSize(128));
 				Assert(this->status_text.setText(L"FPS: -\nFontSize: -,-\nFontScale: -"));
 				this->status_text.setColor(axl::math::Vec4f(0.1f,0.1f,0.7f,0.7f));
 				this->status_text.setScale(axl::math::Vec3f::filled(0.45f), false);
-				this->status_text.setPosition(axl::math::Vec3f((float)this->size.x - 300, (float)this->size.y - 50, 0.0f));
+				this->status_text.setPosition(axl::math::Vec3f((float)this->size.x - 300, (float)this->size.y - 50, 0.1f));
 			}
 			return axl::gl::View::onCreate(recreating);
 		}
@@ -311,9 +242,8 @@ class GameView : public axl::gl::View
 			{
 				switch (key)
 				{
-					case KeyCode::KEY_OPENBRACE:
-					case KeyCode::KEY_CLOSEBRACE:
-						if(bk_control && (!bk_shift && !bk_alt))
+					case KeyCode::KEY_CONTROL:
+						if(size_delta != 0)
 						{
 							this->font.setSize(axl::math::Vec2i::filled(this->font.size.x + size_delta));
 							this->status_text.setScale(axl::math::Vec3f::filled(0.45f*(float)64.0f/this->font.size.x));
@@ -419,7 +349,7 @@ int main(int argc, char* argv[])
 					{
 						axl::math::Vec3f text_position = view.text.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_up ? 1.0f : -1.0f) * delta_time;
-						view.text.setPosition(axl::math::Vec3f(text_position.x, text_position.y + delta, text_position.z));
+						view.text.setPosition(axl::math::Vec3f(text_position.x, text_position.y - delta, text_position.z));
 					}
 				}
 				if(bk_left ^ bk_right)
@@ -428,7 +358,7 @@ int main(int argc, char* argv[])
 					{
 						axl::math::Vec3f text_position = view.text.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_right ? 1.0f : -1.0f) * delta_time;
-						view.text.setPosition(axl::math::Vec3f(text_position.x + delta, text_position.y, text_position.z));
+						view.text.setPosition(axl::math::Vec3f(text_position.x - delta, text_position.y, text_position.z));
 					}
 				}
 				/// -- update

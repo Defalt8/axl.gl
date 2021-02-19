@@ -29,6 +29,8 @@ struct FontData
 	unsigned long glyph_count;
 	unsigned long x_count;
 	unsigned long y_count;
+	unsigned long atlas_width;
+	unsigned long atlas_height;
 };
 
 //
@@ -50,6 +52,8 @@ Font::Font(axl::gl::Context* ptr_context) :
 		font_data->glyph_count = 0;
 		font_data->x_count = 0;
 		font_data->y_count = 0;
+		font_data->atlas_width = 0;
+		font_data->atlas_height = 0;
 	}
 }
 
@@ -103,19 +107,29 @@ bool Font::loadFromFile(const axl::util::String& filepath, const axl::math::Vec2
 		font_data->glyph_count = 0;
 		font_data->x_count = 0;
 		font_data->y_count = 0;
+		font_data->atlas_width = 0;
+		font_data->atlas_height = 0;
 	}
 	font_data->face = ftlib_face;
 	if(this->loadGlyphs(font_size, 0, -1))
 	{
-		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) - 1;
+		GL::GLint max_level = (GL::GLint)axl::math::log2((float)font_size.x) - 1;
 		this->font_size = font_size;
-		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
-		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_lod);
-		if(this->font_texture.generateMipmaps())
+		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_level);
+		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LEVEL, max_level);
+		for(GL::GLint i = 1; i <= max_level; ++i)
 		{
-			this->font_texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR_MIPMAP_NEAREST);
-			this->font_texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR);
+			if(!this->loadGlyphs(font_size, i, -1))
+			{
+				this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, i-1);
+				this->font_texture.setParami(GL::GL_TEXTURE_MAX_LEVEL, i-1);
+				break;
+			}
 		}
+		this->font_texture.setParamf(GL::GL_TEXTURE_LOD_BIAS, 0.0f);
+		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
+		this->font_texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR_MIPMAP_NEAREST);
+		this->font_texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR);
 		return true;
 	}
 	return false;
@@ -123,20 +137,28 @@ bool Font::loadFromFile(const axl::util::String& filepath, const axl::math::Vec2
 
 bool Font::setSize(const axl::math::Vec2i& font_size)
 {
-	if(font_size.x <= 0 || font_size.y <= 0 || !Font::init() || !this->isValid()) return false;
+	if(font_size.x <= 5 || font_size.y <= 5 || !Font::init() || !this->isValid()) return false;
 	FontData* font_data = (FontData*)font_reserved;
 	if(!font_data->face) return false;
 	if(this->loadGlyphs(font_size, 0, -1))
 	{
-		GL::GLint max_lod = (GL::GLint)axl::math::log2((float)font_size.x) - 1;
+		GL::GLint max_level = (GL::GLint)axl::math::log2((float)font_size.x) - 1;
 		this->font_size = font_size;
-		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
-		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_lod);
-		if(this->font_texture.generateMipmaps())
+		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, max_level);
+		this->font_texture.setParami(GL::GL_TEXTURE_MAX_LEVEL, max_level);
+		for(GL::GLint i = 1; i <= max_level; ++i)
 		{
-			this->font_texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR_MIPMAP_NEAREST);
-			this->font_texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR);
+			if(!this->loadGlyphs(font_size, i, -1))
+			{
+				this->font_texture.setParami(GL::GL_TEXTURE_MAX_LOD, i-1);
+				this->font_texture.setParami(GL::GL_TEXTURE_MAX_LEVEL, i-1);
+				break;
+			}
 		}
+		this->font_texture.setParamf(GL::GL_TEXTURE_LOD_BIAS, 0.0f);
+		this->font_texture.setParami(GL::GL_TEXTURE_MIN_LOD, 0);
+		this->font_texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR_MIPMAP_NEAREST);
+		this->font_texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR);
 		return true;
 	}
 	return false;
@@ -162,6 +184,9 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 	FT_Long num_glyphs;
 	int x_count;
 	int y_count;
+	int level_factor = (int)axl::math::pow(2.0f, (float)level);
+	GL::GLsizei atlas_width;
+	GL::GLsizei atlas_height;
 	if(level == 0)
 	{
 		num_glyphs = count <= (unsigned long)font_data->face->num_glyphs ? count : font_data->face->num_glyphs;
@@ -170,21 +195,28 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 		const int sq = root * root;
 		x_count = sq < num_glyphs ? (root+1) : root;
 		y_count = x_count;
+		atlas_width = (GL::GLsizei)(x_count * (font_size.x + 2));
+		atlas_height = (GL::GLsizei)(y_count * (font_size.y + 2));
+		font_data->glyph_count = num_glyphs;
+		font_data->x_count = x_count;
+		font_data->y_count = y_count;
+		font_data->atlas_width = atlas_width;
+		font_data->atlas_height = atlas_height;
 	}
 	else
 	{
 		num_glyphs = font_data->glyph_count;
 		x_count = font_data->x_count;
 		y_count = font_data->y_count;
+		atlas_width = font_data->atlas_width / level_factor;
+		atlas_height = font_data->atlas_height / level_factor;
 	}
-	int level_factor = (int)axl::math::pow(2.0f, (float)level);
-	if(FT_Set_Pixel_Sizes(font_data->face, font_size.x / level_factor, font_size.y / level_factor) != FT_Err_Ok) return false;
-	GL::GLsizei width = (GL::GLsizei)(x_count * (font_size.x / level_factor + 2));
-	GL::GLsizei height = (GL::GLsizei)(y_count * (font_size.y / level_factor + 2));
-	unsigned long glyph_size_x = (unsigned long)(font_size.x / level_factor + 2);
-	unsigned long glyph_size_y = (unsigned long)(font_size.y / level_factor + 2);
-	GL::GLsizei glyph_size = (GL::GLsizei)(glyph_size_x * glyph_size_y);
-	if(!this->font_texture.allocate(level, width, height, GL::GL_R8)) return false;
+	float glyph_size_x = (float)atlas_width / x_count;
+	float glyph_size_y = (float)atlas_height / y_count;
+	if(glyph_size_x <= 10 || glyph_size_y <= 10) return false;
+	if(FT_Set_Pixel_Sizes(font_data->face, (FT_UInt)(glyph_size_x - 2), (FT_UInt)(glyph_size_y - 2)) != FT_Err_Ok) return false;
+	GL::GLsizei glyph_size = ((GL::GLsizei)glyph_size_x) * ((GL::GLsizei)glyph_size_y);
+	if(!this->font_texture.allocate(level, atlas_width, atlas_height, GL::GL_R8)) return false;
 	FT_Long glyph_index = 0;
 	GL::GLubyte *glyph = new GL::GLubyte[glyph_size];
 	if(!glyph) return false;
@@ -200,15 +232,15 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 					this->font_glyphs[glyph_index].width = (short)(font_data->face->glyph->metrics.width / 64);
 					this->font_glyphs[glyph_index].height = (short)(font_data->face->glyph->metrics.height / 64);
 					this->font_glyphs[glyph_index].horiBearingX = (short)(font_data->face->glyph->metrics.horiBearingX / 64);
-					this->font_glyphs[glyph_index].horiBearingY = (short)(font_data->face->glyph->metrics.horiBearingY / 64);
+					this->font_glyphs[glyph_index].horiBearingY = (short)((font_data->face->glyph->metrics.horiBearingY - font_data->face->glyph->metrics.height) / 64);
 					this->font_glyphs[glyph_index].vertBearingX = (short)(font_data->face->glyph->metrics.vertBearingX / 64);
-					this->font_glyphs[glyph_index].vertBearingY = (short)(font_data->face->glyph->metrics.vertBearingY / 64);
+					this->font_glyphs[glyph_index].vertBearingY = (short)((font_data->face->glyph->metrics.vertBearingY - font_data->face->glyph->metrics.height) / 64);
 					this->font_glyphs[glyph_index].horiAdvance = (short)(font_data->face->glyph->metrics.horiAdvance / 64);
 					this->font_glyphs[glyph_index].vertAdvance = (short)(font_data->face->glyph->metrics.vertAdvance / 64);
-					this->font_glyphs[glyph_index].UV.x = (float)(glyph_index % x_count) / x_count - (float)1.f / ((float)font_size.x * width);
-					this->font_glyphs[glyph_index].UV.y = (float)(glyph_index / x_count) / y_count - (float)1.f / ((float)font_size.y * height);
-					this->font_glyphs[glyph_index].UV.z = this->font_glyphs[glyph_index].UV.x + (float)(this->font_glyphs[glyph_index].width + 4) / (width);
-					this->font_glyphs[glyph_index].UV.w = this->font_glyphs[glyph_index].UV.y + (float)(this->font_glyphs[glyph_index].height + 4) / (height);
+					this->font_glyphs[glyph_index].UV.x = ((float)(glyph_index % x_count) * glyph_size_x / atlas_width);
+					this->font_glyphs[glyph_index].UV.y = ((float)(glyph_index / x_count) * glyph_size_y / atlas_height);
+					this->font_glyphs[glyph_index].UV.z = this->font_glyphs[glyph_index].UV.x + ((float)this->font_glyphs[glyph_index].width / atlas_width);
+					this->font_glyphs[glyph_index].UV.w = this->font_glyphs[glyph_index].UV.y + ((float)this->font_glyphs[glyph_index].height / atlas_height);
 				}
 				if(font_data->face->glyph->format == FT_GLYPH_FORMAT_BITMAP)
 				{
@@ -220,22 +252,14 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 					{
 						for(unsigned long gi = 0; gi < (unsigned long)glyph_size_x; ++gi)
 						{
-							unsigned long glyph_index = gj * glyph_size_x + gi;
-							if(gi == 0 || gj == 0 || gi == glyph_size_x-1  || gj == glyph_size_y-1)
-							{
-								glyph[glyph_index] = 0;
-							}
-							else if(gi-1 < bmp_w && gj-1 < bmp_h)
-							{
-								glyph[glyph_index] = font_data->face->glyph->bitmap.buffer[((column_size-gj) * row_size) + gi-1];
-							}
+							unsigned long glyph_index = gj * ((unsigned long)glyph_size_x) + gi;
+							if(gi < bmp_w && gj < bmp_h)
+								glyph[glyph_index] = font_data->face->glyph->bitmap.buffer[((column_size-gj-1) * row_size) + gi];
 							else
-							{
 								glyph[glyph_index] = 0;
-							}
 						}
 					}
-					this->font_texture.setImage(level, i * glyph_size_x, j * glyph_size_y, glyph_size_x, glyph_size_y, GL::GL_RED, GL::GL_UNSIGNED_BYTE, glyph, 1);
+					this->font_texture.setImage(level, (GL::GLint)((float)i * glyph_size_x), (GL::GLint)((float)j * glyph_size_y), (GL::GLsizei)glyph_size_x, (GL::GLsizei)glyph_size_y, GL::GL_RED, GL::GL_UNSIGNED_BYTE, glyph, 1);
 				}
 			}
 			++glyph_index;
@@ -243,12 +267,6 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 		if(glyph_index >= num_glyphs) break;
 	}
 	delete[] glyph;
-	if(level == 0)
-	{
-		font_data->glyph_count = num_glyphs;
-		font_data->x_count = x_count;
-		font_data->y_count = y_count;
-	}
 	return true;
 }
 
