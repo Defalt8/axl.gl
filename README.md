@@ -7,14 +7,14 @@ A simple and multiplatform C++ game library.
 
 - **Latest version**: 0.26.51 alpha
 - **Supported platforms**: Windows
-It is possible to implement this library for linux systems using the X11 library, and for android using the EGL library.
-Other platforms will be implemented once the library is complete enough to be a game library.
+  - It is possible to implement this library for linux systems using the X11 library, and for android using the EGL library.
+  - Other platforms will be implemented once the library is complete enough to be a game library.
 
 ## Requirements and Dependencies
 
 - **Requires**
   - Visual Studio 2017 or higher.
-  - [CMake]("https://cmake.org/download"). *"An open-source, cross-platform family of tools designed to build, test and package software."*
+  - [CMake](https://cmake.org/download). *"An open-source, cross-platform family of tools designed to build, test and package software."*
   - *cmake*, *gcc* and *c++* executable directories must be added to the `PATH` environment variable.
 - **Depends on**
   - *{ `axl.glfl` } -- The C++ OpenGL function loader library.*
