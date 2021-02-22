@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.4 )
 
-project( axl.gl VERSION 0.26.51 DESCRIPTION "A simple and multiplatform C++ game library." )
+project( axl.gl VERSION 0.27.53 DESCRIPTION "A simple and multiplatform C++ game library." )
 
 if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
 	set( AXLGL_STANDALONE TRUE )
@@ -27,17 +27,17 @@ endif()
 set( THIRD_PARTY_INCLUDE_DIR "../../ThirdParty/include" )
 set( THIRD_PARTY_LIB_DIR "../../ThirdParty/lib" )
 
-set( AXLMATH_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.math" CACHE PATH "Path to axl.math library source." )
+set( AXLMATH_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../axl.math" CACHE PATH "Path to axl.math library source." )
 set( AXLMATH_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
 set( AXLMATH_RUNTIME_DIR "${AXLGL_RUNTIME_DIR}" )
 add_subdirectory( "${AXLMATH_SOURCE_DIR}" axl.math )
 
-set( AXLUTIL_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.util" CACHE PATH "Path to axl.util library source." )
+set( AXLUTIL_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../axl.util" CACHE PATH "Path to axl.util library source." )
 set( AXLUTIL_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
 set( AXLUTIL_RUNTIME_DIR "${AXLGL_RUNTIME_DIR}" )
 add_subdirectory( "${AXLUTIL_SOURCE_DIR}" axl.util )
 
-set( AXLGLFL_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.glfl" CACHE PATH "Path to axl.glfl library source." )
+set( AXLGLFL_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../axl.glfl" CACHE PATH "Path to axl.glfl library source." )
 set( AXLGLFL_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
 set( AXLGLFL_RUNTIME_DIR "${AXLGL_RUNTIME_DIR}" )
 add_subdirectory( "${AXLGLFL_SOURCE_DIR}" axl.glfl )

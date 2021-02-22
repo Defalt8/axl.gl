@@ -24,10 +24,12 @@ Text::Text(axl::gl::Context* ptr_context) :
 	text_rotation(0.0f, 0.0f, 0.0f),
 	text_transform(),
 	text_color(0.0f, 0.0f, 0.0f, 1.0f),
+	text_box(0.0f, 0.0f),
+	text_offset(0.0f, 0.0f),
+	text_spacing(0.0f, 0.0f),
 	text_wstring(),
 	text_font(),
-	text_orientation(Text::Orientation::TOR_HORIZONTAL),
-	text_alignment(Text::Alignment::TAL_LEFT|Text::Alignment::TAL_BOTTOM),
+	text_alignment(Text::Alignment::TAL_CENTER),
 	text_program(),
 	actual_text_length(0),
 	vertex_array_id(-1),
@@ -38,9 +40,11 @@ Text::Text(axl::gl::Context* ptr_context) :
 	uniform_location_projection_matrix(-1),
 	uniform_location_view_matrix(-1),
 	uniform_location_model_matrix(-1),
+	uniform_location_text_offset(-1),
 	uniform_location_text_color(-1)
 {
 	this->updateTransform();
+	this->updateAlignment();
 }
 Text::~Text()
 {
@@ -120,6 +124,7 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 			this->text_program->setUniformMat4fv(uniform_location_view_matrix, camera->view_transform.values);
 		}
 		this->text_program->setUniformMat4fv(uniform_location_model_matrix, this->text_transform.values);
+		this->text_program->setUniform2fv(uniform_location_text_offset, &this->text_offset.x);
 		this->text_program->setUniform4fv(uniform_location_text_color, &this->text_color.x);
 		if(!this->text_font->texture.bind() || !this->text_program->use())
 			return false;
@@ -151,6 +156,35 @@ void Text::updateBuffers()
 {
 	if(this->isValid()) this->updateBuffers(this->text_wstring, false, this->text_font ? this->text_font->size != this->rec_font_size : false);
 }
+void Text::updateAlignment()
+{
+	switch((this->text_alignment & 0x03))
+	{
+		default:
+		case HorizontalAlignment::TAL_LEFT:
+			this->text_offset.x = 0.0f;
+			break;
+		case HorizontalAlignment::TAL_RIGHT:
+			this->text_offset.x = -this->text_box.x;
+			break;
+		case HorizontalAlignment::TAL_HORIZONTAL_CENTER:
+			this->text_offset.x = -this->text_box.x / 2.0f;
+			break;
+	}
+	switch((this->text_alignment & 0x0C))
+	{
+		default:
+		case VerticalAlignment::TAL_TOP:
+			this->text_offset.y = 0.0f;
+			break;
+		case VerticalAlignment::TAL_BOTTOM:
+			this->text_offset.y = this->text_box.y;
+			break;
+		case VerticalAlignment::TAL_VERTICAL_CENTER:
+			this->text_offset.y = this->text_box.y / 2.0f;
+			break;
+	}
+}
 // set methods
 void Text::setPosition(const axl::math::Vec3f& p_position, bool update)
 {
@@ -170,6 +204,16 @@ void Text::setRotation(const axl::math::Vec3f& p_rotation, bool update)
 void Text::setColor(const axl::math::Vec4f& p_color)
 {
 	this->text_color = p_color;
+}
+bool Text::setSpacing(const axl::math::Vec2f& spacing)
+{
+	if(spacing.x >= 0.0f && spacing.y >= 0.0f)
+	{
+		this->text_spacing = spacing;
+		this->updateBuffers(this->text_wstring, false, true);
+		return true;
+	}
+	return false;
 }
 bool Text::setStorageSize(axl::util::size_t size)
 {
@@ -204,6 +248,7 @@ void Text::setProgram(const axl::gl::gfx::Program* text_shader_program)
 		this->uniform_location_projection_matrix = this->text_program->getUniformLocation("u_MatProjection");
 		this->uniform_location_view_matrix = this->text_program->getUniformLocation("u_MatView");
 		this->uniform_location_model_matrix = this->text_program->getUniformLocation("u_MatModel");
+		this->uniform_location_text_offset = this->text_program->getUniformLocation("u_TextOffset");
 		this->uniform_location_text_color = this->text_program->getUniformLocation("u_TextColor");
 	}
 	else
@@ -213,16 +258,24 @@ void Text::setProgram(const axl::gl::gfx::Program* text_shader_program)
 		this->uniform_location_projection_matrix = -1;
 		this->uniform_location_view_matrix = -1;
 		this->uniform_location_model_matrix = -1;
+		this->uniform_location_text_offset = -1;
 		this->uniform_location_text_color = -1;
 	}
-}
-void Text::setOrientation(Text::Orientation p_orientation)
-{
-	this->text_orientation = p_orientation;
 }
 void Text::setAlignment(AlignmentFlag p_alignment_flags)
 {
 	this->text_alignment = p_alignment_flags;
+	this->updateBuffers(this->text_wstring, false, true);
+}
+void Text::setHorizontalAlignment(HorizontalAlignment horizontal_alignment)
+{
+	this->text_alignment = (this->text_alignment & 0x0C) | horizontal_alignment;
+	this->updateBuffers(this->text_wstring, false, true);
+}
+void Text::setVerticalAlignment(VerticalAlignment vertical_alignment)
+{
+	this->text_alignment = (this->text_alignment & 0x03) | vertical_alignment;
+	this->updateBuffers(this->text_wstring, false, true);
 }
 // get methods
 const axl::math::Vec3f& Text::getPosition() const
@@ -245,6 +298,18 @@ const axl::math::Vec4f& Text::getColor() const
 {
 	return this->text_color;
 }
+const axl::math::Vec2f& Text::getOffset() const
+{
+	return this->text_offset;
+}
+const axl::math::Vec2f& Text::getBox() const
+{
+	return this->text_box;
+}
+const axl::math::Vec2f& Text::getSpacing() const
+{
+	return this->text_spacing;
+}
 const axl::util::WString& Text::getText() const
 {
 	return this->text_wstring;
@@ -257,34 +322,72 @@ const axl::gl::gfx::Program* Text::getProgram() const
 {
 	return this->text_program;
 }
-Text::Orientation Text::getOrientation() const
-{
-	return this->text_orientation;
-}
 Text::AlignmentFlag Text::getAlignment() const
 {
 	return this->text_alignment;
 }
-bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed, bool font_changed)
+Text::HorizontalAlignment Text::getHorizontalAlignment() const
+{
+	switch((this->text_alignment & 0x03))
+	{
+		default:
+		case HorizontalAlignment::TAL_HORIZONTAL_CENTER: return HorizontalAlignment::TAL_HORIZONTAL_CENTER;
+		case HorizontalAlignment::TAL_LEFT: return HorizontalAlignment::TAL_LEFT;
+		case HorizontalAlignment::TAL_RIGHT: return HorizontalAlignment::TAL_RIGHT;
+	}
+}
+Text::VerticalAlignment Text::getVerticalAlignment() const
+{
+	switch((this->text_alignment & 0x0C))
+	{
+		default:
+		case VerticalAlignment::TAL_VERTICAL_CENTER: return VerticalAlignment::TAL_VERTICAL_CENTER;
+		case VerticalAlignment::TAL_TOP: return VerticalAlignment::TAL_TOP;
+		case VerticalAlignment::TAL_BOTTOM: return VerticalAlignment::TAL_BOTTOM;
+	}
+}
+bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed, bool font_attribute_altered)
 {
 	using namespace GL;
 	if(!this->isValid()) return false;
 	const bool text_changed = &p_wstring != &this->text_wstring;
-	unsigned int text_length = this->text_wstring.length(), actual_length = 0;
-	for(unsigned int i = 0; i < text_length; ++i)
+	unsigned int text_length = this->text_wstring.length(), actual_length = 0, line_count = 0;
+	float max_line_width = 0.0f, max_line_height = 0.0f, line_width_accum = 0.0f;
+	axl::util::ds::Array<float, axl::util::ds::Allocators::Malloc<float>> line_widths((text_length) / 2 + 1);
+	for(unsigned int i = 0; i <= text_length; ++i)
 	{
-		switch(this->text_wstring[i])
+		axl::util::WString::char_t wchr = p_wstring[i];
+		switch(wchr)
 		{
 			case L'\n':
+			case L'\0':
+				{
+					if(line_count >= line_widths.count())
+						line_widths.resize(line_count + (text_length-i) / 2);
+					if(line_width_accum > max_line_width) max_line_width = line_width_accum;
+					line_widths[line_count] = line_width_accum;
+					line_width_accum = 0.0f;
+					++line_count;
+				}
 			case L'\r':
 			case L'\t':
-			case L'\0':
 				continue;
 			default:
+				{
+					unsigned int index = this->text_font->getCharIndex(wchr);
+					if(index != -1)
+					{
+						const axl::gl::gfx::Font::GlyphData& glyph = this->text_font->glyphs[index];
+						line_width_accum += ((float)glyph.horiAdvance + this->text_spacing.x);
+						if(glyph.height > max_line_height) max_line_height = glyph.height;
+					}
+				}
 				++actual_length;
 				continue;
 		}
 	}
+	this->text_box.set(((float)max_line_width - this->text_spacing.x), ((float)((line_count - 1) * (this->text_font->size.y + this->text_spacing.y)) - this->text_spacing.y));
+	this->updateAlignment();
 	this->actual_text_length = actual_length;
 	const unsigned int text_count = this->text_wstring.size() - 1;
 	const unsigned int vertex_count = 16 * text_count, indeces_count = 6 * text_count;
@@ -309,7 +412,7 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 		glVertexAttribPointer(this->attribute_location_position, 2, GL_FLOAT, GL_FALSE, stride, 0);
 		glVertexAttribPointer(this->attribute_location_UV, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(sizeof(GLfloat) * 2));
 	}
-	if((text_changed && text_length > 0) || font_changed)
+	if((text_changed && text_length > 0) || font_attribute_altered)
 	{
 		GLfloat* buffer = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 		GLuint* indeces = (GLuint*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
@@ -327,23 +430,20 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 		const GLfloat space_advance = (GLfloat)(space_glyph_index == -1 ? this->text_font->size.x : this->text_font->glyphs[space_glyph_index].horiAdvance);
 		const GLfloat tab_advance = space_advance * 4.0f;
 		unsigned int skipped_chars_count = 0;
-		for(unsigned int i = 0; i < text_length; ++i)
+		line_count = 0;
+		for(unsigned int i = 0; i <= text_length; ++i)
 		{
 			switch(this->text_wstring[i])
 			{
 				case L'\n':
-					if(this->text_orientation == TOR_HORIZONTAL)
-					{
-						horizontal_advance = 0;
-						vertical_advance -= this->text_font->size.y + 2;
-					}
+				case L'\0':
+					horizontal_advance = 0.0f;
+					vertical_advance -= this->text_font->size.y + this->text_spacing.y;
 					++skipped_chars_count;
+					++line_count;
 					continue;
 				case L'\r':
-					if(this->text_orientation == TOR_HORIZONTAL)
-					{
-						horizontal_advance = 0;
-					}
+					horizontal_advance = 0.0f;
 					++skipped_chars_count;
 					continue;
 				case L'\t':
@@ -355,10 +455,34 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 			const unsigned int base_vertex_index = i_actual * 16, base_indeces_index = i_actual * 6, vertex_indeces_index = i_actual * 4;
 			const unsigned int glyph_index = this->text_font->getCharIndex(this->text_wstring[i]);
 			const axl::gl::gfx::Font::GlyphData& glyph = this->text_font->glyphs[glyph_index];
-			const axl::math::Vec2f offset((float)(horizontal_advance + glyph.horiBearingX), (float)(vertical_advance + glyph.horiBearingY));
+			axl::math::Vec2f offset((float)(horizontal_advance + glyph.horiBearingX), (float)(vertical_advance + glyph.horiBearingY));
+			switch((this->text_alignment & 0x03))
+			{
+				default:
+				case HorizontalAlignment::TAL_LEFT:
+					break;
+				case HorizontalAlignment::TAL_RIGHT:
+					offset.x += (max_line_width - line_widths[line_count]);
+					break;
+				case HorizontalAlignment::TAL_HORIZONTAL_CENTER:
+					offset.x += (max_line_width - line_widths[line_count]) / 2.0f;
+					break;
+			}
+			switch((this->text_alignment & 0x0C))
+			{
+				default:
+				case VerticalAlignment::TAL_TOP:
+					break;
+				case VerticalAlignment::TAL_BOTTOM:
+					offset.y += (this->text_font->size.y * 1.25f);
+					break;
+				case VerticalAlignment::TAL_VERTICAL_CENTER:
+					offset.y += (this->text_font->size.y * 0.75f);
+					break;
+			}
 			const axl::math::Vec2f offsetted_size((float)(offset.x + glyph.width), (float)(offset.y + glyph.height));
 			const axl::math::Vec4f& UV = glyph.UV;
-			horizontal_advance += (GLfloat)glyph.horiAdvance;
+			horizontal_advance += (GLfloat)glyph.horiAdvance + this->text_spacing.x;
 
 			buffer[base_vertex_index] = offset.x;
 			buffer[base_vertex_index + 1] = offset.y;

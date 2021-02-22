@@ -5,9 +5,12 @@ layout(location = 1) in vec2 in_UV;
 uniform mat4 u_MatProjection = mat4(1);
 uniform mat4 u_MatView = mat4(1);
 uniform mat4 u_MatModel = mat4(1);
+uniform vec2 u_TextOffset = vec2(1);
 out vec2 TexCoord;
 
 void main() {
-	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.xy, 0.0, 1.0);
+	float depth = (in_Position.x * in_Position.y) / 9999999.0;
+	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.x + u_TextOffset.x, in_Position.y + u_TextOffset.y, 0.0, 1.0);
+	gl_Position.z -= depth;
 	TexCoord = in_UV;
 }

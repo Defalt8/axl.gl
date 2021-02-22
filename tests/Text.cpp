@@ -33,6 +33,7 @@ class GameView : public axl::gl::View
 		axl::util::uc::Time time, ctime;
 		axl::gl::projection::Orthographicf projection;
 		axl::gl::input::Key key_Control, key_Shift, key_Alt, key_F2, key_F3, key_F4, key_F5, key_Space;
+		axl::gl::input::Key key_Left, key_Right, key_Down, key_Up;
 		bool is_animating;
 		int size_delta;
 	public:
@@ -52,7 +53,11 @@ class GameView : public axl::gl::View
 			key_F3(axl::gl::input::KeyCode::KEY_F3),
 			key_F4(axl::gl::input::KeyCode::KEY_F4),
 			key_F5(axl::gl::input::KeyCode::KEY_F5),
-			key_Space(axl::gl::input::KeyCode::KEY_SPACE)
+			key_Space(axl::gl::input::KeyCode::KEY_SPACE),
+			key_Left(axl::gl::input::KeyCode::KEY_LEFT),
+			key_Right(axl::gl::input::KeyCode::KEY_RIGHT),
+			key_Down(axl::gl::input::KeyCode::KEY_DOWN),
+			key_Up(axl::gl::input::KeyCode::KEY_UP)
 		{}
 
 		~GameView()
@@ -145,11 +150,11 @@ class GameView : public axl::gl::View
 			GL::loadVFShaders(this->text_program, "tests/shaders/330/text_vuPVMs.vert", "tests/shaders/330/text_vuPVMs.frag");
 			if(this->font.create())
 			{
-				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(14,14)));
+				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(16,16)));
 			}
 			if(this->font1.create())
 			{
-				Assert(this->font1.loadFromFile("/Windows/Fonts/impact.ttf", axl::math::Vec2i(14,14)));
+				Assert(this->font1.loadFromFile("../../common/fonts/Roboto-Italic.ttf", axl::math::Vec2i(16,16)));
 			}
 			if(this->font2.create())
 			{
@@ -157,12 +162,49 @@ class GameView : public axl::gl::View
 			}
 			if(this->text.create())
 			{
-				this->text.setText(axl::util::File::getWStringContent("tests/sample_text.txt"));
+				this->text.setAlignment(axl::gl::gfx::Text::Alignment::TAL_TOP_LEFT);
+				this->text.setSpacing(axl::math::Vec2f(1.0f, 1.0f));
+				// this->text.setText(axl::util::File::getWStringContent("tests/sample_text.txt"));
+				this->text.setText(L"To be, or not to be, that is the question:\n"
+					"Whether 'tis nobler in the mind to suffer\n"
+					"The slings and arrows of outrageous fortune,\n"
+					"Or to take arms against a sea of troubles\n"
+					"And by opposing end them. To die-to sleep,\n"
+					"No more; and by a sleep to say we end\n"
+					"The heart-ache and the thousand natural shocks\n"
+					"That flesh is heir to: 'tis a consummation\n"
+					"Devoutly to be wish'd. To die, to sleep;\n"
+					"To sleep, perchance to dream-ay, there's the rub:\n"
+					"For in that sleep of death what dreams may come,\n"
+					"When we have shuffled off this mortal coil,\n"
+					"Must give us pause-there's the respect\n"
+					"That makes calamity of so long life.\n"
+					"For who would bear the whips and scorns of time,\n"
+					"Th'oppressor's wrong, the proud man's contumely,\n"
+					"The pangs of dispriz'd love, the law's delay,\n"
+					"The insolence of office, and the spurns\n"
+					"That patient merit of th'unworthy takes,\n"
+					"When he himself might his quietus make\n"
+					"With a bare bodkin? Who would fardels bear,\n"
+					"To grunt and sweat under a weary life,\n"
+					"But that the dread of something after death,\n"
+					"The undiscovere'd country, from whose bourn\n"
+					"No traveller returns, puzzles the will,\n"
+					"And makes us rather bear those ills we have\n"
+					"Than fly to others that we know not of?\n"
+					"Thus conscience doth make cowards of us all,\n"
+					"And thus the native hue of resolution\n"
+					"Is sicklied o'er with the pale cast of thought,\n"
+					"And enterprises of great pith and moment\n"
+					"With this regard their currents turn awry\n"
+					"And lose the name of action."
+					);
 				this->text.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
 				this->text.setColor(axl::math::Vec4f(0.2f,0.79f,0.5f,1.0f));
 			}
 			if(this->status_text.create())
 			{
+				this->status_text.setAlignment(axl::gl::gfx::Text::Alignment::TAL_TOP_RIGHT);
 				Assert(this->status_text.setStorageSize(128));
 				Assert(this->status_text.setText(L"{TODO:status}"));
 				this->status_text.setColor(axl::math::Vec4f(0.9f,0.1f,0.9f,0.9f));
@@ -184,13 +226,12 @@ class GameView : public axl::gl::View
 			{
 				GL::glViewport(0, 0, width, height);
 				this->camera.viewport_size.set(width, height);
-				float aspect_ratio = (float)this->camera.viewport_size.x / this->camera.viewport_size.y;
 				if(this->camera.projection->type == axl::gl::projection::Projectionf::Type::PT_ORTHOGRAPHIC)
 				{
-					((axl::gl::projection::Orthographicf*)this->camera.projection)->set(0.0f, (float)width, 0.0f, (float)height, 0.01f, 1000.0f);
+					((axl::gl::projection::Orthographicf*)this->camera.projection)->set(0.0f, (float)this->camera.viewport_size.x, 0.0f, (float)this->camera.viewport_size.y, 0.01f, 1000.0f);
 				}
 				this->camera.projection->updateTransform();
-				this->status_text.setPosition(axl::math::Vec3f((float)this->camera.viewport_size.x - 160.0f, (float)this->camera.viewport_size.y - 20.0f, 0.0f));
+				this->status_text.setPosition(axl::math::Vec3f((float)this->camera.viewport_size.x - 10.0f, (float)this->camera.viewport_size.y - 10.0f, 0.0f));
 			}
 			this->update();
 			this->render();
@@ -221,6 +262,77 @@ class GameView : public axl::gl::View
 				this->text.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
 				this->text.setScale(axl::math::Vec3f::filled(1.0f));
 				this->text.setRotation(axl::math::Vec3f::filled(0.0f));
+			}
+			bool bp_left = key_Left.isPressed(), bp_right = key_Right.isPressed();
+			bool bp_up = key_Up.isPressed(), bp_down = key_Down.isPressed();
+			if(bk_shift && !bk_alt && !bk_control)
+			{
+				if(bp_left ^ bp_right)
+				{
+					if(bp_left)
+					{
+						switch(this->text.getHorizontalAlignment())
+						{
+							case axl::gl::gfx::Text::TAL_LEFT:
+								this->text.setHorizontalAlignment(axl::gl::gfx::Text::TAL_RIGHT);
+								break;
+							case axl::gl::gfx::Text::TAL_RIGHT:
+								this->text.setHorizontalAlignment(axl::gl::gfx::Text::TAL_HORIZONTAL_CENTER);
+								break;
+							case axl::gl::gfx::Text::TAL_HORIZONTAL_CENTER:
+								this->text.setHorizontalAlignment(axl::gl::gfx::Text::TAL_LEFT);
+								break;
+						}
+					}
+					else if(bp_right)
+					{
+						switch(this->text.getHorizontalAlignment())
+						{
+							case axl::gl::gfx::Text::TAL_LEFT:
+								this->text.setHorizontalAlignment(axl::gl::gfx::Text::TAL_HORIZONTAL_CENTER);
+								break;
+							case axl::gl::gfx::Text::TAL_RIGHT:
+								this->text.setHorizontalAlignment(axl::gl::gfx::Text::TAL_LEFT);
+								break;
+							case axl::gl::gfx::Text::TAL_HORIZONTAL_CENTER:
+								this->text.setHorizontalAlignment(axl::gl::gfx::Text::TAL_RIGHT);
+								break;
+						}
+					}
+				}
+				if(bp_up ^ bp_down)
+				{
+					if(bp_up)
+					{
+						switch(this->text.getVerticalAlignment())
+						{
+							case axl::gl::gfx::Text::TAL_TOP:
+								this->text.setVerticalAlignment(axl::gl::gfx::Text::TAL_BOTTOM);
+								break;
+							case axl::gl::gfx::Text::TAL_BOTTOM:
+								this->text.setVerticalAlignment(axl::gl::gfx::Text::TAL_VERTICAL_CENTER);
+								break;
+							case axl::gl::gfx::Text::TAL_VERTICAL_CENTER:
+								this->text.setVerticalAlignment(axl::gl::gfx::Text::TAL_TOP);
+								break;
+						}
+					}
+					else if(bp_down)
+					{
+						switch(this->text.getVerticalAlignment())
+						{
+							case axl::gl::gfx::Text::TAL_TOP:
+								this->text.setVerticalAlignment(axl::gl::gfx::Text::TAL_VERTICAL_CENTER);
+								break;
+							case axl::gl::gfx::Text::TAL_BOTTOM:
+								this->text.setVerticalAlignment(axl::gl::gfx::Text::TAL_TOP);
+								break;
+							case axl::gl::gfx::Text::TAL_VERTICAL_CENTER:
+								this->text.setVerticalAlignment(axl::gl::gfx::Text::TAL_BOTTOM);
+								break;
+						}
+					}
+				}
 			}
 			if(down)
 			{
@@ -381,17 +493,51 @@ int main(int argc, char* argv[])
 				if(frame_clock.checkAndSet(false)) // no first time
 				{
 					float fps = rendered_frames / frame_time.deltaTimef();
-					static axl::util::WString fps_string(512);
+					static axl::util::WString fps_string(1024);
 					const axl::gl::gfx::Font *current_font = view.text.getFont();
 					axl::math::Vec2i font_size = current_font ? current_font->size : axl::math::Vec2i(0,0);
 					axl::math::Vec3f text_scale = view.text.getScale();
 					axl::math::Vec2i texture_size = current_font ? current_font->texture.getSize() : axl::math::Vec2i(0,0);
 					unsigned int glyph_count = current_font ? current_font->glyphs.count() : 0;
-					fps_string.format(L"FPS: %.1f\nFontSize: %d,%d\nTextScale: %.1f,%.1f,%.1f\nTextureSize: %d,%d\nTextLength: %u\nGlyphCount:%u", 
-						fps, font_size.x, font_size.y, 
+					const wchar_t *halignment_str = L"-", *valignment_str = L"-";
+					switch(view.text.getHorizontalAlignment())
+					{
+						case axl::gl::gfx::Text::TAL_LEFT:
+							halignment_str = L"Left";
+							break;
+						case axl::gl::gfx::Text::TAL_RIGHT:
+							halignment_str = L"Right";
+							break;
+						case axl::gl::gfx::Text::TAL_HORIZONTAL_CENTER:
+							halignment_str = L"Center";
+							break;
+					}
+					switch(view.text.getVerticalAlignment())
+					{
+						case axl::gl::gfx::Text::TAL_TOP:
+							valignment_str = L"Top";
+							break;
+						case axl::gl::gfx::Text::TAL_BOTTOM:
+							valignment_str = L"Bottom";
+							break;
+						case axl::gl::gfx::Text::TAL_VERTICAL_CENTER:
+							valignment_str = L"Center";
+							break;
+					}
+					fps_string.format(L"FPS: %.1f\n"
+						"GlyphCount:%u\n"
+						"FontSize: %d,%d\n"
+						"TextScale: %.1f,%.1f,%.1f\n"
+						"TextureSize: %d,%d\n"
+						"TextLength: %u\n"
+						"Horizontal-Alignment:%s\n"
+						"Vertical-Alignment:%s", 
+						fps, glyph_count,
+						font_size.x, font_size.y, 
 						text_scale.x, text_scale.y, text_scale.z,
 						texture_size.x, texture_size.y, 
-						view.text.getText().length(), glyph_count
+						view.text.getText().length(),
+						halignment_str, valignment_str
 					);
 					view.status_text.setText(fps_string);
 					frame_time.set();

@@ -24,9 +24,7 @@ class AXLGLCXXAPI Font : public ContextObject
 		struct GlyphData {
 			short width, height;
 			short horiBearingX, horiBearingY;
-			short vertBearingX, vertBearingY;
 			short horiAdvance;
-			short vertAdvance;
 			axl::math::Vec4f UV;
 		};
 	public:

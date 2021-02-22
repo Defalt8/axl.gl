@@ -225,10 +225,7 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 					this->font_glyphs[glyph_index].height = (short)(font_data->face->glyph->metrics.height / 64);
 					this->font_glyphs[glyph_index].horiBearingX = (short)(font_data->face->glyph->metrics.horiBearingX / 64);
 					this->font_glyphs[glyph_index].horiBearingY = (short)((font_data->face->glyph->metrics.horiBearingY - font_data->face->glyph->metrics.height) / 64);
-					this->font_glyphs[glyph_index].vertBearingX = (short)(font_data->face->glyph->metrics.vertBearingX / 64);
-					this->font_glyphs[glyph_index].vertBearingY = (short)((font_data->face->glyph->metrics.vertBearingY - font_data->face->glyph->metrics.height) / 64);
 					this->font_glyphs[glyph_index].horiAdvance = (short)(font_data->face->glyph->metrics.horiAdvance / 64);
-					this->font_glyphs[glyph_index].vertAdvance = (short)(font_data->face->glyph->metrics.vertAdvance / 64);
 					this->font_glyphs[glyph_index].UV.x = ((float)(glyph_index % x_count) * glyph_size_x / atlas_width);
 					this->font_glyphs[glyph_index].UV.y = ((float)(glyph_index / x_count) * glyph_size_y / atlas_height);
 					this->font_glyphs[glyph_index].UV.z = this->font_glyphs[glyph_index].UV.x + ((float)this->font_glyphs[glyph_index].width / atlas_width);

@@ -210,7 +210,8 @@ class GameView : public axl::gl::View
 			axl::math::Vec4f char_uv;
 			if(this->font.create())
 			{
-				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(64,64)));
+				// Assert(this->font.loadFromFile("C:/Users/Defalt8/Desktop/workspace/git/axl.gl.samples/assets/fonts/facon.ttf", axl::math::Vec2i(64,64)));
+				Assert(this->font.loadFromFile("/Windows/Fonts/Arial.ttf", axl::math::Vec2i(64,64)));
 				char_uv.set(0.0, 0.0, 1.0, 1.0);
 			}
 			if(this->main_context.makeCurrent())
@@ -503,7 +504,7 @@ int main(int argc, char* argv[])
 	bool verbose = argc > 1 && (0 == strcmp(argv[1], "-v") || 0 == strcmp(argv[1], "--verbose"));
 	using namespace axl::gl;
 	using namespace axl::gl::lib;
-	printf(">> axl.gl Text test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
+	printf(">> axl.gl Font test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
 	puts("----------------------------------------");
 	{
 		Assertve(axl::glfl::core::load(), verbose);
@@ -514,7 +515,7 @@ int main(int argc, char* argv[])
 		axl::math::Vec2i size(800, 600);
 		axl::math::Vec2i position = (display.size - size) / 2;
 
-		GameView view(L"axl.gl.Text", position, size);
+		GameView view(L"axl.gl.Font", position, size);
 		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(GameView::Config), GameView::VF_RESIZABLE), verbose);
 		Assertv(view.isValid(), verbose);
 		printf(".. View.Config %d selected.\n", view.config.id);
