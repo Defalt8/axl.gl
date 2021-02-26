@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.4 )
 
-project( axl.gl VERSION 0.27.53 DESCRIPTION "A simple and multiplatform C++ game library." )
+project( axl.gl VERSION 0.32.64 DESCRIPTION "A simple and multiplatform C++ game library." )
 
 if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
 	set( AXLGL_STANDALONE TRUE )
@@ -18,7 +18,7 @@ set( AXLGL_INSTALL_ARCHIVES ${AXLGL_STANDALONE} CACHE BOOL "" )
 set( AXLGL_INSTALL_RUNTIMES ${AXLGL_STANDALONE} CACHE BOOL "" )
 set( BUILD_TESTS FALSE CACHE BOOL "" )
 set( BUILD_SHARED_LIBS OFF CACHE BOOL "" )
-#set( BUILD_SHARED_LIBS ON )
+# set( BUILD_SHARED_LIBS ON )
 
 if( BUILD_SHARED_LIBS )
 	set( AXLGL_TYPE SHARED )

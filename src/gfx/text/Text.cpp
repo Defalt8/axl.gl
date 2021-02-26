@@ -54,7 +54,7 @@ bool Text::icreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->text_font || !this->text_program || 
-	   !this->text_font->isValid() || !this->text_program->isValid() || !this->ctx_context->isValid() || !this->ctx_context->makeCurrent()
+	  !this->text_font->isValid() || !this->text_program->isValid() || !this->ctx_context->isValid() || !this->ctx_context->makeCurrent()
 	)
 		return false;
 	GLCLEARERROR();
@@ -119,6 +119,7 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 	{
 		if(camera)
 		{
+			// if(!camera->makeCurrent(this->ctx_context, false)) return false;
 			if(camera->projection)
 				this->text_program->setUniformMat4fv(uniform_location_projection_matrix, camera->projection->matrix.values);
 			this->text_program->setUniformMat4fv(uniform_location_view_matrix, camera->view_transform.values);
@@ -377,7 +378,7 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 					unsigned int index = this->text_font->getCharIndex(wchr);
 					if(index != -1)
 					{
-						const axl::gl::gfx::Font::GlyphData& glyph = this->text_font->glyphs[index];
+						const axl::gl::gfx::GlyphData& glyph = this->text_font->glyphs[index];
 						line_width_accum += ((float)glyph.horiAdvance + this->text_spacing.x);
 						if(glyph.height > max_line_height) max_line_height = glyph.height;
 					}
@@ -454,7 +455,7 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 			const unsigned int i_actual = i - skipped_chars_count;
 			const unsigned int base_vertex_index = i_actual * 16, base_indeces_index = i_actual * 6, vertex_indeces_index = i_actual * 4;
 			const unsigned int glyph_index = this->text_font->getCharIndex(this->text_wstring[i]);
-			const axl::gl::gfx::Font::GlyphData& glyph = this->text_font->glyphs[glyph_index];
+			const axl::gl::gfx::GlyphData& glyph = this->text_font->glyphs[glyph_index];
 			axl::math::Vec2f offset((float)(horizontal_advance + glyph.horiBearingX), (float)(vertical_advance + glyph.horiBearingY));
 			switch((this->text_alignment & 0x03))
 			{

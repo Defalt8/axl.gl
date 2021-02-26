@@ -10,6 +10,49 @@ namespace gl {
 
 class AXLGLCXXAPI Context;
 
+template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::Context*>;
+template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::Context*>::Iterator;
+
+class AXLGLCXXAPI ViewConfig;
+// The default View configuration to be set at the creation of a new ViewConfig by default.
+// You can modify it to your liking before creating configurations. 
+AXLGLAPI ViewConfig DefaultViewConfig;
+// A Null value representaion of the ViewConfig class.
+AXLGLAPI const ViewConfig NullViewConfig;
+
+
+/**
+ * OpenGL view pixel-format configuration info.
+ */
+class AXLGLCXXAPI ViewConfig
+{
+	public:
+		enum PixelType { PT_RGB, PT_RGBA, PT_RGBA_FLOAT, PT_COLORINDEX };
+	public:
+		ViewConfig(long id, PixelType pixel_type, char bits_color, char bits_red, char bits_green, char bits_blue, char bits_alpha, char bits_depth, char bits_stencil, char samples, bool double_buffered, bool stereo);
+		ViewConfig(const ViewConfig& config = DefaultViewConfig);
+		bool operator==(const ViewConfig& config) const;
+		bool operator!=(const ViewConfig& config) const;
+	public:
+		long id;
+		PixelType pixel_type;
+		char bits_color;
+		char bits_red;
+		char bits_green;
+		char bits_blue;
+		char bits_alpha;
+		char bits_depth;
+		char bits_stencil;
+		char samples;
+		bool double_buffered; 
+		bool stereo;
+};
+
+// View cursor type. Implementation varies through platforms.
+enum class Cursor { CUR_NONE, CUR_CUSTOM, CUR_ARROW, CUR_HAND, CUR_CROSS, CUR_WAIT, CUR_HELP, CUR_IBEAM, CUR_NO };
+
+AXLGLAPI Cursor DefaultCursor;
+
 /**
  * A window in Desktop platforms and NativeActivity in Android platforms.
  * Is responsible for creating and initializing a View with an OpenGL context.
@@ -27,46 +70,12 @@ class AXLGLCXXAPI View
 		enum VisiblityState { VS_SHOWN, VS_HIDDEN, VS_FULLSCREEN };
 		// View show modes.
 		enum ShowMode { SM_SHOW, SM_HIDE, SM_FULLSCREEN };
-		// View cursor type. Implementation varies through platforms.
-		enum Cursor { CUR_NONE, CUR_CUSTOM, CUR_ARROW, CUR_HAND, CUR_CROSS, CUR_WAIT, CUR_HELP, CUR_IBEAM, CUR_NO };
-		/**
-		 * OpenGL view pixel-format configuration info.
-		 */
-		class AXLGLCXXAPI Config
-		{
-			public:
-				enum PixelType { PT_RGB, PT_RGBA, PT_RGBA_FLOAT, PT_COLORINDEX };
-			public:
-				Config(long id, PixelType pixel_type, char bits_color, char bits_red, char bits_green, char bits_blue, char bits_alpha, char bits_depth, char bits_stencil, char samples, bool double_buffered, bool stereo);
-				Config(const Config& config = Default);
-				bool operator==(const Config& config) const;
-				bool operator!=(const Config& config) const;
-			public:
-				long id;
-				PixelType pixel_type;
-				char bits_color;
-				char bits_red;
-				char bits_green;
-				char bits_blue;
-				char bits_alpha;
-				char bits_depth;
-				char bits_stencil;
-				char samples;
-				bool double_buffered; 
-				bool stereo;
-			public:
-				// The default View configuration to be set at the creation of a new Config by default.
-				// You can modify it to your liking before creating configurations. 
-				static Config Default;
-				// A Null value representaion of the Config class.
-				static const Config Null;
-		};
 	public:
-		View(const axl::util::WString& title, const axl::math::Vec2i& position, const axl::math::Vec2i& size, const Cursor& cursor = View::DefaultCursor);
+		View(const axl::util::WString& title, const axl::math::Vec2i& position, const axl::math::Vec2i& size, const Cursor& cursor = DefaultCursor);
 		virtual ~View();
 		bool isValid() const;
-		//virtual bool create(bool recreate = false, const Config* configs = (const Config*)0, int configs_count = 0, Flags flags = VF_FIXED);
-		virtual bool create(Display& display, bool recreate = false, const Config* configs = (const Config*)0, int configs_count = 0, Flags flags = VF_FIXED);
+		//virtual bool create(bool recreate = false, const ViewConfig* configs = (const ViewConfig*)0, int configs_count = 0, Flags flags = VF_FIXED);
+		virtual bool create(Display& display, bool recreate = false, const ViewConfig* configs = (const ViewConfig*)0, int configs_count = 0, Flags flags = VF_FIXED);
 		virtual void destroy();
 		const void* getReserved() const;
 		static void cleanup();
@@ -82,6 +91,7 @@ class AXLGLCXXAPI View
 		virtual bool show(ShowMode show_mode = SM_SHOW);
 		virtual bool setCursorPosition(const axl::math::Vec2i& cursor_position);
 		virtual bool swap() const;
+		const axl::util::ds::UniList<axl::gl::Context*>& getContexts() const;
 	protected:
 		bool addContext(Context* view);
 		bool removeContext(Context* view);
@@ -104,27 +114,24 @@ class AXLGLCXXAPI View
 		const axl::math::Vec2i& position;
 		const axl::math::Vec2i& size;
 		const axl::util::WString& title;
-		const View::Config& config;
+		const View::ViewConfig& config;
 		const View::Cursor& cursor;
 		const VisiblityState& visiblity;
 		const bool& is_paused;
 		const bool*const pointers;
-		const axl::util::ds::UniList<axl::gl::Context*>& contexts;
 		void *const& reserved;
 	private:
 		Display* m_display;
 		axl::math::Vec2i m_position;
 		axl::math::Vec2i m_size;
 		axl::util::WString m_title;
-		View::Config m_config;
+		View::ViewConfig m_config;
 		View::Cursor m_cursor;
 		VisiblityState m_visiblity;
 		bool m_is_paused;
 		bool m_pointers[MAX_POINTERS];
 		axl::util::ds::UniList<axl::gl::Context*> m_contexts;
 		void *m_reserved;
-	public:
-		static View::Cursor DefaultCursor;
 	private:
 		View(const View& view);
 		View& operator=(const View& view);

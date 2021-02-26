@@ -19,8 +19,8 @@ namespace camera {
 // Camera3D
 //
 
-axl::gl::projection::Projection Camera3D::DefaultProjection = axl::gl::projection::Projection();
-axl::math::Rules::Axis Camera3D::DefaultAxisRule = axl::math::Rules::Axis::AXIS_RHS;
+axl::gl::projection::Projection DefaultCamera3DProjection = axl::gl::projection::Projection();
+axl::math::Rules::Axis DefaultCamera3DAxisRule = axl::math::Rules::Axis::AXIS_RHS;
 
 Camera3D::Camera3D(const axl::math::Vec3d& p_position,
 				const axl::math::Vec3d& p_target,
@@ -97,7 +97,8 @@ void Camera3D::set(const axl::math::Vec3d& p_position, const axl::math::Vec3d& p
 // Camera3Df
 //
 
-axl::gl::projection::Projectionf Camera3Df::DefaultProjection = axl::gl::projection::Projectionf();
+axl::gl::projection::Projectionf DefaultCamera3DfProjection = axl::gl::projection::Projectionf();
+axl::math::Rules::Axis DefaultCamera3DfAxisRule = axl::math::Rules::Axis::AXIS_RHS;
 
 Camera3Df::Camera3Df(const axl::math::Vec3f& p_position,
 				const axl::math::Vec3f& p_target,

@@ -1,8 +1,9 @@
 #pragma once
 #include "../../lib.hpp"
 #include "../../ContextObject.hpp"
-#include "RenderBuffer.hpp"
 #include "../texture/Texture2D.hpp"
+#include "RenderBuffer.hpp"
+#include <axl.util/ds/List.hpp>
 #include <axl.glfl/gl.hpp>
 
 namespace axl {
@@ -14,21 +15,24 @@ namespace gfx {
 
 class AXLGLCXXAPI RenderBuffer;
 
+struct AXLGLCXXAPI FrameBufferBinding
+{
+	AXLGL_ENUM_CLASS Type { BT_TEXTURE, BT_RENDER_BUFFER } type;
+	union Pointer
+	{
+		Texture* texture;
+		RenderBuffer* render_buffer;
+	} pointer;
+	axl::glfl::GLenum attachment_target;
+	FrameBufferBinding();
+	FrameBufferBinding(Type type, axl::glfl::GLenum attachment_target, void* ptr);
+	bool operator==(const FrameBufferBinding& binding) const;
+};
+
+template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::gfx::FrameBufferBinding>;
+
 class AXLGLCXXAPI FrameBuffer : public ContextObject
 {
-		struct Binding
-		{
-			AXLGL_ENUM_CLASS Type { BT_TEXTURE, BT_RENDER_BUFFER } type;
-			union Pointer
-			{
-				Texture* texture;
-				RenderBuffer* render_buffer;
-			} pointer;
-			axl::glfl::GLenum attachment_target;
-			Binding();
-			Binding(Type type, axl::glfl::GLenum attachment_target, void* ptr);
-			bool operator==(const Binding& binding) const;
-		};
 	public:
 		AXLGL_ENUM_CLASS Target { FBT_BOTH = 0, FBT_READ, FBT_DRAW };
 	public:
@@ -46,7 +50,7 @@ class AXLGLCXXAPI FrameBuffer : public ContextObject
 		bool blit(const FrameBuffer* draw_framebuffer, axl::glfl::GLint srcX0, axl::glfl::GLint srcY0, axl::glfl::GLint srcX1, axl::glfl::GLint srcY1, axl::glfl::GLint dstX0, axl::glfl::GLint dstY0, axl::glfl::GLint dstX1, axl::glfl::GLint dstY1, axl::glfl::GLbitfield mask, axl::glfl::GLenum filter) const;
 	protected:
 		axl::glfl::GLuint fb_id;
-		axl::util::ds::UniList<Binding> fb_bindings;
+		axl::util::ds::UniList<FrameBufferBinding> fb_bindings;
 		friend class AXLGLCXXAPI RenderBuffer;
 };
 

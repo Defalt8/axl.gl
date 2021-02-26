@@ -17,12 +17,12 @@ namespace axl {
 namespace gl {
 namespace gfx {
 
-FrameBuffer::Binding::Binding() :
+FrameBufferBinding::FrameBufferBinding() :
 	type(),
 	pointer()
 {}
 
-FrameBuffer::Binding::Binding(FrameBuffer::Binding::Type p_type, axl::glfl::GLenum p_attachment_target, void* p_ptr) :
+FrameBufferBinding::FrameBufferBinding(FrameBufferBinding::Type p_type, axl::glfl::GLenum p_attachment_target, void* p_ptr) :
 	type(p_type),
 	attachment_target(p_attachment_target),
 	pointer()
@@ -35,7 +35,7 @@ FrameBuffer::Binding::Binding(FrameBuffer::Binding::Type p_type, axl::glfl::GLen
 	}
 }
 
-bool FrameBuffer::Binding::operator==(const FrameBuffer::Binding& binding) const
+bool FrameBufferBinding::operator==(const FrameBufferBinding& binding) const
 {
 	if(this->type != binding.type || this->attachment_target != binding.attachment_target) return false;
 	switch(this->type)
@@ -80,7 +80,7 @@ bool FrameBuffer::idestroy()
 	{
 		while(!this->fb_bindings.isEmpty())
 		{
-			Binding binding = this->fb_bindings.removeFirst();
+			FrameBufferBinding binding = this->fb_bindings.removeFirst();
 			glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, binding.attachment_target, GL_RENDERBUFFER, 0);
 			glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, binding.attachment_target, GL_RENDERBUFFER, 0);
 		}
@@ -148,7 +148,7 @@ bool FrameBuffer::attachRenderBuffer(axl::glfl::GLenum attachment_target, Render
 		glFramebufferRenderbuffer(fb_target, attachment_target, GL_RENDERBUFFER, render_buffer_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	if(glGetError() != GL_NO_ERROR) return false;
-	this->fb_bindings.insertLast(Binding(Binding::Type::BT_RENDER_BUFFER, attachment_target, render_buffer));
+	this->fb_bindings.insertLast(FrameBufferBinding(FrameBufferBinding::Type::BT_RENDER_BUFFER, attachment_target, render_buffer));
 	return true;
 }
 bool FrameBuffer::attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D* texture, Target p_target)
@@ -157,7 +157,8 @@ bool FrameBuffer::attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D
 	if(!this->bind(Target::FBT_BOTH)) return false;
 	axl::glfl::GLuint texture_id = texture && texture->isValid() ? texture->getId() : 0;
 	axl::glfl::GLenum fb_target = p_target == Target::FBT_READ ? GL_READ_FRAMEBUFFER : (p_target == Target::FBT_DRAW ? GL_DRAW_FRAMEBUFFER : GL_FRAMEBUFFER);
-	GLCLEARERROR();if(p_target == Target::FBT_BOTH)
+	GLCLEARERROR();
+	if(p_target == Target::FBT_BOTH)
 	{
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, attachment_target, GL_TEXTURE_2D, texture_id, 0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment_target, GL_TEXTURE_2D, texture_id, 0);
@@ -166,7 +167,7 @@ bool FrameBuffer::attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D
 		glFramebufferTexture2D(fb_target, attachment_target, GL_TEXTURE_2D, texture_id, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	if(glGetError() != GL_NO_ERROR) return false;
-	this->fb_bindings.insertLast(Binding(Binding::Type::BT_TEXTURE, attachment_target, texture));
+	this->fb_bindings.insertLast(FrameBufferBinding(FrameBufferBinding::Type::BT_TEXTURE, attachment_target, texture));
 	return true;
 }
 bool FrameBuffer::blit(const FrameBuffer* draw_framebuffer, axl::glfl::GLint srcX0, axl::glfl::GLint srcY0, axl::glfl::GLint srcX1, axl::glfl::GLint srcY1, axl::glfl::GLint dstX0, axl::glfl::GLint dstY0, axl::glfl::GLint dstX1, axl::glfl::GLint dstY1, axl::glfl::GLbitfield mask, axl::glfl::GLenum filter) const

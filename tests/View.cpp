@@ -19,14 +19,14 @@ class GameView : public axl::gl::View
 		axl::gl::Context main_context;
 		axl::math::Vec3d position;
 	private:
-		Cursor NormalCursor;
+		axl::gl::Cursor NormalCursor;
 		axl::util::uc::Time time, ctime;
 		axl::gl::input::Key key_F1, key_F2;
 	public:
-		GameView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const Cursor& _cursor = View::DefaultCursor) :
+		GameView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const axl::gl::Cursor& _cursor = axl::gl::DefaultCursor) :
 			axl::gl::View(_title, _position, _size, _cursor),
 			main_context(),
-			NormalCursor(CUR_CROSS),
+			NormalCursor(axl::gl::Cursor::CUR_CROSS),
 			key_F1(axl::gl::input::KeyCode::KEY_F1),
 			key_F2(axl::gl::input::KeyCode::KEY_F2)
 		{}
@@ -112,13 +112,13 @@ class GameView : public axl::gl::View
 
 		bool onCreate(bool recreating)
 		{
-			axl::gl::Context::Config context_configs[] = {
-				axl::gl::Context::Config(1, 3, 3, axl::gl::Context::Config::GLP_COMPATIBLITY),
-				axl::gl::Context::Config(1, 4, 6, axl::gl::Context::Config::GLP_CORE),
-				axl::gl::Context::Config(2, 3, 3, axl::gl::Context::Config::GLP_CORE),
-				axl::gl::Context::Config(3, 2, 1, axl::gl::Context::Config::GLP_COMPATIBLITY)
+			axl::gl::ContextConfig context_configs[] = {
+				axl::gl::ContextConfig(1, 3, 3, axl::gl::ContextConfig::GLP_COMPATIBLITY),
+				axl::gl::ContextConfig(1, 4, 6, axl::gl::ContextConfig::GLP_CORE),
+				axl::gl::ContextConfig(2, 3, 3, axl::gl::ContextConfig::GLP_CORE),
+				axl::gl::ContextConfig(3, 2, 1, axl::gl::ContextConfig::GLP_COMPATIBLITY)
 			};
-			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
+			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::ContextConfig))) return false;
 			this->init();
 			// Create stuff here
 			
@@ -179,7 +179,7 @@ class GameView : public axl::gl::View
 			}
 			if(key_F2.isPressed())
 			{
-				this->setCursor(this->cursor == CUR_NONE ? NormalCursor : CUR_NONE);
+				this->setCursor(this->cursor == axl::gl::Cursor::CUR_NONE ? NormalCursor : axl::gl::Cursor::CUR_NONE);
 			}
 			switch (key)
 			{
@@ -196,16 +196,16 @@ class GameView : public axl::gl::View
 /*****
  * 
  *****/
-const GameView::Config view_configs[] = {
-	GameView::Config(1, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 16, true, false),
-	GameView::Config(2, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 8, true, false),
-	GameView::Config(3, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 4, true, false),
-	GameView::Config(4, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 2, true, false),
-	GameView::Config(5, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 1, true, false),
-	GameView::Config(6, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 0, true, false),
-	GameView::Config(7, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 0, false, false),
-	GameView::Config(8, GameView::Config::PT_RGBA, 32,8,8,8,8, 0,0, 0, false, false),
-	GameView::Config(9, GameView::Config::PT_RGB, 24,8,8,8,0, 0,0, 0, false, false),
+const axl::gl::ViewConfig view_configs[] = {
+	axl::gl::ViewConfig(1, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 16, true, false),
+	axl::gl::ViewConfig(2, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 8, true, false),
+	axl::gl::ViewConfig(3, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 4, true, false),
+	axl::gl::ViewConfig(4, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 2, true, false),
+	axl::gl::ViewConfig(5, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 1, true, false),
+	axl::gl::ViewConfig(6, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 0, true, false),
+	axl::gl::ViewConfig(7, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 0, false, false),
+	axl::gl::ViewConfig(8, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 0,0, 0, false, false),
+	axl::gl::ViewConfig(9, axl::gl::ViewConfig::PT_RGB, 24,8,8,8,0, 0,0, 0, false, false),
 };
 axl::gl::Display display;
 
@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
 		axl::math::Vec2i position = (display.size - size) / 2;
 
 		GameView view(L"axl.gl.View", position, size);
-		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(GameView::Config), GameView::VF_RESIZABLE), verbose);
+		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(axl::gl::ViewConfig), GameView::VF_RESIZABLE), verbose);
 		Assertv(view.isValid(), verbose);
 		printf(".. View.Config %d selected.\n", view.config.id);
 		if(view.isValid())

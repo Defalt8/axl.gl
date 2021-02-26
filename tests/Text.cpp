@@ -29,7 +29,7 @@ class GameView : public axl::gl::View
 		axl::gl::gfx::Font font, font1, font2;
 		axl::gl::gfx::Text text, status_text;
 	private:
-		Cursor NormalCursor;
+		axl::gl::Cursor NormalCursor;
 		axl::util::uc::Time time, ctime;
 		axl::gl::projection::Orthographicf projection;
 		axl::gl::input::Key key_Control, key_Shift, key_Alt, key_F2, key_F3, key_F4, key_F5, key_Space;
@@ -37,7 +37,7 @@ class GameView : public axl::gl::View
 		bool is_animating;
 		int size_delta;
 	public:
-		GameView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const Cursor& _cursor = View::DefaultCursor) :
+		GameView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const axl::gl::Cursor& _cursor = axl::gl::DefaultCursor) :
 			axl::gl::View(_title, _position, _size, _cursor),
 			main_context(),
 			camera(),
@@ -45,7 +45,7 @@ class GameView : public axl::gl::View
 			text_program(),
 			text(),
 			status_text(),
-			NormalCursor(CUR_CROSS),
+			NormalCursor(axl::gl::Cursor::CUR_CROSS),
 			key_Control(axl::gl::input::KeyCode::KEY_CONTROL),
 			key_Shift(axl::gl::input::KeyCode::KEY_SHIFT),
 			key_Alt(axl::gl::input::KeyCode::KEY_ALT),
@@ -138,13 +138,13 @@ class GameView : public axl::gl::View
 
 		bool onCreate(bool recreating)
 		{
-			axl::gl::Context::Config context_configs[] = {
-				axl::gl::Context::Config(1, 4, 6, axl::gl::Context::Config::GLP_CORE),
-				axl::gl::Context::Config(2, 3, 3, axl::gl::Context::Config::GLP_CORE),
-				axl::gl::Context::Config(3, 3, 0, axl::gl::Context::Config::GLP_COMPATIBLITY),
-				axl::gl::Context::Config(4, 2, 1, axl::gl::Context::Config::GLP_COMPATIBLITY)
+			axl::gl::ContextConfig context_configs[] = {
+				axl::gl::ContextConfig(1, 4, 6, axl::gl::ContextConfig::GLP_CORE),
+				axl::gl::ContextConfig(2, 3, 3, axl::gl::ContextConfig::GLP_CORE),
+				axl::gl::ContextConfig(3, 3, 0, axl::gl::ContextConfig::GLP_COMPATIBLITY),
+				axl::gl::ContextConfig(4, 2, 1, axl::gl::ContextConfig::GLP_COMPATIBLITY)
 			};
-			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::Context::Config))) return false;
+			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::ContextConfig))) return false;
 			this->init();
 			// Create stuff here
 			GL::loadVFShaders(this->text_program, "tests/shaders/330/text_vuPVMs.vert", "tests/shaders/330/text_vuPVMs.frag");
@@ -199,6 +199,7 @@ class GameView : public axl::gl::View
 					"With this regard their currents turn awry\n"
 					"And lose the name of action."
 					);
+				this->text.setScale(axl::math::Vec3f(1.0f,1.0f,1.0f), false);
 				this->text.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
 				this->text.setColor(axl::math::Vec4f(0.2f,0.79f,0.5f,1.0f));
 			}
@@ -245,7 +246,7 @@ class GameView : public axl::gl::View
 			if(key_F2.isPressed() && no_modifiers)
 				this->show(this->visiblity == VS_FULLSCREEN ? SM_SHOW : SM_FULLSCREEN);
 			if(key_F3.isPressed() && no_modifiers)
-				this->setCursor(this->cursor == CUR_NONE ? this->NormalCursor : CUR_NONE);
+				this->setCursor(this->cursor == axl::gl::Cursor::CUR_NONE ? this->NormalCursor : axl::gl::Cursor::CUR_NONE);
 			if(key_F4.isPressed() && no_modifiers)
 			{
 				static axl::util::uc::Time ptime = ctime;
@@ -396,16 +397,16 @@ class GameView : public axl::gl::View
 /*****
  * 
  *****/
-const GameView::Config view_configs[] = {
-	GameView::Config(1, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 4, true, false),
-	GameView::Config(2, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 8, true, false),
-	GameView::Config(3, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 4, true, false),
-	GameView::Config(4, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 2, true, false),
-	GameView::Config(5, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 1, true, false),
-	GameView::Config(6, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 0, true, false),
-	GameView::Config(7, GameView::Config::PT_RGBA, 32,8,8,8,8, 24,8, 0, false, false),
-	GameView::Config(8, GameView::Config::PT_RGBA, 32,8,8,8,8, 0,0, 0, false, false),
-	GameView::Config(9, GameView::Config::PT_RGB, 24,8,8,8,0, 0,0, 0, false, false),
+const axl::gl::ViewConfig view_configs[] = {
+	axl::gl::ViewConfig(1, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 4, true, false),
+	axl::gl::ViewConfig(2, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 8, true, false),
+	axl::gl::ViewConfig(3, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 4, true, false),
+	axl::gl::ViewConfig(4, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 2, true, false),
+	axl::gl::ViewConfig(5, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 1, true, false),
+	axl::gl::ViewConfig(6, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 0, true, false),
+	axl::gl::ViewConfig(7, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 24,8, 0, false, false),
+	axl::gl::ViewConfig(8, axl::gl::ViewConfig::PT_RGBA, 32,8,8,8,8, 0,0, 0, false, false),
+	axl::gl::ViewConfig(9, axl::gl::ViewConfig::PT_RGB, 24,8,8,8,0, 0,0, 0, false, false),
 };
 
 axl::gl::Display display;
@@ -438,7 +439,7 @@ int main(int argc, char* argv[])
 		axl::math::Vec2i position = (display.size - size) / 2;
 
 		GameView view(L"axl.gl.Text", position, size);
-		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(GameView::Config), GameView::VF_RESIZABLE), verbose);
+		Assertv(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(axl::gl::ViewConfig), GameView::VF_RESIZABLE), verbose);
 		Assertv(view.isValid(), verbose);
 		printf(".. View.Config %d selected.\n", view.config.id);
 		if(view.isValid())

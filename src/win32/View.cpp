@@ -21,6 +21,106 @@ namespace GL {
 using namespace axl::glfl::WGL;
 using namespace axl::glfl::core::GL;
 }
+
+
+//////////////////
+// ViewConfig
+
+ViewConfig::ViewConfig(long id_, PixelType pixel_type_, 
+		char bits_color_, char bits_red_, char bits_green_, char bits_blue_, char bits_alpha_, 
+		char bits_depth_, char bits_stencil_, 
+		char samples_, bool double_buffered_, bool stereo_) :
+	id(id_),
+	pixel_type(pixel_type_),
+	bits_color(bits_color_),
+	bits_red(bits_red_),
+	bits_green(bits_green_),
+	bits_blue(bits_blue_),
+	bits_alpha(bits_alpha_),
+	bits_depth(bits_depth_),
+	bits_stencil(bits_stencil_),
+	samples(samples_),
+	double_buffered(double_buffered_),
+	stereo(stereo_)
+{}
+
+ViewConfig::ViewConfig(const ViewConfig& config) :
+	id(config.id),
+	pixel_type(config.pixel_type),
+	bits_color(config.bits_color),
+	bits_red(config.bits_red),
+	bits_green(config.bits_green),
+	bits_blue(config.bits_blue),
+	bits_alpha(config.bits_alpha),
+	bits_depth(config.bits_depth),
+	bits_stencil(config.bits_stencil),
+	samples(config.samples),
+	double_buffered(config.double_buffered),
+	stereo(config.stereo)
+{}
+
+bool ViewConfig::operator==(const ViewConfig& rhs) const
+{
+	return	(
+		pixel_type == rhs.pixel_type &&
+		bits_color == rhs.bits_color &&
+		bits_red == rhs.bits_red &&
+		bits_green == rhs.bits_green &&
+		bits_blue == rhs.bits_blue &&
+		bits_alpha == rhs.bits_alpha &&
+		bits_depth == rhs.bits_depth &&
+		bits_stencil == rhs.bits_stencil &&
+		samples == rhs.samples &&
+		double_buffered == rhs.double_buffered &&
+		stereo == rhs.stereo
+		);
+}
+
+bool ViewConfig::operator!=(const ViewConfig& rhs) const
+{
+	return	(
+		pixel_type != rhs.pixel_type ||
+		bits_color != rhs.bits_color ||
+		bits_red != rhs.bits_red ||
+		bits_green != rhs.bits_green ||
+		bits_blue != rhs.bits_blue ||
+		bits_alpha != rhs.bits_alpha ||
+		bits_depth != rhs.bits_depth ||
+		bits_stencil != rhs.bits_stencil ||
+		samples != rhs.samples ||
+		double_buffered != rhs.double_buffered ||
+		stereo != rhs.stereo
+		);
+}
+axl::gl::ViewConfig DefaultViewConfig = axl::gl::ViewConfig(
+	0, // id
+	ViewConfig::PT_RGB, // pixel_type
+	24, // bits_color
+	8, // bits_red
+	8, // bits_green
+	8, // bits_blue
+	0, // bits_alpha
+	24, // bits_depth
+	8, // bits_stencil
+	0, // samples
+	false, // double_buffered
+	false // stereo
+);
+const axl::gl::ViewConfig NullViewConfig = axl::gl::ViewConfig(
+	-1, // id
+	ViewConfig::PT_RGB, // pixel_type
+	-1, // bits_color
+	-1, // bits_red
+	-1, // bits_green
+	-1, // bits_blue
+	-1, // bits_alpha
+	-1, // bits_depth
+	-1, // bits_stencil
+	-1, // samples
+	false, // double_buffered
+	false // stereo
+);
+
 /////////
 // View
 
@@ -46,13 +146,12 @@ View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, 
 	visiblity(m_visiblity),
 	is_paused(m_is_paused),
 	pointers(m_pointers),
-	contexts(m_contexts),
 	reserved(m_reserved),
 	m_display(),
 	m_position(position_),
 	m_size(size_),
 	m_title(title_),
-	m_config(View::Config::Default),
+	m_config(DefaultViewConfig),
 	m_cursor(cursor_),
 	m_visiblity(View::VS_HIDDEN),
 	m_is_paused(false),
@@ -83,7 +182,7 @@ bool View::isValid() const
 	return (m_reserved && ((ViewData*)m_reserved)->hwnd && ((ViewData*)m_reserved)->hdc);
 }
 
-bool View::create(Display& display, bool recreate, const Config* configs_, int configs_count_, Flags view_flags)
+bool View::create(Display& display, bool recreate, const ViewConfig* configs_, int configs_count_, Flags view_flags)
 {
 	if(!_cursors_loaded) // load cursors
 	{
@@ -192,12 +291,12 @@ bool View::create(Display& display, bool recreate, const Config* configs_, int c
 		{
 			WGL::load();
 			// set the pixelformat
-			const View::Config *config;
+			const ViewConfig *config;
 			BOOL set = FALSE;
 			for(int i=0; i<configs_count_+1; ++i)
 			{
 				if(i<configs_count_) config = &configs_[i];
-				else config = &Config::Default;
+				else config = &DefaultViewConfig;
 				if(WGL::WGL_ARB_pixel_format)
 				{
 					UINT num_formats;
@@ -207,9 +306,9 @@ bool View::create(Display& display, bool recreate, const Config* configs_, int c
 					switch(config->pixel_type)
 					{
 						default:
-						case View::Config::PT_RGBA: pixel_type = WGL::WGL_TYPE_RGBA_ARB; break;
-						case View::Config::PT_RGBA_FLOAT: pixel_type = WGL::WGL_TYPE_RGBA_FLOAT_ARB; break;
-						case View::Config::PT_COLORINDEX: pixel_type = WGL::WGL_TYPE_COLORINDEX_ARB; break;
+						case ViewConfig::PT_RGBA: pixel_type = WGL::WGL_TYPE_RGBA_ARB; break;
+						case ViewConfig::PT_RGBA_FLOAT: pixel_type = WGL::WGL_TYPE_RGBA_FLOAT_ARB; break;
+						case ViewConfig::PT_COLORINDEX: pixel_type = WGL::WGL_TYPE_COLORINDEX_ARB; break;
 					}
 					int attribs[] = {
 						WGL::WGL_DRAW_TO_WINDOW_ARB, (int)GL::GL_TRUE,
@@ -243,14 +342,14 @@ bool View::create(Display& display, bool recreate, const Config* configs_, int c
 					}
 					else return false;
 				}
-				else if(config->pixel_type != View::Config::PT_RGBA_FLOAT)
+				else if(config->pixel_type != ViewConfig::PT_RGBA_FLOAT)
 				{
 					BYTE pixel_type;
 					switch(config->pixel_type)
 					{
 						default:
-						case View::Config::PT_RGBA: pixel_type = PFD_TYPE_RGBA; break;
-						case View::Config::PT_COLORINDEX: pixel_type = PFD_TYPE_COLORINDEX; break;
+						case ViewConfig::PT_RGBA: pixel_type = PFD_TYPE_RGBA; break;
+						case ViewConfig::PT_COLORINDEX: pixel_type = PFD_TYPE_COLORINDEX; break;
 					}
 					PIXELFORMATDESCRIPTOR pfd;
 					ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
@@ -274,7 +373,7 @@ bool View::create(Display& display, bool recreate, const Config* configs_, int c
 				}
 			}
 			if(set == FALSE)
-				m_config = Config::Default;
+				m_config = DefaultViewConfig;
 			SendMessageW(hwnd, WM_USER+1, 0, (LPARAM)this);
 			return set != FALSE;
 		}
@@ -358,7 +457,7 @@ bool View::setCursor(const Cursor& cursor_)
 	if(!m_reserved) return false;
 	m_cursor = cursor_;
 	HCURSOR hcursor = NULL;
-	if(m_cursor == CUR_CUSTOM)
+	if(m_cursor == Cursor::CUR_CUSTOM)
 	{
 		hcursor = ((ViewData*)m_reserved)->hcursor_custom;
 	}
@@ -366,16 +465,16 @@ bool View::setCursor(const Cursor& cursor_)
 	{
 		switch (m_cursor)
 		{
-			case CUR_ARROW: hcursor = _hcur_arrow; break;
-			case CUR_CROSS: hcursor = _hcur_cross; break;
-			case CUR_HAND: hcursor = _hcur_hand; break;
-			case CUR_WAIT: hcursor = _hcur_wait; break;
-			case CUR_HELP: hcursor = _hcur_help; break;
-			case CUR_IBEAM: hcursor = _hcur_ibeam; break;
-			case CUR_NO: hcursor = _hcur_no; break;
-			case CUR_NONE:
+			case Cursor::CUR_ARROW: hcursor = _hcur_arrow; break;
+			case Cursor::CUR_CROSS: hcursor = _hcur_cross; break;
+			case Cursor::CUR_HAND: hcursor = _hcur_hand; break;
+			case Cursor::CUR_WAIT: hcursor = _hcur_wait; break;
+			case Cursor::CUR_HELP: hcursor = _hcur_help; break;
+			case Cursor::CUR_IBEAM: hcursor = _hcur_ibeam; break;
+			case Cursor::CUR_NO: hcursor = _hcur_no; break;
+			case Cursor::CUR_NONE:
 				hcursor = NULL;
-				m_cursor = CUR_NONE;
+				m_cursor = Cursor::CUR_NONE;
 				break;
 			default: return false;
 		}
@@ -388,7 +487,7 @@ bool View::setCursor(const Cursor& cursor_)
 bool View::setCursorFromResource(int res_id)
 {
 	if(!m_reserved) return false;
-	m_cursor = CUR_CUSTOM;
+	m_cursor = Cursor::CUR_CUSTOM;
 	HCURSOR hcursor = LoadCursorW(((ViewData*)m_reserved)->hinst, MAKEINTRESOURCEW(res_id));
 	if(!hcursor) return false;
 	((ViewData*)m_reserved)->hcursor = hcursor;
@@ -541,6 +640,10 @@ bool View::swap() const
 {
 	if(!m_reserved) return false;
 	return SwapBuffers(((ViewData*)m_reserved)->hdc) != FALSE;
+}
+const axl::util::ds::UniList<axl::gl::Context*>& View::getContexts() const
+{
+	return this->m_contexts;
 }
 ///////////
 // protected
@@ -845,107 +948,8 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 	return 0;
 }
 
-View::Cursor View::DefaultCursor = View::CUR_ARROW;
+Cursor DefaultCursor = Cursor::CUR_ARROW;
 
-//////////////////
-// View::Config
-
-View::Config::Config(long id_, PixelType pixel_type_, 
-		char bits_color_, char bits_red_, char bits_green_, char bits_blue_, char bits_alpha_, 
-		char bits_depth_, char bits_stencil_, 
-		char samples_, bool double_buffered_, bool stereo_) :
-	id(id_),
-	pixel_type(pixel_type_),
-	bits_color(bits_color_),
-	bits_red(bits_red_),
-	bits_green(bits_green_),
-	bits_blue(bits_blue_),
-	bits_alpha(bits_alpha_),
-	bits_depth(bits_depth_),
-	bits_stencil(bits_stencil_),
-	samples(samples_),
-	double_buffered(double_buffered_),
-	stereo(stereo_)
-{}
-
-View::Config::Config(const Config& config) :
-	id(config.id),
-	pixel_type(config.pixel_type),
-	bits_color(config.bits_color),
-	bits_red(config.bits_red),
-	bits_green(config.bits_green),
-	bits_blue(config.bits_blue),
-	bits_alpha(config.bits_alpha),
-	bits_depth(config.bits_depth),
-	bits_stencil(config.bits_stencil),
-	samples(config.samples),
-	double_buffered(config.double_buffered),
-	stereo(config.stereo)
-{}
-
-bool View::Config::operator==(const Config& rhs) const
-{
-	return	(
-		pixel_type == rhs.pixel_type &&
-		bits_color == rhs.bits_color &&
-		bits_red == rhs.bits_red &&
-		bits_green == rhs.bits_green &&
-		bits_blue == rhs.bits_blue &&
-		bits_alpha == rhs.bits_alpha &&
-		bits_depth == rhs.bits_depth &&
-		bits_stencil == rhs.bits_stencil &&
-		samples == rhs.samples &&
-		double_buffered == rhs.double_buffered &&
-		stereo == rhs.stereo
-		);
-}
-
-bool View::Config::operator!=(const Config& rhs) const
-{
-	return	(
-		pixel_type != rhs.pixel_type ||
-		bits_color != rhs.bits_color ||
-		bits_red != rhs.bits_red ||
-		bits_green != rhs.bits_green ||
-		bits_blue != rhs.bits_blue ||
-		bits_alpha != rhs.bits_alpha ||
-		bits_depth != rhs.bits_depth ||
-		bits_stencil != rhs.bits_stencil ||
-		samples != rhs.samples ||
-		double_buffered != rhs.double_buffered ||
-		stereo != rhs.stereo
-		);
-}
-
-View::Config View::Config::Default(
-	0, // id
-	PT_RGB, // pixel_type
-	24, // bits_color
-	8, // bits_red
-	8, // bits_green
-	8, // bits_blue
-	0, // bits_alpha
-	24, // bits_depth
-	8, // bits_stencil
-	0, // samples
-	false, // double_buffered
-	false // stereo
-);
-
-const View::Config View::Config::Null(
-	-1, // id
-	PT_RGB, // pixel_type
-	-1, // bits_color
-	-1, // bits_red
-	-1, // bits_green
-	-1, // bits_blue
-	-1, // bits_alpha
-	-1, // bits_depth
-	-1, // bits_stencil
-	-1, // samples
-	false, // double_buffered
-	false // stereo
-);
 
 } // axl::gl
 } // axl

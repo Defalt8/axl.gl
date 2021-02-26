@@ -9,6 +9,9 @@ namespace gl {
 
 class AXLGLCXXAPI View;
 
+template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::View*>;
+template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::View*>::Iterator;
+
 class AXLGLCXXAPI Display {
 	public:
 		struct AXLGLCXXAPI Settings
@@ -32,6 +35,7 @@ class AXLGLCXXAPI Display {
 		bool reopen(int index);
 		bool close();
 		bool isConfigurable() const;
+		const axl::util::ds::UniList<axl::gl::View*>& getViews() const;
 	protected:
 		bool addView(View* view);
 		bool removeView(View* view);
@@ -56,7 +60,6 @@ class AXLGLCXXAPI Display {
 		const axl::math::Vec2f& ppi; // pixels per inch
 		const char*const name;
 		const Settings& settings;
-		const axl::util::ds::UniList<axl::gl::View*>& views;
 	private:
 		void* m_reserved;
 		int m_index;

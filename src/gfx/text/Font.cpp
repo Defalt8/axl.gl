@@ -38,10 +38,11 @@ struct FontData
 //
 
 Font::Font(axl::gl::Context* ptr_context) :
+	ContextObject(ptr_context),
 	texture(font_texture),
 	glyphs(font_glyphs),
 	size(font_size),
-	font_texture(),
+	font_texture(ptr_context),
 	font_size()
 {
 	this->font_reserved = (void*)new FontData();

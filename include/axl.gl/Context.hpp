@@ -8,52 +8,58 @@ namespace gl {
 
 class AXLGLCXXAPI View;
 
+template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::ContextObject*>;
+template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::ContextObject*>::Iterator;
+
+class AXLGLCXXAPI ContextConfig;
+// The default OpenGL context configuration to be set at the creation of a new ContextConfig by default.
+// You can modify it to your liking before creating configurations. 
+AXLGLAPI axl::gl::ContextConfig DefaultContextConfig;
+// A Null value representaion of the ContextConfig class.
+AXLGLAPI const axl::gl::ContextConfig NullContextConfig;
+
+/**
+ * OpenGL context configuration info.
+ */
+class AXLGLCXXAPI ContextConfig
+{
+	public:
+		// OpenGL context profiles.
+		enum GLProfile { GLP_COMPATIBLITY, GLP_CORE };
+	public:
+		ContextConfig(long id, int major_version, int minor_version, GLProfile profile);
+		ContextConfig(const ContextConfig& config = DefaultContextConfig);
+		bool operator==(const ContextConfig& config) const;
+		bool operator!=(const ContextConfig& config) const;
+	public:
+		long id;
+		int major_version;
+		int minor_version;
+		GLProfile profile;
+};
+
 class AXLGLCXXAPI Context
 {
 	public:
-		/**
-		 * OpenGL context configuration info.
-		 */
-		class AXLGLCXXAPI Config
-		{
-			public:
-				// OpenGL context profiles.
-				enum GLProfile { GLP_COMPATIBLITY, GLP_CORE };
-			public:
-				Config(long id, int major_version, int minor_version, GLProfile profile);
-				Config(const Config& config = Default);
-				bool operator==(const Config& config) const;
-				bool operator!=(const Config& config) const;
-			public:
-				long id;
-				int major_version;
-				int minor_version;
-				GLProfile profile;
-			public:
-				// The default OpenGL context configuration to be set at the creation of a new Config by default.
-				// You can modify it to your liking before creating configurations. 
-				static Config Default;
-				// A Null value representaion of the Config class.
-				static const Config Null;
-		};
 	public:
 		Context();
 		virtual ~Context();
 		virtual bool isCurrent() const;
 		virtual bool isValid() const;
-		virtual bool create(bool recreate, View* view, const Context::Config* configs, int num_configs);
+		virtual bool create(bool recreate, View* view, const Context::ContextConfig* configs, int num_configs);
 		virtual void destroy();
 		virtual bool makeCurrent() const;
 		virtual bool clearCurrent() const;
+		const axl::util::ds::UniList<ContextObject*>& getContextObjects() const;
 		bool getVSync() const;
 		bool setVSync(bool v_sync) const;
 	public:
 		View*const& view;
-		const Context::Config& config;
+		const Context::ContextConfig& config;
 		const void*const& reserved;
 	private:
 		View* m_view;
-		Context::Config m_config;
+		Context::ContextConfig m_config;
 		axl::util::ds::UniList<ContextObject*> m_context_objects;
 		void *m_reserved;
 	private:

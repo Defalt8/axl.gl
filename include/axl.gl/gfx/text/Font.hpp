@@ -18,15 +18,17 @@ namespace gfx {
 
 class AXLGLCXXAPI Text;
 
+struct AXLGLCXXAPI GlyphData {
+	short width, height;
+	short horiBearingX, horiBearingY;
+	short horiAdvance;
+	axl::math::Vec4f UV;
+};
+
+template class AXLGLCXXAPI axl::util::ds::Array<axl::gl::gfx::GlyphData>;
+
 class AXLGLCXXAPI Font : public ContextObject
 {
-	public:
-		struct GlyphData {
-			short width, height;
-			short horiBearingX, horiBearingY;
-			short horiAdvance;
-			axl::math::Vec4f UV;
-		};
 	public:
 		Font(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Font();
@@ -51,6 +53,7 @@ class AXLGLCXXAPI Font : public ContextObject
 		axl::math::Vec2i font_size;
 		void* font_reserved;
 };
+
 
 } // namespace axl.gl.gfx
 } // namespace axl.gl

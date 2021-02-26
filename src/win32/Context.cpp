@@ -10,6 +10,58 @@
 
 namespace axl {
 namespace gl {
+
+
+//////////////////
+// ContextConfig
+
+ContextConfig::ContextConfig(long id_, int version_major_, int version_minor_, GLProfile profile_) :
+	id(id_),
+	major_version(version_major_),
+	minor_version(version_minor_),
+	profile(profile_)
+{}
+
+ContextConfig::ContextConfig(const ContextConfig& config) :
+	id(config.id),
+	major_version(config.major_version),
+	minor_version(config.minor_version),
+	profile(config.profile)
+{}
+
+bool ContextConfig::operator==(const ContextConfig& rhs) const
+{
+	return	(
+		major_version == rhs.major_version &&
+		minor_version == rhs.minor_version &&
+		profile == rhs.profile
+		);
+}
+
+bool ContextConfig::operator!=(const ContextConfig& rhs) const
+{
+	return	(
+		major_version != rhs.major_version ||
+		minor_version != rhs.minor_version ||
+		profile != rhs.profile
+		);
+}
+
+ContextConfig DefaultContextConfig = ContextConfig(
+	0, // id
+	0, // major_version
+	0, // minor_version
+	ContextConfig::GLP_COMPATIBLITY // profile
+);
+
+const ContextConfig NullContextConfig = ContextConfig(
+	-1, // id
+	-1, // major_version
+	-1, // minor_version
+	ContextConfig::GLP_CORE // profile
+);
+
+
 ////////////
 // Context
 
@@ -25,7 +77,7 @@ Context::Context() :
 	view(m_view),
 	config(m_config),
 	reserved(m_reserved),
-	m_config(Context::Config::Default),
+	m_config(DefaultContextConfig),
 	m_reserved(new ContextData())
 {}
 
@@ -50,7 +102,7 @@ bool Context::isValid() const
 	return (((ContextData*)m_reserved)->hdc && ((ContextData*)m_reserved)->hglrc);
 }
 
-bool Context::create(bool recreate, View* view_, const Context::Config* configs_, int num_configs_)
+bool Context::create(bool recreate, View* view_, const ContextConfig* configs_, int num_configs_)
 {
 	if(!m_reserved) m_reserved = new ContextData();
 	if(!view_->isValid() || !m_reserved) return false;
@@ -67,14 +119,14 @@ bool Context::create(bool recreate, View* view_, const Context::Config* configs_
 	{
 		if(configs_ && num_configs_ > 0)
 		{
-			const Context::Config* cur_config;
+			const ContextConfig* cur_config;
 			for(int i=0; i<num_configs_; ++i)
 			{
 				cur_config = &configs_[i];
 				if(cur_config->major_version <= 0)
 				{
 					int attribs[] = {
-						axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (cur_config->profile==Config::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
+						axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (cur_config->profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
 						0
 					};
 					hglrc = axl::glfl::WGL::wglCreateContextAttribsARB(hdc, NULL, attribs);
@@ -84,7 +136,7 @@ bool Context::create(bool recreate, View* view_, const Context::Config* configs_
 					int attribs[] = {
 						axl::glfl::WGL::WGL_CONTEXT_MAJOR_VERSION_ARB, cur_config->major_version,
 						axl::glfl::WGL::WGL_CONTEXT_MINOR_VERSION_ARB, cur_config->minor_version,
-						axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (cur_config->profile==Config::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
+						axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (cur_config->profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
 						0
 					};
 					hglrc = axl::glfl::WGL::wglCreateContextAttribsARB(hdc, NULL, attribs);
@@ -101,7 +153,7 @@ bool Context::create(bool recreate, View* view_, const Context::Config* configs_
 			if(config.major_version <= 0)
 			{
 				int attribs[] = {
-					axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (config.profile==Config::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
+					axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (config.profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
 					0
 				};
 				hglrc = axl::glfl::WGL::wglCreateContextAttribsARB(hdc, NULL, attribs);
@@ -111,7 +163,7 @@ bool Context::create(bool recreate, View* view_, const Context::Config* configs_
 				int attribs[] = {
 					axl::glfl::WGL::WGL_CONTEXT_MAJOR_VERSION_ARB, config.major_version,
 					axl::glfl::WGL::WGL_CONTEXT_MINOR_VERSION_ARB, config.minor_version,
-					axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (config.profile==Config::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
+					axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (config.profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
 					0
 				};
 				hglrc = axl::glfl::WGL::wglCreateContextAttribsARB(hdc, NULL, attribs);
@@ -121,7 +173,7 @@ bool Context::create(bool recreate, View* view_, const Context::Config* configs_
 	if(hglrc == NULL)
 	{
 		hglrc = wglCreateContext(hdc);
-		m_config.profile = Config::GLP_COMPATIBLITY;
+		m_config.profile = ContextConfig::GLP_COMPATIBLITY;
 		m_config.major_version = 0;
 		m_config.minor_version = 0;
 	}
@@ -185,6 +237,10 @@ bool Context::clearCurrent() const
 {
 	return wglMakeCurrent(((ContextData*)m_reserved)->hdc, NULL) != FALSE;
 }
+const axl::util::ds::UniList<ContextObject*>& Context::getContextObjects() const
+{
+	return this->m_context_objects;
+}
 bool Context::getVSync() const
 {
 	if (axl::glfl::WGL::WGL_EXT_swap_control && this->makeCurrent())
@@ -197,54 +253,6 @@ bool Context::setVSync(bool v_sync) const
 		return axl::glfl::WGL::wglSwapIntervalEXT((int)v_sync);
 	return false;
 }
-//////////////////
-// Context::Config
-
-Context::Config::Config(long id_, int version_major_, int version_minor_, GLProfile profile_) :
-	id(id_),
-	major_version(version_major_),
-	minor_version(version_minor_),
-	profile(profile_)
-{}
-
-Context::Config::Config(const Config& config) :
-	id(config.id),
-	major_version(config.major_version),
-	minor_version(config.minor_version),
-	profile(config.profile)
-{}
-
-bool Context::Config::operator==(const Config& rhs) const
-{
-	return	(
-		major_version == rhs.major_version &&
-		minor_version == rhs.minor_version &&
-		profile == rhs.profile
-		);
-}
-
-bool Context::Config::operator!=(const Config& rhs) const
-{
-	return	(
-		major_version != rhs.major_version ||
-		minor_version != rhs.minor_version ||
-		profile != rhs.profile
-		);
-}
-
-Context::Config Context::Config::Default(
-	0, // id
-	0, // major_version
-	0, // minor_version
-	GLP_COMPATIBLITY // profile
-);
-
-const Context::Config Context::Config::Null(
-	-1, // id
-	-1, // major_version
-	-1, // minor_version
-	GLP_CORE // profile
-);
 
 } // namespace axl.gl
 } // namespace axl

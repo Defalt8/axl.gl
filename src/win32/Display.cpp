@@ -81,7 +81,6 @@ Display::Display(int p_index) :
 	ppi(m_ppi),
 	name(m_name),
 	settings(m_settings),
-	views(m_views),
 	m_index(-1),
 	m_position(0,0),
 	m_size(0,0),
@@ -271,6 +270,10 @@ int Display::count()
 {
 	return GetSystemMetrics(SM_CMONITORS);
 }
+const axl::util::ds::UniList<axl::gl::View*>& Display::getViews() const
+{
+	return this->m_views;
+}
 
 bool Display::addView(View* view)
 {
@@ -287,6 +290,7 @@ bool Display::removeView(View* view)
 	if(!this->isOpen()) return false;
 	return this->m_views.remove(view);
 }
+
 
 } // axl::gl
 } // axl
