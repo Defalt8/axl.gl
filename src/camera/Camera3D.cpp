@@ -93,6 +93,51 @@ void Camera3D::set(const axl::math::Vec3d& p_position, const axl::math::Vec3d& p
 	this->axis_rule = p_axis_rule;
 }
 
+axl::math::Vec3d Camera3D::screenToWorld(const axl::math::Vec2i& vec2) const
+{
+	axl::math::Vec3d world_coord(
+		((double)(vec2.x - this->viewport_position.x) / this->viewport_size.x),
+		((double)((double)this->viewport_size.y - (vec2.y - this->viewport_position.y)) / this->viewport_size.y),
+		0.0);
+	if(this->projection)
+	{
+		switch(this->projection->type)
+		{
+			case axl::gl::projection::Projection::PT_ORTHOGRAPHIC:
+				{
+					axl::gl::projection::Orthographic* op = (axl::gl::projection::Orthographic*)this->projection;
+					world_coord.x = op->left + world_coord.x * (op->right - op->left);
+					world_coord.y = op->bottom + world_coord.y * (op->top - op->bottom);
+				}
+				break;
+			case axl::gl::projection::Projection::PT_PERSPECTIVE:
+				{
+					axl::gl::projection::Perspective* pp = (axl::gl::projection::Perspective*)this->projection;
+					world_coord.x = pp->left + world_coord.x * (pp->right - pp->left);
+					world_coord.y = pp->bottom + world_coord.y * (pp->top - pp->bottom);
+				}
+				break;
+			case axl::gl::projection::Projection::PT_IDENTITY:
+			case axl::gl::projection::Projection::PT_OTHER:
+			default:
+				break;
+		}
+	}
+	world_coord = this->view_transform.affineInvert(world_coord);
+	world_coord.z = 0.0;
+	return world_coord;
+}
+
+axl::math::Vec2i Camera3D::worldToScreen(const axl::math::Vec3d& vec3) const
+{
+	axl::math::Vec4d world_coord;
+	if(this->projection)
+		world_coord = this->view_transform * this->projection->matrix * axl::math::Vec4d(vec3.x, vec3.y, vec3.z, 1.0);
+	else
+		world_coord = this->view_transform * axl::math::Vec4d(vec3.x, vec3.y, vec3.z, 1.0);
+	return axl::math::Vec2i((int)world_coord.x, (int)world_coord.y);
+}
+
 //
 // Camera3Df
 //
@@ -169,6 +214,51 @@ void Camera3Df::set(const axl::math::Vec3f& p_position, const axl::math::Vec3f& 
 	this->viewport_size = p_viewport_size;
 	this->projection = p_projection;
 	this->axis_rule = p_axis_rule;
+}
+
+axl::math::Vec3f Camera3Df::screenToWorld(const axl::math::Vec2i& vec2) const
+{
+	axl::math::Vec3f world_coord(
+		((float)(vec2.x - this->viewport_position.x) / this->viewport_size.x),
+		((float)((float)this->viewport_size.y - (vec2.y - this->viewport_position.y)) / this->viewport_size.y),
+		0.0f);
+	if(this->projection)
+	{
+		switch(this->projection->type)
+		{
+			case axl::gl::projection::Projection::PT_ORTHOGRAPHIC:
+				{
+					axl::gl::projection::Orthographicf* op = (axl::gl::projection::Orthographicf*)this->projection;
+					world_coord.x = op->left + world_coord.x * (op->right - op->left);
+					world_coord.y = op->bottom + world_coord.y * (op->top - op->bottom);
+				}
+				break;
+			case axl::gl::projection::Projection::PT_PERSPECTIVE:
+				{
+					axl::gl::projection::Perspectivef* pp = (axl::gl::projection::Perspectivef*)this->projection;
+					world_coord.x = pp->left + world_coord.x * (pp->right - pp->left);
+					world_coord.y = pp->bottom + world_coord.y * (pp->top - pp->bottom);
+				}
+				break;
+			case axl::gl::projection::Projection::PT_IDENTITY:
+			case axl::gl::projection::Projection::PT_OTHER:
+			default:
+				break;
+		}
+	}
+	world_coord = this->view_transform.affineInvert(world_coord);
+	world_coord.z = 0.0f;
+	return world_coord;
+}
+
+axl::math::Vec2i Camera3Df::worldToScreen(const axl::math::Vec3f& vec3) const
+{
+	axl::math::Vec4f world_coord;
+	if(this->projection)
+		world_coord = this->view_transform * this->projection->matrix * axl::math::Vec4f(vec3.x, vec3.y, vec3.z, 1.0f);
+	else
+		world_coord = this->view_transform * axl::math::Vec4f(vec3.x, vec3.y, vec3.z, 1.0f);
+	return axl::math::Vec2i((int)world_coord.x, (int)world_coord.y);
 }
 
 

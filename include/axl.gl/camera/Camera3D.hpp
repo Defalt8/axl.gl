@@ -33,6 +33,8 @@ class AXLGLCXXAPI Camera3D
 		void updateTransform();
 		void lookAt(const axl::math::Vec3d& position, const axl::math::Vec3d& target, double roll_angle = 0.0);
 		void set(const axl::math::Vec3d& position, const axl::math::Vec3d& target, double roll_angle, const axl::math::Vec3d& scale, const axl::math::Vec2i& viewport_position, const axl::math::Vec2i& viewport_size, axl::gl::projection::Projection* projection, axl::math::Rules::Axis axis_rule = DefaultCamera3DAxisRule);
+		axl::math::Vec3d screenToWorld(const axl::math::Vec2i& vec2) const;
+		axl::math::Vec2i worldToScreen(const axl::math::Vec3d& vec3) const;
 	public:
 		axl::math::Rules::Axis axis_rule;
 		axl::math::Vec3d position;
@@ -65,6 +67,8 @@ class AXLGLCXXAPI Camera3Df
 		void updateTransform();
 		void lookAt(const axl::math::Vec3f& position, const axl::math::Vec3f& target, float roll_angle = 0.0f);
 		void set(const axl::math::Vec3f& position, const axl::math::Vec3f& target, float roll_angle, const axl::math::Vec3f& scale, const axl::math::Vec2i& viewport_position, const axl::math::Vec2i& viewport_size, axl::gl::projection::Projectionf* projection, axl::math::Rules::Axis axis_rule = DefaultCamera3DfAxisRule);
+		axl::math::Vec3f screenToWorld(const axl::math::Vec2i& vec2) const;
+		axl::math::Vec2i worldToScreen(const axl::math::Vec3f& vec3) const;
 	public:
 		axl::math::Rules::Axis axis_rule;
 		axl::math::Vec3f position;
