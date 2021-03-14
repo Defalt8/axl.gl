@@ -932,7 +932,7 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 			break;
 		case WM_CLOSE:
 		case WM_DESTROY:
-			if(view && view->isValid())
+			if(view)
 			{
 				if(!((ViewData*)view->reserved)->destroying)
 				{

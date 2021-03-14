@@ -3,6 +3,8 @@
 #include "common.hpp"
 #include <axl.gl/Application.hpp>
 #include <axl.gl/Display.hpp>
+#include <axl.gl/View.hpp>
+#include <axl.gl/gfx/text/Font.hpp>
 
 void __cdecl _on_exit()
 {
@@ -29,6 +31,7 @@ bool init()
 	signal(SIGILL, _sig_handler);
 	signal(SIGINT, _sig_handler);
 	signal(SIGSEGV, _sig_handler);
+	axl::gl::gfx::Font::init();
 	return 0 == std::atexit(_on_exit);
 }
 void quit(int quit_code)
@@ -49,6 +52,8 @@ void exit(int exit_code)
 		ON_EXIT_CALLED = true;
 		onExit(exit_code);
 	}
+	axl::gl::View::cleanup();
+	axl::gl::gfx::Font::cleanup();
 	std::exit(exit_code);
 }
 
