@@ -38,6 +38,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"gfx/shader/Program.cpp"
 	"gfx/text/Font.cpp"
 	"gfx/text/Text.cpp"
+	"gfx/UI/UIElement.cpp"
 
 	"${AXLGL_INCLUDE_DIR}/axl.gl/everything.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/lib.hpp"
@@ -73,6 +74,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Font.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Text.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/UIElement.hpp"
 )
 target_link_directories( axl.gl
 	PUBLIC "${THIRD_PARTY_LIB_DIR}"
@@ -157,6 +159,7 @@ if( AXLGL_INSTALL_HEADERS )
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Font.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Text.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/UIElement.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx.hpp"
 		DESTINATION "include/axl.gl"
 	)
