@@ -79,8 +79,7 @@ UIElement::UIElement(axl::gl::Context* ptr_context) :
 	ContextObject(ptr_context),
 	transform(),
 	uielement_size(0,0),
-	uielement_frame_buffer(ptr_context),
-	uielement_render_buffer_depth(ptr_context),
+	frame_buffer(0),
 	uielement_texture(ptr_context),
 	m_vertex_array(-1),
 	m_vertex_buffer(-1),
@@ -98,23 +97,20 @@ bool UIElement::isValid() const
 	return this->ctx_context && this->ctx_context->isValid() &&
 		this->m_vertex_array != -1 && this->m_vertex_buffer != -1 &&
 		this->uielement_texture.isValid() &&
-		this->uielement_frame_buffer.isValid() &&
-		this->uielement_render_buffer_depth.isValid() &&
+		this->frame_buffer &&
+		this->frame_buffer->isValid() &&
 		this->m_program.isLinked();
 }
 void UIElement::setContext(axl::gl::Context* ptr_context)
 {
 	ContextObject::setContext(ptr_context);
-	this->uielem_frame_buffer.setContext(ptr_context);
-	this->uielement_frame_buffer.setContext(ptr_context);
-	this->uielement_render_buffer_depth.setContext(ptr_context);
 	this->uielement_texture.setContext(ptr_context);
 	this->m_program.setContext(ptr_context);
 }
 bool UIElement::icreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->ctx_context->makeCurrent()) return false;
+	if(!this->frame_buffer || !this->frame_buffer->isValid() || !GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->ctx_context->makeCurrent()) return false;
 	GLCLEARERROR();
 	glGenVertexArrays(1, &this->m_vertex_array);
 	glGenBuffers(1, &this->m_vertex_buffer);
@@ -162,16 +158,13 @@ bool UIElement::icreate()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (GLsizei)(sizeof(GLfloat) * 4), (const void*)(sizeof(GLfloat) * 2));
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	this->frame_buffer->setSize(axl::math::Vec2i(width, height));
 	if(!(GL::glGetError() == GL_NO_ERROR &&
-		this->uielement_frame_buffer.create() &&
 		this->uielement_texture.create() &&
 		this->m_program.create() &&
 		this->uielement_texture.allocate(0, width, height, GL::GL_RGBA8) &&
-		this->uielement_render_buffer_depth.create() &&
-		this->uielement_render_buffer_depth.allocate(width, height, GL_DEPTH_COMPONENT24, 0) &&
-		this->uielement_frame_buffer.attachTexture2D(GL_COLOR_ATTACHMENT0, &this->uielement_texture) &&
-		this->uielement_frame_buffer.attachRenderBuffer(GL_DEPTH_ATTACHMENT, &this->uielement_render_buffer_depth))
-		)
+		this->frame_buffer->attachTexture2D(GL_COLOR_ATTACHMENT0, &this->uielement_texture)
+		))
 	{
 		this->destroy();
 		return false;
@@ -198,15 +191,17 @@ bool UIElement::idestroy()
 			this->m_vertex_array = -1;
 		}
 	}
-	return (glGetError() == GL_NO_ERROR && this->uielement_render_buffer_depth.destroy() && this->uielement_frame_buffer.destroy() && this->uielement_texture.destroy() && this->m_program.destroy());
+	return (glGetError() == GL_NO_ERROR &&
+		this->uielement_texture.destroy() &&
+		this->m_program.destroy());
 }
 bool UIElement::render(const camera::Camera3Df* camera)
 {
 	using namespace GL;
 	if(!this->isValid() || !camera || !camera->makeCurrent(this->ctx_context, false)) return false;
-	if(!this->uielement_frame_buffer.bind(axl::gl::gfx::FrameBuffer::FBT_DRAW)) return false;
+	if(!this->frame_buffer->bind(axl::gl::gfx::FrameBuffer::FBT_DRAW)) return false;
 	this->irender(camera);
-	this->uielement_frame_buffer.unbind();
+	this->frame_buffer->unbind();
 	if(!camera->makeCurrent(this->ctx_context, true)) return false;
 	if(camera->projection)
 		this->m_program.setUniformMat4fv(uloc_projection, camera->projection->matrix.values);
@@ -234,7 +229,9 @@ bool UIElement::setSize(const axl::math::Vec2i& size)
 	if(size.x < 0 || size.y < 0) return false;
 	if(this->isValid())
 	{
-		if(!this->uielement_texture.allocate(0, (GLsizei)size.x, (GLsizei)size.y, GL_RGBA8)) return false;
+		if(!this->uielement_texture.allocate(0, (GLsizei)size.x, (GLsizei)size.y, GL_RGBA8) ||
+			!this->frame_buffer->setSize(size))
+			return false;
 		glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer);
 		if(GL::glGetError() != GL_NO_ERROR) return false;
 		GLfloat* buffer = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);

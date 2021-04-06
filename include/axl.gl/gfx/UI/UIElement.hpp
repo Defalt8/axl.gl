@@ -4,6 +4,7 @@
 #include "../buffer/FrameBuffer.hpp"
 #include "../texture/Texture2D.hpp"
 #include "../shader/Program.hpp"
+#include "UIFrameBuffer.hpp"
 #include <axl.math/vec/Vec2i.hpp>
 #include <axl.math/transform/Transform4f.hpp>
 #include <axl.glfl/GL.hpp>
@@ -37,10 +38,9 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		const axl::math::Vec2i& getSize();
 	public:
 		axl::math::Transform4f transform;
+		axl::gl::gfx::UIFrameBuffer* frame_buffer;
 	protected:
 		axl::math::Vec2i uielement_size;
-		gfx::FrameBuffer uielement_frame_buffer;
-		gfx::RenderBuffer uielement_render_buffer_depth;
 		gfx::Texture2D uielement_texture;
 	private:
 		axl::glfl::GLuint m_vertex_array;

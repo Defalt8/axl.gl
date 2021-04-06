@@ -86,6 +86,7 @@ class GameView : public axl::gl::View
 		axl::gl::gfx::Font font, font1, font2;
 		axl::gl::gfx::Text text, status_text;
 		TestElement test_element;
+		axl::gl::gfx::UIFrameBuffer ui_frame_buffer;
 	private:
 		axl::gl::Cursor NormalCursor;
 		axl::util::uc::Time time, ctime;
@@ -102,6 +103,7 @@ class GameView : public axl::gl::View
 			projection(),
 			text_program(&main_context),
 			test_element(&main_context),
+			ui_frame_buffer(&main_context),
 			text(&main_context),
 			status_text(&main_context),
 			NormalCursor(axl::gl::Cursor::CUR_CROSS),
@@ -140,6 +142,7 @@ class GameView : public axl::gl::View
 			status_text.setFont(&this->font2);
 			status_text.setProgram(&this->text_program);
 			test_element.setContext(&this->main_context);
+			ui_frame_buffer.setContext(&this->main_context);
 			is_animating = false;
 			size_delta = 0;
 			time.set();
@@ -183,7 +186,7 @@ class GameView : public axl::gl::View
 				GL::glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
-			// this->text.render(&this->camera);
+			this->text.render(&this->camera);
 			this->status_text.render(&this->camera);
 			this->test_element.setSize(axl::math::Vec2i(300,75));
 			this->test_element.transform.setPosition(axl::math::Vec3f(100.0f,105.0f,0.0f));
@@ -242,6 +245,8 @@ class GameView : public axl::gl::View
 				Assert(this->status_text.setText(L"{TODO:status}"));
 				this->status_text.setColor(axl::math::Vec4f(0.9f,0.1f,0.9f,0.9f));
 			}
+			Assert(this->ui_frame_buffer.create());
+			this->test_element.frame_buffer = &ui_frame_buffer;
 			this->test_element.setSize(axl::math::Vec2i(300,200));
 			this->test_element.transform.setPosition(axl::math::Vec3f(100.0f,140.0f,0.0f));
 			Assert(this->test_element.create());
