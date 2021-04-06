@@ -19,10 +19,7 @@ namespace gl {
 namespace gfx {
 
 Text::Text(axl::gl::Context* ptr_context) :
-	text_position(0.0f, 0.0f, 0.0f),
-	text_scale(1.0f, 1.0f, 1.0f),
-	text_rotation(0.0f, 0.0f, 0.0f),
-	text_transform(),
+	transform(),
 	text_color(0.0f, 0.0f, 0.0f, 1.0f),
 	text_box(0.0f, 0.0f),
 	text_offset(0.0f, 0.0f),
@@ -43,7 +40,6 @@ Text::Text(axl::gl::Context* ptr_context) :
 	uniform_location_text_offset(-1),
 	uniform_location_text_color(-1)
 {
-	this->updateTransform();
 	this->updateAlignment();
 }
 Text::~Text()
@@ -119,12 +115,11 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 	{
 		if(camera)
 		{
-			// if(!camera->makeCurrent(this->ctx_context, false)) return false;
 			if(camera->projection)
 				this->text_program->setUniformMat4fv(uniform_location_projection_matrix, camera->projection->matrix.values);
 			this->text_program->setUniformMat4fv(uniform_location_view_matrix, camera->view_transform.values);
 		}
-		this->text_program->setUniformMat4fv(uniform_location_model_matrix, this->text_transform.values);
+		this->text_program->setUniformMat4fv(uniform_location_model_matrix, this->transform.getMatrix().values);
 		this->text_program->setUniform2fv(uniform_location_text_offset, &this->text_offset.x);
 		this->text_program->setUniform4fv(uniform_location_text_color, &this->text_color.x);
 		if(!this->text_font->texture.bind() || !this->text_program->use())
@@ -148,10 +143,6 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 		return true;
 	}
 	return true;
-}
-void Text::updateTransform()
-{
-	this->text_transform = axl::math::Transform4::scaleTranslate(this->text_scale, this->text_position) * axl::math::Transform4::rotateXYZ(this->text_rotation);
 }
 void Text::updateBuffers()
 {
@@ -187,21 +178,6 @@ void Text::updateAlignment()
 	}
 }
 // set methods
-void Text::setPosition(const axl::math::Vec3f& p_position, bool update)
-{
-	this->text_position = p_position;
-	if(update) this->updateTransform();
-}
-void Text::setScale(const axl::math::Vec3f& p_scale, bool update)
-{
-	this->text_scale = p_scale;
-	if(update) this->updateTransform();
-}
-void Text::setRotation(const axl::math::Vec3f& p_rotation, bool update)
-{
-	this->text_rotation = p_rotation;
-	if(update) this->updateTransform();
-}
 void Text::setColor(const axl::math::Vec4f& p_color)
 {
 	this->text_color = p_color;
@@ -279,22 +255,6 @@ void Text::setVerticalAlignment(VerticalAlignment vertical_alignment)
 	this->updateBuffers(this->text_wstring, false, true);
 }
 // get methods
-const axl::math::Vec3f& Text::getPosition() const
-{
-	return this->text_position;
-}
-const axl::math::Vec3f& Text::getScale() const
-{
-	return this->text_scale;
-}
-const axl::math::Vec3f& Text::getRotation() const
-{
-	return this->text_rotation;
-}
-const axl::math::Mat4f& Text::getTransform() const
-{
-	return this->text_transform;
-}
 const axl::math::Vec4f& Text::getColor() const
 {
 	return this->text_color;

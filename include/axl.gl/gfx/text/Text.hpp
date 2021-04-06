@@ -9,6 +9,7 @@
 #include <axl.math/vec/Vec3f.hpp>
 #include <axl.math/vec/Vec4f.hpp>
 #include <axl.math/mat/Mat4f.hpp>
+#include <axl.math/transform/Transform4f.hpp>
 
 namespace axl {
 namespace gl {
@@ -51,13 +52,10 @@ class AXLGLCXXAPI Text : public ContextObject
 		bool idestroy();
 		bool isValid() const;
 		bool render(const axl::gl::camera::Camera3Df* camera = 0) const;
-		void updateTransform();
+		// void updateTransform();
 		void updateBuffers();
 		void updateAlignment();
 		// set methods
-		void setPosition(const axl::math::Vec3f& position, bool update = true);
-		void setScale(const axl::math::Vec3f& scale, bool update = true);
-		void setRotation(const axl::math::Vec3f& rotation, bool update = true);
 		void setColor(const axl::math::Vec4f& color);
 		bool setSpacing(const axl::math::Vec2f& spacing);
 		bool setStorageSize(axl::util::size_t size);
@@ -68,10 +66,6 @@ class AXLGLCXXAPI Text : public ContextObject
 		void setHorizontalAlignment(HorizontalAlignment horizontal_alignment);
 		void setVerticalAlignment(VerticalAlignment vertical_alignment);
 		// get methods
-		const axl::math::Vec3f& getPosition() const;
-		const axl::math::Vec3f& getScale() const;
-		const axl::math::Vec3f& getRotation() const;
-		const axl::math::Mat4f& getTransform() const;
 		const axl::math::Vec4f& getColor() const;
 		const axl::math::Vec2f& getOffset() const;
 		const axl::math::Vec2f& getBox() const;
@@ -84,11 +78,9 @@ class AXLGLCXXAPI Text : public ContextObject
 		VerticalAlignment getVerticalAlignment() const;
 	protected:
 		bool updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed = false, bool font_attribute_altered = false);
+	public:
+		axl::math::Transform4f transform;
 	protected:
-		axl::math::Vec3f text_position;
-		axl::math::Vec3f text_scale;
-		axl::math::Vec3f text_rotation;
-		axl::math::Mat4f text_transform;
 		axl::math::Vec4f text_color;
 		axl::math::Vec2f text_offset;
 		axl::math::Vec2f text_box;

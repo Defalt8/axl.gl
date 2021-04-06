@@ -52,7 +52,7 @@ class TestElement : public axl::gl::gfx::UIElement
 			if(!text.create()) return false;
 			text.setAlignment(axl::gl::gfx::Text::TAL_CENTER);
 			text.setText(L"Hello World!");
-			text.setPosition(axl::math::Vec2f((uielement_size.x) / 2.0f, (uielement_size.y) / 2.0f));
+			text.transform.setPosition(axl::math::Vec2f((uielement_size.x) / 2.0f, (uielement_size.y) / 2.0f));
 			text.setColor(axl::math::Vec4f(0.9f,0.9f,0.9f,1.0f));
 			return true;
 		}
@@ -67,7 +67,7 @@ class TestElement : public axl::gl::gfx::UIElement
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glClearColor(0.0f, 0.9f, 0.9f, 0.5f);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-			text.setPosition(axl::math::Vec2f((uielement_size.x) / 2.0f, (uielement_size.y) / 2.0f));
+			text.transform.setPosition(axl::math::Vec2f((uielement_size.x) / 2.0f, (uielement_size.y) / 2.0f));
 			text.render(camera);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
@@ -234,8 +234,8 @@ class GameView : public axl::gl::View
 				this->text.setAlignment(axl::gl::gfx::Text::Alignment::TAL_TOP_LEFT);
 				this->text.setSpacing(axl::math::Vec2f(1.0f, 1.0f));
 				this->text.setText(axl::util::File::getWStringContent("tests/sample_text.txt"));
-				this->text.setScale(axl::math::Vec3f(1.0f,1.0f,1.0f), false);
-				this->text.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
+				this->text.transform.setScale(axl::math::Vec3f(1.0f,1.0f,1.0f), false);
+				this->text.transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
 				this->text.setColor(axl::math::Vec4f(0.2f,0.79f,0.5f,1.0f));
 			}
 			if(this->status_text.create())
@@ -273,7 +273,7 @@ class GameView : public axl::gl::View
 					this->projection.set(0.0f, (float)this->camera.viewport_size.x, 0.0f, (float)this->camera.viewport_size.y,-10.0f, 10.0f);
 				}
 				this->projection.updateTransform();
-				this->status_text.setPosition(axl::math::Vec3f((float)this->camera.viewport_size.x - 10.0f, (float)this->camera.viewport_size.y - 10.0f, 0.0f));
+				this->status_text.transform.setPosition(axl::math::Vec3f((float)this->camera.viewport_size.x - 10.0f, (float)this->camera.viewport_size.y - 10.0f, 0.0f));
 			}
 			this->update();
 			this->render();
@@ -301,9 +301,9 @@ class GameView : public axl::gl::View
 			if(key_F5.isPressed() && no_modifiers)
 			{
 				this->camera.position.set(0.0f);
-				this->text.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
-				this->text.setScale(axl::math::Vec3f::filled(1.0f));
-				this->text.setRotation(axl::math::Vec3f::filled(0.0f));
+				this->text.transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
+				this->text.transform.setScale(axl::math::Vec3f::filled(1.0f), false);
+				this->text.transform.setRotation(axl::math::Vec3f::filled(0.0f));
 			}
 			bool bp_left = key_Left.isPressed(), bp_right = key_Right.isPressed();
 			bool bp_up = key_Up.isPressed(), bp_down = key_Down.isPressed();
@@ -504,24 +504,24 @@ int main(int argc, char* argv[])
 				{
 					if(bk_control && (!bk_shift && !bk_alt))
 					{
-						axl::math::Vec3f text_scale = view.text.getScale();
+						axl::math::Vec3f text_scale = view.text.transform.getScale();
 						float delta = 0.8f * (bk_up ? 1.0f : -1.0f) * delta_time;
-						view.text.setScale(text_scale + delta);
+						view.text.transform.setScale(text_scale + delta);
 					}
 					else if(no_modifiers)
 					{
-						axl::math::Vec3f text_position = view.text.getPosition();
+						axl::math::Vec3f text_position = view.text.transform.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_up ? 1.0f : -1.0f) * delta_time;
-						view.text.setPosition(axl::math::Vec3f(text_position.x, text_position.y - delta, text_position.z));
+						view.text.transform.setPosition(axl::math::Vec3f(text_position.x, text_position.y - delta, text_position.z));
 					}
 				}
 				if(bk_left ^ bk_right)
 				{
 					if(no_modifiers)
 					{
-						axl::math::Vec3f text_position = view.text.getPosition();
+						axl::math::Vec3f text_position = view.text.transform.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_right ? 1.0f : -1.0f) * delta_time;
-						view.text.setPosition(axl::math::Vec3f(text_position.x - delta, text_position.y, text_position.z));
+						view.text.transform.setPosition(axl::math::Vec3f(text_position.x - delta, text_position.y, text_position.z));
 					}
 				}
 				/// -- update
@@ -538,7 +538,7 @@ int main(int argc, char* argv[])
 					static axl::util::WString fps_string(1024);
 					const axl::gl::gfx::Font *current_font = view.text.getFont();
 					axl::math::Vec2i font_size = current_font ? current_font->size : axl::math::Vec2i(0,0);
-					axl::math::Vec3f text_scale = view.text.getScale();
+					axl::math::Vec3f text_scale = view.text.transform.getScale();
 					axl::math::Vec2i texture_size = current_font ? current_font->texture.getSize() : axl::math::Vec2i(0,0);
 					unsigned int glyph_count = current_font ? current_font->glyphs.count() : 0;
 					const wchar_t *halignment_str = L"-", *valignment_str = L"-";
