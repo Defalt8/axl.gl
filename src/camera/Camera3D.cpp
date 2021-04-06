@@ -20,7 +20,7 @@ namespace camera {
 //
 
 axl::gl::projection::Projection DefaultCamera3DProjection = axl::gl::projection::Projection();
-axl::math::Rules::Axis DefaultCamera3DAxisRule = axl::math::Rules::Axis::AXIS_RHS;
+axl::math::Rules::Axis DefaultCamera3DAxisRule = axl::math::Rules::Axis::RHS;
 
 Camera3D::Camera3D(const axl::math::Vec3d& p_position,
 				const axl::math::Vec3d& p_target,
@@ -65,8 +65,8 @@ void Camera3D::updateTransform()
 	switch (this->axis_rule)
 	{
 		default:
-		case axl::math::Rules::Axis::AXIS_RHS: angle.y = -(axl::math::atan2(-delta.x, -delta.z)); break;
-		case axl::math::Rules::Axis::AXIS_LHS: angle.y = -(axl::math::atan2(-delta.x, delta.z)); break;
+		case axl::math::Rules::Axis::RHS: angle.y = -(axl::math::atan2(-delta.x, -delta.z)); break;
+		case axl::math::Rules::Axis::LHS: angle.y = -(axl::math::atan2(-delta.x, delta.z)); break;
 	}
 	angle.x = (axl::math::atan2(hyp, delta.y) - axl::math::Constants::D_HALF_PI);
 	angle.z = -this->roll_angle;
@@ -143,7 +143,7 @@ axl::math::Vec2i Camera3D::worldToScreen(const axl::math::Vec3d& vec3) const
 //
 
 axl::gl::projection::Projectionf DefaultCamera3DfProjection = axl::gl::projection::Projectionf();
-axl::math::Rules::Axis DefaultCamera3DfAxisRule = axl::math::Rules::Axis::AXIS_RHS;
+axl::math::Rules::Axis DefaultCamera3DfAxisRule = axl::math::Rules::Axis::RHS;
 
 Camera3Df::Camera3Df(const axl::math::Vec3f& p_position,
 				const axl::math::Vec3f& p_target,
@@ -188,8 +188,8 @@ void Camera3Df::updateTransform()
 	switch (this->axis_rule)
 	{
 		default:
-		case axl::math::Rules::Axis::AXIS_RHS: angle.y = -(axl::math::atan2(-delta.x, -delta.z)); break;
-		case axl::math::Rules::Axis::AXIS_LHS: angle.y = -(axl::math::atan2(-delta.x, delta.z)); break;
+		case axl::math::Rules::Axis::RHS: angle.y = -(axl::math::atan2(-delta.x, -delta.z)); break;
+		case axl::math::Rules::Axis::LHS: angle.y = -(axl::math::atan2(-delta.x, delta.z)); break;
 	}
 	angle.x = (axl::math::atan2(hyp, delta.y) - axl::math::Constants::F_HALF_PI);
 	angle.z = -this->roll_angle;
