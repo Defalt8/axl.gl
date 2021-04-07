@@ -15,70 +15,6 @@ namespace gl {
 namespace gfx {
 
 //
-// UIElement::Program
-//
-
-UIElement::Program::Program(axl::gl::Context* ptr_context) :
-	axl::gl::gfx::Program(ptr_context)
-{}
-UIElement::Program::~Program()
-{
-	this->destroy();
-}
-bool UIElement::Program::icreate()
-{
-	using namespace GL;
-	if(!axl::gl::gfx::Program::icreate()) return false;
-	Shader vertex_shader(this->ctx_context, GL_VERTEX_SHADER), fragment_shader(this->ctx_context, GL_FRAGMENT_SHADER);
-	if(!vertex_shader.create() || !fragment_shader.create()) return false;
-	vertex_shader.setSource(
-		"# version 330 core\n"
-		"layout(location = 0) in vec2 in_Position;\n"
-		"layout(location = 1) in vec2 in_UV;\n"
-		"uniform mat4 u_MatProjection = mat4(1);\n"
-		"uniform mat4 u_MatView = mat4(1);\n"
-		"uniform mat4 u_MatModel = mat4(1);\n"
-		"out vec2 v_TexCoord;"
-		"void main() {\n"
-		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position, 0.0, 1.0);\n"
-		"	v_TexCoord = in_UV;\n"
-		"}\n"
-		);
-	fragment_shader.setSource(
-		"# version 330 core\n"
-		"in vec2 v_TexCoord;\n"
-		"uniform sampler2D texture;\n"
-		"uniform ivec2 u_Size = ivec2(0,0);"
-		"uniform vec4 u_Border = vec4(0,0,0,0);"
-		"uniform vec4 u_BorderColor = vec4(0,0,0,0);"
-		"void main() {\n"
-		"	vec4 sample = texture2D(texture, v_TexCoord);\n"
-		"	gl_FragColor = (v_TexCoord.x <= (u_Border.x / u_Size.x) || \n"
-		"		v_TexCoord.x >= ((u_Size.x - u_Border.z) / u_Size.x) || \n"
-		"		v_TexCoord.y <= (u_Border.y / u_Size.y) || \n"
-		"		v_TexCoord.y >= ((u_Size.y - u_Border.w) / u_Size.y) \n"
-		"		) ? u_BorderColor : sample;\n"
-		"}\n"
-		);
-	if(!vertex_shader.compile() || !fragment_shader.compile())
-	{
-		printf("===== VIL:\n %s\n", vertex_shader.getInfoLog().cstr());
-		printf("===== FIL:\n %s\n", fragment_shader.getInfoLog().cstr());
-		return false;
-	}
-	vertex_shader.attach(*this);
-	fragment_shader.attach(*this);
-	if(!this->link()) return false;
-	vertex_shader.detach(*this);
-	fragment_shader.detach(*this);
-	return true;
-}
-bool UIElement::Program::idestroy()
-{
-	return axl::gl::gfx::Program::idestroy();
-}
-
-//
 // UIElement
 //
 
@@ -87,12 +23,12 @@ UIElement::UIElement(axl::gl::Context* ptr_context) :
 	transform(),
 	uielement_size(0,0),
 	uielement_border_size(0.0f,0.0f,0.0f,0.0f),
-	uielement_border_color(0.1f,0.1f,0.1f,0.8f),
-	frame_buffer(0),
+	uielement_border_color(0.1f,0.1f,0.1f,1.0f),
+	uielement_frame_buffer(ptr_context),
 	uielement_texture(ptr_context),
+	m_program(ptr_context),
 	m_vertex_array(-1),
 	m_vertex_buffer(-1),
-	m_program(),
 	uloc_projection(-1),
 	uloc_view(-1),
 	uloc_model(-1),
@@ -109,20 +45,23 @@ bool UIElement::isValid() const
 	return this->ctx_context && this->ctx_context->isValid() &&
 		this->m_vertex_array != -1 && this->m_vertex_buffer != -1 &&
 		this->uielement_texture.isValid() &&
-		this->frame_buffer &&
-		this->frame_buffer->isValid() &&
+		this->uielement_frame_buffer.isValid() &&
 		this->m_program.isLinked();
 }
 void UIElement::setContext(axl::gl::Context* ptr_context)
 {
 	ContextObject::setContext(ptr_context);
+	this->uielement_frame_buffer.setContext(ptr_context);
 	this->uielement_texture.setContext(ptr_context);
 	this->m_program.setContext(ptr_context);
 }
 bool UIElement::icreate()
 {
 	using namespace GL;
-	if(!this->frame_buffer || !this->frame_buffer->isValid() || !GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->ctx_context->makeCurrent()) return false;
+	if(!GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->ctx_context->makeCurrent() ||
+		!uielement_frame_buffer.create()
+		)
+		return false;
 	GLCLEARERROR();
 	glGenVertexArrays(1, &this->m_vertex_array);
 	glGenBuffers(1, &this->m_vertex_buffer);
@@ -170,13 +109,13 @@ bool UIElement::icreate()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (GLsizei)(sizeof(GLfloat) * 4), (const void*)(sizeof(GLfloat) * 2));
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-	this->frame_buffer->setSize(axl::math::Vec2i(width, height));
-	if(!(GL::glGetError() == GL_NO_ERROR &&
-		this->uielement_texture.create() &&
-		this->m_program.create() &&
-		this->uielement_texture.allocate(0, width, height, GL::GL_RGBA8) &&
-		this->frame_buffer->attachTexture2D(GL_COLOR_ATTACHMENT0, &this->uielement_texture)
-		))
+	if(!this->uielement_frame_buffer.setSize(axl::math::Vec2i(width, height)) ||
+		GL::glGetError() != GL_NO_ERROR ||
+		!this->uielement_texture.create() ||
+		!this->m_program.create() ||
+		!this->uielement_texture.allocate(0, width, height, GL::GL_RGBA8) ||
+		!this->uielement_frame_buffer.attachTexture2D(GL_COLOR_ATTACHMENT0, &this->uielement_texture)
+		)
 	{
 		this->destroy();
 		return false;
@@ -214,9 +153,13 @@ bool UIElement::render(const camera::Camera3Df* camera)
 {
 	using namespace GL;
 	if(!this->isValid() || !camera || !camera->makeCurrent(this->ctx_context, false)) return false;
-	if(!this->frame_buffer->bind(axl::gl::gfx::FrameBuffer::FBT_BOTH)) return false;
-	this->irender(camera);
-	this->frame_buffer->unbind();
+	if(!this->uielement_frame_buffer.bind(axl::gl::gfx::FrameBuffer::FBT_BOTH)) return false;
+	if(!this->irender(camera))
+	{
+		this->uielement_frame_buffer.unbind(axl::gl::gfx::FrameBuffer::FBT_BOTH);
+		return false;
+	}
+	this->uielement_frame_buffer.unbind(axl::gl::gfx::FrameBuffer::FBT_BOTH);
 	if(!camera->makeCurrent(this->ctx_context, true)) return false;
 	if(camera->projection)
 		this->m_program.setUniformMat4fv(uloc_projection, camera->projection->matrix.values);
@@ -248,7 +191,7 @@ bool UIElement::setSize(const axl::math::Vec2i& size)
 	if(this->isValid())
 	{
 		if(!this->uielement_texture.allocate(0, (GLsizei)size.x, (GLsizei)size.y, GL_RGBA8) ||
-			!this->frame_buffer->setSize(size))
+			!this->uielement_frame_buffer.setSize(size))
 			return false;
 		glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer);
 		if(GL::glGetError() != GL_NO_ERROR) return false;
@@ -304,6 +247,70 @@ const axl::math::Vec4f& UIElement::getBorderSize() const
 const axl::math::Vec4f& UIElement::getBorderColor() const
 {
 	return this->uielement_border_color;
+}
+
+//
+// UIElement::Program
+//
+
+UIElement::Program::Program(axl::gl::Context* ptr_context) :
+	axl::gl::gfx::Program(ptr_context)
+{}
+UIElement::Program::~Program()
+{
+	this->destroy();
+}
+bool UIElement::Program::icreate()
+{
+	using namespace GL;
+	if(!axl::gl::gfx::Program::icreate()) return false;
+	Shader vertex_shader(this->ctx_context, GL_VERTEX_SHADER), fragment_shader(this->ctx_context, GL_FRAGMENT_SHADER);
+	if(!vertex_shader.create() || !fragment_shader.create()) return false;
+	vertex_shader.setSource(
+		"# version 330 core\n"
+		"layout(location = 0) in vec2 in_Position;\n"
+		"layout(location = 1) in vec2 in_UV;\n"
+		"uniform mat4 u_MatProjection = mat4(1);\n"
+		"uniform mat4 u_MatView = mat4(1);\n"
+		"uniform mat4 u_MatModel = mat4(1);\n"
+		"out vec2 v_TexCoord;"
+		"void main() {\n"
+		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position, 0.0, 1.0);\n"
+		"	v_TexCoord = in_UV;\n"
+		"}\n"
+		);
+	fragment_shader.setSource(
+		"# version 330 core\n"
+		"in vec2 v_TexCoord;\n"
+		"uniform sampler2D texture;\n"
+		"uniform ivec2 u_Size = ivec2(0,0);"
+		"uniform vec4 u_Border = vec4(0,0,0,0);"
+		"uniform vec4 u_BorderColor = vec4(0,0,0,0);"
+		"void main() {\n"
+		"	vec4 sample = texture2D(texture, v_TexCoord);\n"
+		"	gl_FragColor = (v_TexCoord.x <= (u_Border.x / u_Size.x) || \n"
+		"		v_TexCoord.x >= ((u_Size.x - u_Border.z) / u_Size.x) || \n"
+		"		v_TexCoord.y <= (u_Border.y / u_Size.y) || \n"
+		"		v_TexCoord.y >= ((u_Size.y - u_Border.w) / u_Size.y) \n"
+		"		) ? u_BorderColor : sample;\n"
+		"}\n"
+		);
+	if(!vertex_shader.compile() || !fragment_shader.compile())
+	{
+		printf("===== UIElement::VIL:\n %s\n", vertex_shader.getInfoLog().cstr());
+		printf("===== UIElement::FIL:\n %s\n", fragment_shader.getInfoLog().cstr());
+		return false;
+	}
+	vertex_shader.attach(*this);
+	fragment_shader.attach(*this);
+	if(!this->link()) return false;
+	vertex_shader.detach(*this);
+	fragment_shader.detach(*this);
+	return true;
+}
+bool UIElement::Program::idestroy()
+{
+	return axl::gl::gfx::Program::idestroy();
 }
 
 } // axl.gl.gfx

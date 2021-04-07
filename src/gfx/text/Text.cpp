@@ -126,6 +126,10 @@ bool Text::render_text(const axl::gl::camera::Camera3Df* camera)
 		this->text_program->setUniform4fv(uniform_location_text_color, &this->text_color.x);
 		if(!this->text_font->texture.bind() || !this->text_program->use())
 			return false;
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+		glEnable(GL_BLEND);
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
 		GLCLEARERROR();
 		glBindVertexArray(this->vertex_array_id);
 		glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer_id);
@@ -134,6 +138,8 @@ bool Text::render_text(const axl::gl::camera::Camera3Df* camera)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
+		glDisable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
 		if(glGetError() != GL_NO_ERROR)
 		{
 			this->text_font->texture.unbind();
