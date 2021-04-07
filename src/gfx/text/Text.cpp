@@ -19,7 +19,7 @@ namespace gl {
 namespace gfx {
 
 Text::Text(axl::gl::Context* ptr_context) :
-	transform(),
+	text_transform(),
 	text_color(0.0f, 0.0f, 0.0f, 1.0f),
 	text_box(0.0f, 0.0f),
 	text_offset(0.0f, 0.0f),
@@ -107,10 +107,12 @@ bool Text::isValid() const
 		   this->vertex_array_id != -1 && this->vertex_buffer_id != -1 && this->element_array_id != -1 &&
 		   this->attribute_location_position != -1 && this->attribute_location_UV != -1;
 }
-bool Text::render(const axl::gl::camera::Camera3Df* camera) const
+bool Text::render_text(const axl::gl::camera::Camera3Df* camera)
 {
 	using namespace GL;
 	if(!this->isValid()) return false;
+	if(this->rec_font_size.notEquals(this->text_font->size))
+		this->updateBuffers(this->text_wstring, false, true);
 	if(actual_text_length > 0)
 	{
 		if(camera)
@@ -119,7 +121,7 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera) const
 				this->text_program->setUniformMat4fv(uniform_location_projection_matrix, camera->projection->matrix.values);
 			this->text_program->setUniformMat4fv(uniform_location_view_matrix, camera->view_transform.values);
 		}
-		this->text_program->setUniformMat4fv(uniform_location_model_matrix, this->transform.getMatrix().values);
+		this->text_program->setUniformMat4fv(uniform_location_model_matrix, this->text_transform.getMatrix().values);
 		this->text_program->setUniform2fv(uniform_location_text_offset, &this->text_offset.x);
 		this->text_program->setUniform4fv(uniform_location_text_color, &this->text_color.x);
 		if(!this->text_font->texture.bind() || !this->text_program->use())

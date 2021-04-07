@@ -199,8 +199,8 @@ class GameView : public axl::gl::View
 					"With this regard their currents turn awry\n"
 					"And lose the name of action."
 					);
-				this->text.transform.setScale(axl::math::Vec3f(1.0f,1.0f,1.0f), false);
-				this->text.transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
+				this->text.text_transform.setScale(axl::math::Vec3f(1.0f,1.0f,1.0f), false);
+				this->text.text_transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
 				this->text.setColor(axl::math::Vec4f(0.2f,0.79f,0.5f,1.0f));
 			}
 			if(this->status_text.create())
@@ -232,7 +232,7 @@ class GameView : public axl::gl::View
 					((axl::gl::projection::Orthographicf*)this->camera.projection)->set(0.0f, (float)this->camera.viewport_size.x, 0.0f, (float)this->camera.viewport_size.y, 0.01f, 1000.0f);
 				}
 				this->camera.projection->updateTransform();
-				this->status_text.transform.setPosition(axl::math::Vec3f((float)this->camera.viewport_size.x - 10.0f, (float)this->camera.viewport_size.y - 10.0f, 0.0f));
+				this->status_text.text_transform.setPosition(axl::math::Vec3f((float)this->camera.viewport_size.x - 10.0f, (float)this->camera.viewport_size.y - 10.0f, 0.0f));
 			}
 			this->update();
 			this->render();
@@ -260,9 +260,9 @@ class GameView : public axl::gl::View
 			if(key_F5.isPressed() && no_modifiers)
 			{
 				this->camera.position.set(0.0f);
-				this->text.transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f), false);
-				this->text.transform.setScale(axl::math::Vec3f::filled(1.0f), false);
-				this->text.transform.setRotation(axl::math::Vec3f::filled(0.0f));
+				this->text.text_transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f), false);
+				this->text.text_transform.setScale(axl::math::Vec3f::filled(1.0f), false);
+				this->text.text_transform.setRotation(axl::math::Vec3f::filled(0.0f));
 			}
 			bool bp_left = key_Left.isPressed(), bp_right = key_Right.isPressed();
 			bool bp_up = key_Up.isPressed(), bp_down = key_Down.isPressed();
@@ -463,24 +463,24 @@ int main(int argc, char* argv[])
 				{
 					if(bk_control && (!bk_shift && !bk_alt))
 					{
-						axl::math::Vec3f text_scale = view.text.transform.getScale();
+						axl::math::Vec3f text_scale = view.text.text_transform.getScale();
 						float delta = 0.8f * (bk_up ? 1.0f : -1.0f) * delta_time;
-						view.text.transform.setScale(text_scale + delta);
+						view.text.text_transform.setScale(text_scale + delta);
 					}
 					else if(no_modifiers)
 					{
-						axl::math::Vec3f text_position = view.text.transform.getPosition();
+						axl::math::Vec3f text_position = view.text.text_transform.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_up ? 1.0f : -1.0f) * delta_time;
-						view.text.transform.setPosition(axl::math::Vec3f(text_position.x, text_position.y - delta, text_position.z));
+						view.text.text_transform.setPosition(axl::math::Vec3f(text_position.x, text_position.y - delta, text_position.z));
 					}
 				}
 				if(bk_left ^ bk_right)
 				{
 					if(no_modifiers)
 					{
-						axl::math::Vec3f text_position = view.text.transform.getPosition();
+						axl::math::Vec3f text_position = view.text.text_transform.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_right ? 1.0f : -1.0f) * delta_time;
-						view.text.transform.setPosition(axl::math::Vec3f(text_position.x - delta, text_position.y, text_position.z));
+						view.text.text_transform.setPosition(axl::math::Vec3f(text_position.x - delta, text_position.y, text_position.z));
 					}
 				}
 				/// -- update
@@ -497,7 +497,7 @@ int main(int argc, char* argv[])
 					static axl::util::WString fps_string(1024);
 					const axl::gl::gfx::Font *current_font = view.text.getFont();
 					axl::math::Vec2i font_size = current_font ? current_font->size : axl::math::Vec2i(0,0);
-					axl::math::Vec3f text_scale = view.text.transform.getScale();
+					axl::math::Vec3f text_scale = view.text.text_transform.getScale();
 					axl::math::Vec2i texture_size = current_font ? current_font->texture.getSize() : axl::math::Vec2i(0,0);
 					unsigned int glyph_count = current_font ? current_font->glyphs.count() : 0;
 					const wchar_t *halignment_str = L"-", *valignment_str = L"-";

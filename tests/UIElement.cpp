@@ -52,7 +52,7 @@ class TestElement : public axl::gl::gfx::UIElement
 			if(!text.create()) return false;
 			text.setAlignment(axl::gl::gfx::Text::TAL_CENTER);
 			text.setText(L"Hello World!");
-			text.transform.setPosition(axl::math::Vec2f((uielement_size.x) / 2.0f, (uielement_size.y) / 2.0f));
+			text.text_transform.setPosition(axl::math::Vec2f((uielement_size.x) / 2.0f, (uielement_size.y) / 2.0f));
 			text.setColor(axl::math::Vec4f(0.9f,0.9f,0.9f,1.0f));
 			return true;
 		}
@@ -67,8 +67,8 @@ class TestElement : public axl::gl::gfx::UIElement
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glClearColor(0.0f, 0.9f, 0.9f, 0.5f);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-			text.transform.setPosition(axl::math::Vec2f((uielement_size.x) / 2.0f, (uielement_size.y) / 2.0f));
-			text.render(camera);
+			text.text_transform.setPosition(axl::math::Vec2f((uielement_size.x) / 2.0f, (uielement_size.y) / 2.0f));
+			text.render_text(camera);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 		}
@@ -85,7 +85,7 @@ class GameView : public axl::gl::View
 		axl::gl::gfx::Program text_program;
 		axl::gl::gfx::Font font, font1, font2;
 		axl::gl::gfx::Text text, status_text;
-		TestElement test_element;
+		axl::gl::gfx::ui::TextView test_element;
 		axl::gl::gfx::UIFrameBuffer ui_frame_buffer;
 	private:
 		axl::gl::Cursor NormalCursor;
@@ -183,16 +183,22 @@ class GameView : public axl::gl::View
 			if(!this->camera.makeCurrent(&this->main_context)) return;
 			if(p_clear)
 			{
-				GL::glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+				GL::glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
-			this->text.render(&this->camera);
-			this->status_text.render(&this->camera);
+			this->text.render_text(&this->camera);
+			this->status_text.render_text(&this->camera);
 			this->test_element.setSize(axl::math::Vec2i(300,75));
-			this->test_element.transform.setPosition(axl::math::Vec3f(100.0f,105.0f,0.0f));
+			this->test_element.transform.setPosition(axl::math::Vec3f(100.0f,120.0f,0.0f));
+			this->test_element.setColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
+			this->test_element.setBackgroundColor(axl::math::Vec4f(0.3f,0.7f,0.85f,1.0f));
+			this->test_element.setBorderColor(axl::math::Vec4f(0.97f,0.97f,0.97f,1.0f));
 			this->test_element.render(&this->camera);
 			this->test_element.setSize(axl::math::Vec2i(200,40));
 			this->test_element.transform.setPosition(axl::math::Vec3f(150.0f,100.0f,-0.01f));
+			this->test_element.setColor(axl::math::Vec4f(0.2f,0.2f,0.1f,1.0f));
+			this->test_element.setBackgroundColor(axl::math::Vec4f(0.99f,0.99f,0.99f,1.0f));
+			this->test_element.setBorderColor(axl::math::Vec4f(0.6f,0.4f,0.1f,1.0f));
 			this->test_element.render(&this->camera);
 		}
 
@@ -219,11 +225,11 @@ class GameView : public axl::gl::View
 			GL::loadVFShaders(this->text_program, "tests/shaders/330/text_vuPVMs.vert", "tests/shaders/330/text_vuPVMs.frag");
 			if(this->font.create())
 			{
-				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(16,16)));
+				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(12,12)));
 			}
 			if(this->font1.create())
 			{
-				Assert(this->font1.loadFromFile("../../common/fonts/Roboto-Italic.ttf", axl::math::Vec2i(16,16)));
+				Assert(this->font1.loadFromFile("../../common/fonts/Roboto-Italic.ttf", axl::math::Vec2i(18,18)));
 			}
 			if(this->font2.create())
 			{
@@ -234,9 +240,9 @@ class GameView : public axl::gl::View
 				this->text.setAlignment(axl::gl::gfx::Text::Alignment::TAL_TOP_LEFT);
 				this->text.setSpacing(axl::math::Vec2f(1.0f, 1.0f));
 				this->text.setText(axl::util::File::getWStringContent("tests/sample_text.txt"));
-				this->text.transform.setScale(axl::math::Vec3f(1.0f,1.0f,1.0f), false);
-				this->text.transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
-				this->text.setColor(axl::math::Vec4f(0.2f,0.79f,0.5f,1.0f));
+				this->text.text_transform.setScale(axl::math::Vec3f(1.0f,1.0f,1.0f), false);
+				this->text.text_transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
+				this->text.setColor(axl::math::Vec4f(0.0f,0.0f,0.0f,1.0f));
 			}
 			if(this->status_text.create())
 			{
@@ -246,11 +252,15 @@ class GameView : public axl::gl::View
 				this->status_text.setColor(axl::math::Vec4f(0.9f,0.1f,0.9f,0.9f));
 			}
 			Assert(this->ui_frame_buffer.create());
+			this->test_element.setProgram(&this->text_program);
+			this->test_element.setFont(&this->font1);
 			this->test_element.frame_buffer = &ui_frame_buffer;
 			this->test_element.setSize(axl::math::Vec2i(300,200));
 			this->test_element.transform.setPosition(axl::math::Vec3f(100.0f,140.0f,0.0f));
-			Assert(this->test_element.create());
-			Assert(this->test_element.isValid());
+			this->test_element.setBorderColor(axl::math::Vec4f(0.97f,0.97f,0.97f,1.0f));
+			this->test_element.setBorderSize(axl::math::Vec4f(1.0f,2.0f,1.0f,2.0f));
+			Assert(((axl::gl::gfx::UIElement*)&this->test_element)->create());
+			Assert(((axl::gl::gfx::UIElement*)&this->test_element)->isValid());
 			return axl::gl::View::onCreate(recreating);
 		}
 
@@ -273,7 +283,7 @@ class GameView : public axl::gl::View
 					this->projection.set(0.0f, (float)this->camera.viewport_size.x, 0.0f, (float)this->camera.viewport_size.y,-10.0f, 10.0f);
 				}
 				this->projection.updateTransform();
-				this->status_text.transform.setPosition(axl::math::Vec3f((float)this->camera.viewport_size.x - 10.0f, (float)this->camera.viewport_size.y - 10.0f, 0.0f));
+				this->status_text.text_transform.setPosition(axl::math::Vec3f((float)this->camera.viewport_size.x - 10.0f, (float)this->camera.viewport_size.y - 10.0f, 0.0f));
 			}
 			this->update();
 			this->render();
@@ -301,9 +311,9 @@ class GameView : public axl::gl::View
 			if(key_F5.isPressed() && no_modifiers)
 			{
 				this->camera.position.set(0.0f);
-				this->text.transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
-				this->text.transform.setScale(axl::math::Vec3f::filled(1.0f), false);
-				this->text.transform.setRotation(axl::math::Vec3f::filled(0.0f));
+				this->text.text_transform.setPosition(axl::math::Vec3f(5.0f, (float)this->camera.viewport_size.y - 5.0f, -0.1f));
+				this->text.text_transform.setScale(axl::math::Vec3f::filled(1.0f), false);
+				this->text.text_transform.setRotation(axl::math::Vec3f::filled(0.0f));
 			}
 			bool bp_left = key_Left.isPressed(), bp_right = key_Right.isPressed();
 			bool bp_up = key_Up.isPressed(), bp_down = key_Down.isPressed();
@@ -413,7 +423,7 @@ class GameView : public axl::gl::View
 							if(current_font)
 							{
 								current_font->setSize(axl::math::Vec2i::filled(this->font.size.x + size_delta));
-								this->text.updateBuffers();
+								// this->text.updateBuffers();
 							}
 							size_delta = 0;
 						}
@@ -504,24 +514,24 @@ int main(int argc, char* argv[])
 				{
 					if(bk_control && (!bk_shift && !bk_alt))
 					{
-						axl::math::Vec3f text_scale = view.text.transform.getScale();
+						axl::math::Vec3f text_scale = view.text.text_transform.getScale();
 						float delta = 0.8f * (bk_up ? 1.0f : -1.0f) * delta_time;
-						view.text.transform.setScale(text_scale + delta);
+						view.text.text_transform.setScale(text_scale + delta);
 					}
 					else if(no_modifiers)
 					{
-						axl::math::Vec3f text_position = view.text.transform.getPosition();
+						axl::math::Vec3f text_position = view.text.text_transform.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_up ? 1.0f : -1.0f) * delta_time;
-						view.text.transform.setPosition(axl::math::Vec3f(text_position.x, text_position.y - delta, text_position.z));
+						view.text.text_transform.setPosition(axl::math::Vec3f(text_position.x, text_position.y - delta, text_position.z));
 					}
 				}
 				if(bk_left ^ bk_right)
 				{
 					if(no_modifiers)
 					{
-						axl::math::Vec3f text_position = view.text.transform.getPosition();
+						axl::math::Vec3f text_position = view.text.text_transform.getPosition();
 						float delta = 1.0f * view.camera.viewport_size.y * (bk_right ? 1.0f : -1.0f) * delta_time;
-						view.text.transform.setPosition(axl::math::Vec3f(text_position.x - delta, text_position.y, text_position.z));
+						view.text.text_transform.setPosition(axl::math::Vec3f(text_position.x - delta, text_position.y, text_position.z));
 					}
 				}
 				/// -- update
@@ -538,7 +548,7 @@ int main(int argc, char* argv[])
 					static axl::util::WString fps_string(1024);
 					const axl::gl::gfx::Font *current_font = view.text.getFont();
 					axl::math::Vec2i font_size = current_font ? current_font->size : axl::math::Vec2i(0,0);
-					axl::math::Vec3f text_scale = view.text.transform.getScale();
+					axl::math::Vec3f text_scale = view.text.text_transform.getScale();
 					axl::math::Vec2i texture_size = current_font ? current_font->texture.getSize() : axl::math::Vec2i(0,0);
 					unsigned int glyph_count = current_font ? current_font->glyphs.count() : 0;
 					const wchar_t *halignment_str = L"-", *valignment_str = L"-";

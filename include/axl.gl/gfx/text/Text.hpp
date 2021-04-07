@@ -51,10 +51,11 @@ class AXLGLCXXAPI Text : public ContextObject
 		bool icreate();
 		bool idestroy();
 		bool isValid() const;
-		bool render(const axl::gl::camera::Camera3Df* camera = 0) const;
-		// void updateTransform();
-		void updateBuffers();
+		bool render_text(const axl::gl::camera::Camera3Df* camera = 0);
+		void updateBuffers(void);
+	protected:
 		void updateAlignment();
+	public:
 		// set methods
 		void setColor(const axl::math::Vec4f& color);
 		bool setSpacing(const axl::math::Vec2f& spacing);
@@ -79,7 +80,7 @@ class AXLGLCXXAPI Text : public ContextObject
 	protected:
 		bool updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed = false, bool font_attribute_altered = false);
 	public:
-		axl::math::Transform4f transform;
+		axl::math::Transform4f text_transform;
 	protected:
 		axl::math::Vec4f text_color;
 		axl::math::Vec2f text_offset;
