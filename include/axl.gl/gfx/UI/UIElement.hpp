@@ -31,16 +31,23 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		virtual void setContext(axl::gl::Context* ptr_context);
 		virtual bool icreate();
 		virtual bool idestroy();
+	protected:
 		virtual void irender(const camera::Camera3Df* camera) = 0;
-		bool render(const camera::Camera3Df* camera);
 	public:
-		bool setSize(const axl::math::Vec2i& bounds);
-		const axl::math::Vec2i& getSize();
+		bool render(const camera::Camera3Df* camera);
+		bool setSize(const axl::math::Vec2i& size);
+		bool setBorderSize(const axl::math::Vec4f& border_size);
+		bool setBorderColor(const axl::math::Vec4f& border_color);
+		const axl::math::Vec2i& getSize() const;
+		const axl::math::Vec4f& getBorderSize() const;
+		const axl::math::Vec4f& getBorderColor() const;
 	public:
 		axl::math::Transform4f transform;
 		axl::gl::gfx::UIFrameBuffer* frame_buffer;
 	protected:
 		axl::math::Vec2i uielement_size;
+		axl::math::Vec4f uielement_border_size;
+		axl::math::Vec4f uielement_border_color;
 		gfx::Texture2D uielement_texture;
 	private:
 		axl::glfl::GLuint m_vertex_array;
@@ -49,6 +56,9 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		axl::glfl::GLint uloc_projection;
 		axl::glfl::GLint uloc_view;
 		axl::glfl::GLint uloc_model;
+		axl::glfl::GLint uloc_size;
+		axl::glfl::GLint uloc_border;
+		axl::glfl::GLint uloc_border_color;
 
 };
 

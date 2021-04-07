@@ -46,11 +46,18 @@ bool UIElement::Program::icreate()
 		);
 	fragment_shader.setSource(
 		"# version 330 core\n"
-		"in vec2 v_TexCoord;"
-		"uniform sampler2D texture;"
+		"in vec2 v_TexCoord;\n"
+		"uniform sampler2D texture;\n"
+		"uniform ivec2 u_Size = ivec2(0,0);"
+		"uniform vec4 u_Border = vec4(0,0,0,0);"
+		"uniform vec4 u_BorderColor = vec4(0,0,0,0);"
 		"void main() {\n"
 		"	vec4 sample = texture2D(texture, v_TexCoord);\n"
-		"	gl_FragColor = sample;\n"
+		"	gl_FragColor = (v_TexCoord.x <= (u_Border.x / u_Size.x) || \n"
+		"		v_TexCoord.x >= ((u_Size.x - u_Border.z) / u_Size.x) || \n"
+		"		v_TexCoord.y <= (u_Border.y / u_Size.y) || \n"
+		"		v_TexCoord.y >= ((u_Size.y - u_Border.w) / u_Size.y) \n"
+		"		) ? u_BorderColor : sample;\n"
 		"}\n"
 		);
 	if(!vertex_shader.compile() || !fragment_shader.compile())
@@ -79,6 +86,8 @@ UIElement::UIElement(axl::gl::Context* ptr_context) :
 	ContextObject(ptr_context),
 	transform(),
 	uielement_size(0,0),
+	uielement_border_size(0.0f,0.0f,0.0f,0.0f),
+	uielement_border_color(0.1f,0.1f,0.1f,0.8f),
 	frame_buffer(0),
 	uielement_texture(ptr_context),
 	m_vertex_array(-1),
@@ -86,7 +95,10 @@ UIElement::UIElement(axl::gl::Context* ptr_context) :
 	m_program(),
 	uloc_projection(-1),
 	uloc_view(-1),
-	uloc_model(-1)
+	uloc_model(-1),
+	uloc_size(-1),
+	uloc_border(-1),
+	uloc_border_color(-1)
 {}
 UIElement::~UIElement()
 {
@@ -172,6 +184,9 @@ bool UIElement::icreate()
 	this->uloc_projection = this->m_program.getUniformLocation("u_MatProjection");
 	this->uloc_view = this->m_program.getUniformLocation("u_MatView");
 	this->uloc_model = this->m_program.getUniformLocation("u_MatModel");
+	this->uloc_size = this->m_program.getUniformLocation("u_Size");
+	this->uloc_border = this->m_program.getUniformLocation("u_Border");
+	this->uloc_border_color = this->m_program.getUniformLocation("u_BorderColor");
 	return true;
 }
 bool UIElement::idestroy()
@@ -199,7 +214,7 @@ bool UIElement::render(const camera::Camera3Df* camera)
 {
 	using namespace GL;
 	if(!this->isValid() || !camera || !camera->makeCurrent(this->ctx_context, false)) return false;
-	if(!this->frame_buffer->bind(axl::gl::gfx::FrameBuffer::FBT_DRAW)) return false;
+	if(!this->frame_buffer->bind(axl::gl::gfx::FrameBuffer::FBT_BOTH)) return false;
 	this->irender(camera);
 	this->frame_buffer->unbind();
 	if(!camera->makeCurrent(this->ctx_context, true)) return false;
@@ -207,6 +222,9 @@ bool UIElement::render(const camera::Camera3Df* camera)
 		this->m_program.setUniformMat4fv(uloc_projection, camera->projection->matrix.values);
 	this->m_program.setUniformMat4fv(uloc_view, camera->view_transform.values);
 	this->m_program.setUniformMat4fv(uloc_model, this->transform.getMatrix().values);
+	this->m_program.setUniform2iv(uloc_size, &this->uielement_size.x);
+	this->m_program.setUniform4fv(uloc_border, &this->uielement_border_size.x);
+	this->m_program.setUniform4fv(uloc_border_color, &this->uielement_border_color.x);
 	if(!this->m_program.use() || !this->uielement_texture.bind()) return false;
 	GLCLEARERROR();
 	glEnable(GL_BLEND);
@@ -260,9 +278,32 @@ bool UIElement::setSize(const axl::math::Vec2i& size)
 	this->uielement_size = size;
 	return true;
 }
-const axl::math::Vec2i& UIElement::getSize()
+
+bool UIElement::setBorderSize(const axl::math::Vec4f& border_size)
+{
+	if(border_size.x < 0.0f || border_size.y < 0.0f || border_size.z < 0.0f || border_size.w < 0.0f)
+		return false;
+	this->uielement_border_size = border_size;
+	return true;
+}
+bool UIElement::setBorderColor(const axl::math::Vec4f& border_color)
+{
+	if(border_color.x < 0.0f || border_color.y < 0.0f || border_color.z < 0.0f || border_color.w < 0.0f)
+		return false;
+	this->uielement_border_color = border_color;
+	return true;
+}
+const axl::math::Vec2i& UIElement::getSize() const
 {
 	return this->uielement_size;
+}
+const axl::math::Vec4f& UIElement::getBorderSize() const
+{
+	return this->uielement_border_size;
+}
+const axl::math::Vec4f& UIElement::getBorderColor() const
+{
+	return this->uielement_border_color;
 }
 
 } // axl.gl.gfx
