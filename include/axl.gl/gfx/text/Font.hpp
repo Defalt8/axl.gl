@@ -30,6 +30,12 @@ template class AXLGLCXXAPI axl::util::ds::Array<axl::gl::gfx::GlyphData>;
 class AXLGLCXXAPI Font : public ContextObject
 {
 	public:
+		enum Quality {
+			Q_LOW,
+			Q_MEDIUM,
+			Q_HIGH
+		};
+	public:
 		Font(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Font();
 		bool icreate();
@@ -37,6 +43,7 @@ class AXLGLCXXAPI Font : public ContextObject
 		bool isValid() const;
 		bool loadFromFile(const axl::util::String& filepath, const axl::math::Vec2i& font_size);
 		bool setSize(const axl::math::Vec2i& font_size);
+		bool setQuality(Quality quality);
 		unsigned int getCharIndex(axl::util::WString::char_t unicode_char) const;
 	private:
 		bool loadGlyphs(const axl::math::Vec2i& font_size, int level = 0, unsigned long count = -1);

@@ -11,9 +11,7 @@
 
 namespace GL {
 	using namespace axl::glfl;
-	using namespace axl::glfl::core::GL1;
-	using namespace axl::glfl::core::GL2;
-	using namespace axl::glfl::core::GL3;
+	using namespace axl::glfl::core::GL;
 }
 
 namespace axl {
@@ -156,6 +154,26 @@ bool Font::setSize(const axl::math::Vec2i& font_size)
 	}
 	return false;
 }
+bool Font::setQuality(Font::Quality quality)
+{
+	using namespace GL;
+	if(!this->isValid())
+		return false;
+	switch(quality)
+	{
+		default:
+		case Q_LOW:
+			return this->font_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
+				this->font_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		case Q_MEDIUM:
+			return this->font_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
+				this->font_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		case Q_HIGH:
+			return this->font_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_LINEAR) &&
+				this->font_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	return false;
+}
 
 unsigned int Font::getCharIndex(axl::util::WString::char_t unicode_char) const
 {
@@ -230,7 +248,7 @@ bool Font::loadGlyphs(const axl::math::Vec2i& font_size, int level, unsigned lon
 					this->font_glyphs[glyph_index].UV.x = ((float)(glyph_index % x_count) * glyph_size_x / atlas_width);
 					this->font_glyphs[glyph_index].UV.y = ((float)(glyph_index / x_count) * glyph_size_y / atlas_height);
 					this->font_glyphs[glyph_index].UV.z = this->font_glyphs[glyph_index].UV.x + ((float)this->font_glyphs[glyph_index].width / atlas_width);
-					this->font_glyphs[glyph_index].UV.w = this->font_glyphs[glyph_index].UV.y + ((float)this->font_glyphs[glyph_index].height / atlas_height);
+					this->font_glyphs[glyph_index].UV.w = this->font_glyphs[glyph_index].UV.y + ((float)(this->font_glyphs[glyph_index].height + 1) / atlas_height);
 				}
 				if(font_data->face->glyph->format == FT_GLYPH_FORMAT_BITMAP)
 				{
