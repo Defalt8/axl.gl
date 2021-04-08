@@ -61,6 +61,8 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		bool setSize(const axl::math::Vec2i& size);
 		void setBackgroundColor(const axl::math::Vec4f& bg_color);
 		void setTextColor(const axl::math::Vec4f& text_color);
+		void setShadowColor(const axl::math::Vec4f& shadow_color);
+		void setShadowOffset(const axl::math::Vec2f& shadow_offset);
 		bool setSpacing(const axl::math::Vec2f& spacing);
 		bool setOrigin(const axl::math::Vec2f& origin);
 		bool setPadding(const axl::math::Vec4f& padding);
@@ -74,6 +76,8 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		// get methods
 		const axl::math::Vec4f& getBackgroundColor() const;
 		const axl::math::Vec4f& getTextColor() const;
+		const axl::math::Vec4f& getShadowColor() const;
+		const axl::math::Vec2f& getShadowOffset() const;
 		const axl::math::Vec2f& getSpacing() const;
 		const axl::math::Vec2f& getOrigin() const;
 		const axl::math::Vec4f& getPadding() const;
@@ -85,6 +89,8 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		AlignmentFlag getAlignment() const;
 		HorizontalAlignment getHorizontalAlignment() const;
 		VerticalAlignment getVerticalAlignment() const;
+	public:
+		bool enable_shadow;
 	protected:
 		void updateOffset();
 		void updateAlignment();
@@ -94,6 +100,8 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		axl::util::WString txtv_wstring;
 		axl::math::Vec4f txtv_background_color;
 		axl::math::Vec4f txtv_text_color;
+		axl::math::Vec2f txtv_shadow_offset;
+		axl::math::Vec4f txtv_shadow_color;
 		axl::math::Vec2f txtv_spacing;
 		axl::math::Vec2f txtv_origin;
 		axl::math::Vec4f txtv_padding;
@@ -102,6 +110,7 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		const axl::gl::gfx::Font* txtv_font;
 		const axl::gl::gfx::Program* txtv_program;
 		AlignmentFlag txtv_alignment;
+		axl::math::Transform4f txtv_transform;
 	private:
 		unsigned int m_actual_text_length;
 		axl::math::Vec2i m_rec_font_size;
@@ -110,10 +119,12 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		axl::glfl::GLuint m_element_array_id;
 		axl::glfl::GLint m_attribute_location_position;
 		axl::glfl::GLint m_attribute_location_UV;
-		axl::glfl::GLint m_uniform_location_projection_matrix;
-		axl::glfl::GLint m_uniform_location_view_matrix;
-		axl::glfl::GLint m_uniform_location_text_offset;
-		axl::glfl::GLint m_uniform_location_text_color;
+		axl::glfl::GLint m_uloc_projection_matrix;
+		axl::glfl::GLint m_uloc_view_matrix;
+		axl::glfl::GLint m_uloc_model_matrix;
+		axl::glfl::GLint m_uloc_text_offset;
+		axl::glfl::GLint m_uloc_text_color;
+		axl::glfl::GLint m_uloc_depth;
 };
 
 } // axl.gl.gfx.ui

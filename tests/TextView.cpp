@@ -110,7 +110,7 @@ class GameView : public axl::gl::View
 			if(!this->camera.makeCurrent(&this->main_context)) return;
 			if(p_clear)
 			{
-				GL::glClearColor(0.05f, 0.2f, 0.3f, 0.0f);
+				GL::glClearColor(0.85f, 0.8f, 0.8f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
 			this->status_text.render(&this->camera);
@@ -143,36 +143,38 @@ class GameView : public axl::gl::View
 			if(this->font_status.create())
 			{
 				Assert(this->font_status.loadFromFile("../../common/fonts/Roboto-Bold.ttf", axl::math::Vec2i(12,12)));
-				// Assert(this->font_status.setQuality(axl::gl::gfx::Font::Q_LOW));
+				Assert(this->font_status.setQuality(axl::gl::gfx::Font::Q_HIGH));
 			}
 			if(this->font1.create())
 			{
-				Assert(this->font1.loadFromFile("../../common/fonts/Montserrat-Bold.ttf", axl::math::Vec2i(22,22)));
-				// Assert(this->font1.setQuality(axl::gl::gfx::Font::Q_HIGH));
+				Assert(this->font1.loadFromFile("../../common/fonts/Montserrat-Bold.ttf", axl::math::Vec2i(26,26)));
+				Assert(this->font1.setQuality(axl::gl::gfx::Font::Q_HIGH));
 			}
 			if(this->font2.create())
 			{
 				Assert(this->font2.loadFromFile("../../common/fonts/Roboto-Light.ttf", axl::math::Vec2i(22,22)));
-				// Assert(this->font2.setQuality(axl::gl::gfx::Font::Q_HIGH));
+				Assert(this->font2.setQuality(axl::gl::gfx::Font::Q_HIGH));
 			}
 			Assert(this->text_view_program.create());
 			//
-			this->status_text.setAlignment(axl::gl::gfx::Text::Alignment::TAL_TOP_RIGHT);
-			this->status_text.setTextColor(axl::math::Vec4f(0.99f,0.5f,0.0f,1.0f));
-			this->status_text.setBackgroundColor(axl::math::Vec4f(0.99f,0.99f,0.99f,0.1f));
-			this->status_text.setBorderColor(axl::math::Vec4f(0.0f,0.9f,0.0f,1.0f));
-			this->status_text.setBorderSize(axl::math::Vec4f(1.0f,1.0f,2.0f,1.0f));
-			this->status_text.setSpacing(axl::math::Vec2f(0.0f,0.0f));
-			this->status_text.setPadding(axl::math::Vec4f(5.0f,5.0f,5.0f,5.0f));
-			this->status_text.setSize(axl::math::Vec2i(300,220));
-			Assert(this->status_text.create());
-			Assert(this->status_text.setStorageSize(256));
-			Assert(this->status_text.setText(L"{TODO:status}"));
-			Assert(this->status_text.setQuality(axl::gl::gfx::UIElement::Q_HIGH));
+			{
+				this->status_text.setAlignment(axl::gl::gfx::Text::Alignment::TAL_TOP_RIGHT);
+				this->status_text.setTextColor(axl::math::Vec4f(0.0f,1.0f,0.0f,1.0f));
+				this->status_text.setBackgroundColor(axl::math::Vec4f(0.0f,0.0f,0.8f,0.8f));
+				this->status_text.setBorderColor(axl::math::Vec4f(1.0f,0.0f,0.0f,1.0f));
+				this->status_text.setBorderSize(axl::math::Vec4f(1.0f,1.0f,2.0f,1.0f));
+				this->status_text.setSpacing(axl::math::Vec2f(0.0f,0.0f));
+				this->status_text.setPadding(axl::math::Vec4f(5.0f,5.0f,5.0f,5.0f));
+				this->status_text.setSize(axl::math::Vec2i(300,220));
+				Assert(this->status_text.create());
+				Assert(this->status_text.setStorageSize(256));
+				Assert(this->status_text.setText(L"{TODO:status}"));
+				Assert(this->status_text.setQuality(axl::gl::gfx::UIElement::Q_HIGH));
+			}
 			//
 			{
 				this->text_view[0].setFont(&this->font2);
-				this->text_view[0].transform.setPosition(axl::math::Vec3f(100.0f,40.0f,-0.01f));
+				this->text_view[0].transform.setPosition(axl::math::Vec3f(69.0f,69.0f,-0.01f));
 				this->text_view[0].setTextColor(axl::math::Vec4f(0.1f,0.1f,0.1f,1.0f));
 				this->text_view[0].setBackgroundColor(axl::math::Vec4f(0.94f,0.94f,0.94f,1.0f));
 				this->text_view[0].setBorderColor(axl::math::Vec4f(0.9f,0.0f,0.1f,1.0f));
@@ -186,12 +188,12 @@ class GameView : public axl::gl::View
 			}
 			{
 				this->text_view[1].setFont(&this->font2);
-				this->text_view[1].transform.setPosition(axl::math::Vec3f(100.0f,100.0f,0.0f));
-				this->text_view[1].setTextColor(axl::math::Vec4f(0.98f,0.98f,0.1f,1.0f));
-				this->text_view[1].setBackgroundColor(axl::math::Vec4f(0.1f,0.1f,0.1f,0.5f));
-				this->text_view[1].setBorderColor(axl::math::Vec4f(0.9f,0.1f,0.9f,0.96f));
-				this->text_view[1].setBorderSize(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
-				this->text_view[1].setPadding(axl::math::Vec4f(2.0f,2.0f,2.0f,2.0f));
+				this->text_view[1].transform.setPosition(axl::math::Vec3f(69.0f,129.0f,0.0f));
+				this->text_view[1].setTextColor(axl::math::Vec4f(1.0f,0.6f,0.0f,1.0f));
+				this->text_view[1].setBackgroundColor(axl::math::Vec4f(0.1f,0.1f,0.3f,0.9f));
+				this->text_view[1].setBorderColor(axl::math::Vec4f(1.0f,0.6f,0.0f,1.0f));
+				this->text_view[1].setBorderSize(axl::math::Vec4f(4.0f,4.0f,4.0f,4.0f));
+				this->text_view[1].setPadding(axl::math::Vec4f(10.0f,6.0f,10.0f,6.0f));
 				this->text_view[1].setSpacing(axl::math::Vec2f(1.0f,0.0f));
 				Assert(this->text_view[1].create());
 				Assert(this->text_view[1].setQuality(axl::gl::gfx::UIElement::Q_MEDIUM));
@@ -200,8 +202,9 @@ class GameView : public axl::gl::View
 			}
 			{
 				this->text_view[2].setFont(&this->font1);
-				this->text_view[2].transform.setPosition(axl::math::Vec3f(100.0f,180.0f,0.0f));
-				// this->text_view[2].setTextColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
+				this->text_view[2].transform.setPosition(axl::math::Vec3f(69.0f,209.0f,0.0f));
+				this->text_view[2].enable_shadow = true;
+				this->text_view[2].setShadowOffset(axl::math::Vec2f(1.0f,-1.0f));
 				this->text_view[2].setTextColor(axl::math::Vec4f(0.96f,1.0f,0.0f,1.0f));
 				this->text_view[2].setBackgroundColor(axl::math::Vec4f(0.3f,0.9f,0.9f,0.8f));
 				this->text_view[2].setBorderColor(axl::math::Vec4f(0.96f,1.0f,0.0f,1.0f));
@@ -215,10 +218,13 @@ class GameView : public axl::gl::View
 			}
 			{
 				this->text_view[3].setFont(&this->font1);
-				this->text_view[3].transform.setPosition(axl::math::Vec3f(100.0f,350.0f,0.0f));
+				this->text_view[3].transform.setPosition(axl::math::Vec3f(69.0f,379.0f,0.0f));
 				this->text_view[3].setTextColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
-				this->text_view[3].setBackgroundColor(axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f));
-				this->text_view[3].setBorderColor(axl::math::Vec4f(0.9f,0.9f,0.9f,1.0f));
+				this->text_view[3].enable_shadow = true;
+				this->text_view[3].setShadowOffset(axl::math::Vec2f(1.0f,-2.0f));
+				this->text_view[3].setShadowColor(axl::math::Vec4f(1.0f,0.0f,0.0f,0.9f));
+				this->text_view[3].setBackgroundColor(axl::math::Vec4f(0.0f,0.0f,0.0f,0.1f));
+				this->text_view[3].setBorderColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
 				this->text_view[3].setBorderSize(axl::math::Vec4f(2.0f,0.0f,0.0f,0.0f));
 				this->text_view[3].setPadding(axl::math::Vec4f(10.0f,10.0f,10.0f,10.0f));
 				this->text_view[3].setSpacing(axl::math::Vec2f(1.0f,2.0f));

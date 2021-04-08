@@ -17,9 +17,12 @@ namespace ui {
 
 TextView::TextView(axl::gl::Context* ptr_context, axl::gl::gfx::Font* ptr_font, axl::gl::gfx::Program* ptr_program, axl::math::Vec2i size) :
 	axl::gl::gfx::UIElement(ptr_context),
+	enable_shadow(false),
 	txtv_wstring(L"TextView"),
 	txtv_background_color(axl::math::Vec4f(0.9f,0.9f,0.9f,0.0f)),
 	txtv_text_color(axl::math::Vec4f(0.1f,0.1f,0.1f,1.0f)),
+	txtv_shadow_color(axl::math::Vec4f(0.0f,0.0f,0.0f,0.69f)),
+	txtv_shadow_offset(axl::math::Vec2f(0.0f,0.0f)),
 	txtv_spacing(0.0f,0.0f),
 	txtv_origin(0.5f,0.5f),
 	txtv_padding(4.0f,4.0f,4.0f,4.0f),
@@ -28,6 +31,7 @@ TextView::TextView(axl::gl::Context* ptr_context, axl::gl::gfx::Font* ptr_font, 
 	txtv_font(ptr_font),
 	txtv_program(ptr_program),
 	txtv_alignment(axl::gl::gfx::ui::TextView::TAL_LEFT_CENTER),
+	txtv_transform(),
 	m_actual_text_length(0),
 	m_rec_font_size(-1,-1),
 	m_vertex_array_id(-1),
@@ -35,10 +39,12 @@ TextView::TextView(axl::gl::Context* ptr_context, axl::gl::gfx::Font* ptr_font, 
 	m_element_array_id(-1),
 	m_attribute_location_position(-1),
 	m_attribute_location_UV(-1),
-	m_uniform_location_projection_matrix(-1),
-	m_uniform_location_view_matrix(-1),
-	m_uniform_location_text_offset(-1),
-	m_uniform_location_text_color(-1)
+	m_uloc_projection_matrix(-1),
+	m_uloc_view_matrix(-1),
+	m_uloc_model_matrix(-1),
+	m_uloc_text_offset(-1),
+	m_uloc_text_color(-1),
+	m_uloc_depth(-1)
 {
 	axl::gl::gfx::UIElement::setSize(size);
 	this->updateAlignment();
@@ -118,10 +124,12 @@ bool TextView::idestroy()
 	this->m_vertex_array_id = -1;
 	this->m_attribute_location_position = -1;
 	this->m_attribute_location_UV = -1;
-	this->m_uniform_location_projection_matrix = -1;
-	this->m_uniform_location_view_matrix = -1;
-	this->m_uniform_location_text_offset = -1;
-	this->m_uniform_location_text_color = -1;
+	this->m_uloc_projection_matrix = -1;
+	this->m_uloc_view_matrix = -1;
+	this->m_uloc_model_matrix = -1;
+	this->m_uloc_text_offset = -1;
+	this->m_uloc_text_color = -1;
+	this->m_uloc_depth = -1;
 	return axl::gl::gfx::UIElement::idestroy();
 }
 
@@ -141,6 +149,14 @@ void TextView::setBackgroundColor(const axl::math::Vec4f& bg_color)
 void TextView::setTextColor(const axl::math::Vec4f& text_color)
 {
 	this->txtv_text_color = text_color;
+}
+void TextView::setShadowColor(const axl::math::Vec4f& shadow_color)
+{
+	this->txtv_shadow_color = shadow_color;
+}
+void TextView::setShadowOffset(const axl::math::Vec2f& shadow_offset)
+{
+	this->txtv_shadow_offset = shadow_offset;
 }
 bool TextView::setSpacing(const axl::math::Vec2f& spacing)
 {
@@ -191,25 +207,31 @@ bool TextView::setProgram(const axl::gl::gfx::Program* text_shader_program)
 	{
 		this->m_attribute_location_position = this->txtv_program->getAttributeLocation("in_Position");
 		this->m_attribute_location_UV = this->txtv_program->getAttributeLocation("in_UV");
-		this->m_uniform_location_projection_matrix = this->txtv_program->getUniformLocation("u_MatProjection");
-		this->m_uniform_location_view_matrix = this->txtv_program->getUniformLocation("u_MatView");
-		this->m_uniform_location_text_offset = this->txtv_program->getUniformLocation("u_TextOffset");
-		this->m_uniform_location_text_color = this->txtv_program->getUniformLocation("u_TextColor");
+		this->m_uloc_projection_matrix = this->txtv_program->getUniformLocation("u_MatProjection");
+		this->m_uloc_view_matrix = this->txtv_program->getUniformLocation("u_MatView");
+		this->m_uloc_model_matrix = this->txtv_program->getUniformLocation("u_MatModel");
+		this->m_uloc_text_offset = this->txtv_program->getUniformLocation("u_TextOffset");
+		this->m_uloc_text_color = this->txtv_program->getUniformLocation("u_TextColor");
+		this->m_uloc_depth = this->txtv_program->getUniformLocation("u_Depth");
 		return this->m_attribute_location_position != -1 &&
 			this->m_attribute_location_UV != -1 &&
-			this->m_uniform_location_projection_matrix != -1 &&
-			this->m_uniform_location_view_matrix != -1 &&
-			this->m_uniform_location_text_offset != -1 &&
-			this->m_uniform_location_text_color != -1;
+			this->m_uloc_projection_matrix != -1 &&
+			this->m_uloc_view_matrix != -1 &&
+			this->m_uloc_model_matrix != -1 &&
+			this->m_uloc_text_offset != -1 &&
+			this->m_uloc_text_color != -1 &&
+			this->m_uloc_depth != -1;
 	}
 	else
 	{
 		this->m_attribute_location_position = -1;
 		this->m_attribute_location_UV = -1;
-		this->m_uniform_location_projection_matrix = -1;
-		this->m_uniform_location_view_matrix = -1;
-		this->m_uniform_location_text_offset = -1;
-		this->m_uniform_location_text_color = -1;
+		this->m_uloc_projection_matrix = -1;
+		this->m_uloc_view_matrix = -1;
+		this->m_uloc_model_matrix = -1;
+		this->m_uloc_text_offset = -1;
+		this->m_uloc_text_color = -1;
+		this->m_uloc_depth = -1;
 		return false;
 	}
 }
@@ -238,6 +260,14 @@ const axl::math::Vec4f& TextView::getBackgroundColor() const
 const axl::math::Vec4f& TextView::getTextColor() const
 {
 	return this->txtv_text_color;
+}
+const axl::math::Vec4f& TextView::getShadowColor() const
+{
+	return this->txtv_shadow_color;
+}
+const axl::math::Vec2f& TextView::getShadowOffset() const
+{
+	return this->txtv_shadow_offset;
 }
 const axl::math::Vec2f& TextView::getSpacing() const
 {
@@ -516,7 +546,7 @@ bool TextView::irender(const axl::gl::camera::Camera3Df* camera)
 		this->updateBuffers(this->txtv_wstring, false, true);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	if(this->txtv_background_color.w > 0.0f)
+	if(this->txtv_background_color.w > 0.0f || this->enable_shadow)
 	{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -529,11 +559,32 @@ bool TextView::irender(const axl::gl::camera::Camera3Df* camera)
 		if(camera)
 		{
 			if(camera->projection)
-				this->txtv_program->setUniformMat4fv(m_uniform_location_projection_matrix, camera->projection->matrix.values);
-			this->txtv_program->setUniformMat4fv(m_uniform_location_view_matrix, camera->view_transform.values);
+				this->txtv_program->setUniformMat4fv(m_uloc_projection_matrix, camera->projection->matrix.values);
+			this->txtv_program->setUniformMat4fv(m_uloc_view_matrix, camera->view_transform.values);
 		}
-		this->txtv_program->setUniform2fv(m_uniform_location_text_offset, &this->txtv_offset.x);
-		this->txtv_program->setUniform4fv(m_uniform_location_text_color, &this->txtv_text_color.x);
+		if(this->enable_shadow)
+		{
+			this->txtv_program->setUniform1f(m_uloc_depth, -1.f);
+			this->txtv_program->setUniformMat4fv(m_uloc_model_matrix, this->txtv_transform.getMatrix().values);
+			this->txtv_program->setUniform2f(m_uloc_text_offset, txtv_offset.x + txtv_shadow_offset.x, txtv_offset.y + txtv_shadow_offset.y);
+			this->txtv_program->setUniform4fv(m_uloc_text_color, &this->txtv_shadow_color.x);
+			if(this->txtv_font->texture.bind() && this->txtv_program->use())
+			{
+				GLCLEARERROR();
+				glBindVertexArray(this->m_vertex_array_id);
+				glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer_id);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->m_element_array_id);
+				glDrawElements(GL_TRIANGLES, 6 * this->m_actual_text_length, GL_UNSIGNED_INT, 0);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBindVertexArray(0);
+			}
+		}
+		// Text
+		this->txtv_program->setUniform1f(m_uloc_depth, 0.0f);
+		this->txtv_program->setUniformMat4fv(m_uloc_model_matrix, this->txtv_transform.getMatrix().values);
+		this->txtv_program->setUniform2fv(m_uloc_text_offset, &this->txtv_offset.x);
+		this->txtv_program->setUniform4fv(m_uloc_text_color, &this->txtv_text_color.x);
 		if(this->txtv_font->texture.bind() && this->txtv_program->use())
 		{
 			GLCLEARERROR();
@@ -577,11 +628,13 @@ bool TextView::Program::icreate()
 		"layout(location = 1) in vec2 in_UV;\n"
 		"uniform mat4 u_MatProjection = mat4(1);\n"
 		"uniform mat4 u_MatView = mat4(1);\n"
+		"uniform mat4 u_MatModel = mat4(1);\n"
 		"uniform vec2 u_TextOffset = vec2(0,0);\n"
+		"uniform float u_Depth = 0.0;\n"
 		"out vec2 v_TexCoord;"
 		"void main() {\n"
-		"	float depth = (in_Position.x * in_Position.y) / 999999.0;\n"
-		"	gl_Position = u_MatProjection * u_MatView * vec4(in_Position.x + u_TextOffset.x, in_Position.y + u_TextOffset.y, depth, 1.0);"
+		"	float depth = u_Depth + (in_Position.x * in_Position.y) / 999999.0;\n"
+		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4((in_Position.x + u_TextOffset.x), (in_Position.y + u_TextOffset.y), depth, 1.0);"
 		"	v_TexCoord = in_UV;\n"
 		"}\n"
 		);
