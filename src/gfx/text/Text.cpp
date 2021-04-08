@@ -107,7 +107,7 @@ bool Text::isValid() const
 		   this->vertex_array_id != -1 && this->vertex_buffer_id != -1 && this->element_array_id != -1 &&
 		   this->attribute_location_position != -1 && this->attribute_location_UV != -1;
 }
-bool Text::render_text(const axl::gl::camera::Camera3Df* camera)
+bool Text::render(const axl::gl::camera::Camera3Df* camera)
 {
 	using namespace GL;
 	if(!this->isValid()) return false;

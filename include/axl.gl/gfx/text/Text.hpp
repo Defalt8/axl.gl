@@ -51,7 +51,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		bool icreate();
 		bool idestroy();
 		bool isValid() const;
-		bool render_text(const axl::gl::camera::Camera3Df* camera = 0);
+		bool render(const axl::gl::camera::Camera3Df* camera = 0);
 		void updateBuffers(void);
 	protected:
 		void updateAlignment();
