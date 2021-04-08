@@ -163,13 +163,13 @@ bool Font::setQuality(Font::Quality quality)
 	{
 		default:
 		case Q_LOW:
-			return this->font_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
-				this->font_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			return this->font_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST) &&
+				this->font_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 		case Q_MEDIUM:
-			return this->font_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
+			return this->font_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST) &&
 				this->font_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		case Q_HIGH:
-			return this->font_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_LINEAR) &&
+			return this->font_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR) &&
 				this->font_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 	return false;
