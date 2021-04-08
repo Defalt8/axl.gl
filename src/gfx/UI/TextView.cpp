@@ -28,17 +28,17 @@ TextView::TextView(axl::gl::Context* ptr_context, axl::gl::gfx::Font* ptr_font, 
 	txtv_font(ptr_font),
 	txtv_program(ptr_program),
 	txtv_alignment(axl::gl::gfx::ui::TextView::TAL_LEFT_CENTER),
-	txtv_actual_text_length(0),
-	txtv_rec_font_size(-1,-1),
-	txtv_vertex_array_id(-1),
-	txtv_vertex_buffer_id(-1),
-	txtv_element_array_id(-1),
-	txtv_attribute_location_position(-1),
-	txtv_attribute_location_UV(-1),
-	txtv_uniform_location_projection_matrix(-1),
-	txtv_uniform_location_view_matrix(-1),
-	txtv_uniform_location_text_offset(-1),
-	txtv_uniform_location_text_color(-1)
+	m_actual_text_length(0),
+	m_rec_font_size(-1,-1),
+	m_vertex_array_id(-1),
+	m_vertex_buffer_id(-1),
+	m_element_array_id(-1),
+	m_attribute_location_position(-1),
+	m_attribute_location_UV(-1),
+	m_uniform_location_projection_matrix(-1),
+	m_uniform_location_view_matrix(-1),
+	m_uniform_location_text_offset(-1),
+	m_uniform_location_text_color(-1)
 {
 	axl::gl::gfx::UIElement::setSize(size);
 	this->updateAlignment();
@@ -51,8 +51,8 @@ bool TextView::isValid() const
 {
 	return axl::gl::gfx::UIElement::isValid() && this->txtv_font &&  this->txtv_program && 
 		   this->ctx_context->isValid() && this->txtv_font->isValid() && this->txtv_program->isLinked() && 
-		   this->txtv_vertex_array_id != -1 && this->txtv_vertex_buffer_id != -1 && this->txtv_element_array_id != -1 &&
-		   this->txtv_attribute_location_position != -1 && this->txtv_attribute_location_UV != -1;
+		   this->m_vertex_array_id != -1 && this->m_vertex_buffer_id != -1 && this->m_element_array_id != -1 &&
+		   this->m_attribute_location_position != -1 && this->m_attribute_location_UV != -1;
 }
 void TextView::setContext(axl::gl::Context* ptr_context)
 {
@@ -67,19 +67,19 @@ bool TextView::icreate()
 	)
 		return false;
 	GLCLEARERROR();
-	glGenVertexArrays(1, &this->txtv_vertex_array_id);
-	if(this->txtv_vertex_array_id == -1 || glGetError() != GL_NO_ERROR) return false;
-	glGenBuffers(1, &this->txtv_vertex_buffer_id);
-	if(this->txtv_vertex_buffer_id == -1 || glGetError() != GL_NO_ERROR)
+	glGenVertexArrays(1, &this->m_vertex_array_id);
+	if(this->m_vertex_array_id == -1 || glGetError() != GL_NO_ERROR) return false;
+	glGenBuffers(1, &this->m_vertex_buffer_id);
+	if(this->m_vertex_buffer_id == -1 || glGetError() != GL_NO_ERROR)
 	{
-		glDeleteVertexArrays(1, &this->txtv_vertex_array_id);
+		glDeleteVertexArrays(1, &this->m_vertex_array_id);
 		return false;
 	}
-	glGenBuffers(1, &this->txtv_element_array_id);
-	if(this->txtv_element_array_id == -1 || glGetError() != GL_NO_ERROR)
+	glGenBuffers(1, &this->m_element_array_id);
+	if(this->m_element_array_id == -1 || glGetError() != GL_NO_ERROR)
 	{
-		glDeleteBuffers(1, &this->txtv_vertex_buffer_id);
-		glDeleteVertexArrays(1, &this->txtv_vertex_array_id);
+		glDeleteBuffers(1, &this->m_vertex_buffer_id);
+		glDeleteVertexArrays(1, &this->m_vertex_array_id);
 		return false;
 	}
 	if(glGetError() != GL_NO_ERROR)
@@ -96,32 +96,32 @@ bool TextView::idestroy()
 	if(this->ctx_context && this->ctx_context->isValid() && this->ctx_context->makeCurrent())
 	{
 		GLCLEARERROR();
-		if(this->txtv_element_array_id != -1)
+		if(this->m_element_array_id != -1)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-			glDeleteBuffers(1, &this->txtv_element_array_id);
+			glDeleteBuffers(1, &this->m_element_array_id);
 		}
-		if(this->txtv_vertex_buffer_id != -1)
+		if(this->m_vertex_buffer_id != -1)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glDeleteBuffers(1, &this->txtv_vertex_buffer_id);
+			glDeleteBuffers(1, &this->m_vertex_buffer_id);
 		}
-		if(this->txtv_vertex_array_id != -1)
+		if(this->m_vertex_array_id != -1)
 		{
 			glBindVertexArray(0);
-			glDeleteVertexArrays(1, &this->txtv_vertex_array_id);
+			glDeleteVertexArrays(1, &this->m_vertex_array_id);
 		}
 		return glGetError() == GL_NO_ERROR;
 	}
-	this->txtv_element_array_id = -1;
-	this->txtv_vertex_buffer_id = -1;
-	this->txtv_vertex_array_id = -1;
-	this->txtv_attribute_location_position = -1;
-	this->txtv_attribute_location_UV = -1;
-	this->txtv_uniform_location_projection_matrix = -1;
-	this->txtv_uniform_location_view_matrix = -1;
-	this->txtv_uniform_location_text_offset = -1;
-	this->txtv_uniform_location_text_color = -1;
+	this->m_element_array_id = -1;
+	this->m_vertex_buffer_id = -1;
+	this->m_vertex_array_id = -1;
+	this->m_attribute_location_position = -1;
+	this->m_attribute_location_UV = -1;
+	this->m_uniform_location_projection_matrix = -1;
+	this->m_uniform_location_view_matrix = -1;
+	this->m_uniform_location_text_offset = -1;
+	this->m_uniform_location_text_color = -1;
 	return axl::gl::gfx::UIElement::idestroy();
 }
 
@@ -181,7 +181,7 @@ void TextView::setFont(const Font* font)
 {
 	this->txtv_font = font;
 	if(font)
-		this->txtv_rec_font_size = font->size;
+		this->m_rec_font_size = font->size;
 	this->updateBuffers(this->txtv_wstring, false, true);
 }
 bool TextView::setProgram(const axl::gl::gfx::Program* text_shader_program)
@@ -189,27 +189,27 @@ bool TextView::setProgram(const axl::gl::gfx::Program* text_shader_program)
 	this->txtv_program = text_shader_program;
 	if(text_shader_program)
 	{
-		this->txtv_attribute_location_position = this->txtv_program->getAttributeLocation("in_Position");
-		this->txtv_attribute_location_UV = this->txtv_program->getAttributeLocation("in_UV");
-		this->txtv_uniform_location_projection_matrix = this->txtv_program->getUniformLocation("u_MatProjection");
-		this->txtv_uniform_location_view_matrix = this->txtv_program->getUniformLocation("u_MatView");
-		this->txtv_uniform_location_text_offset = this->txtv_program->getUniformLocation("u_TextOffset");
-		this->txtv_uniform_location_text_color = this->txtv_program->getUniformLocation("u_TextColor");
-		return this->txtv_attribute_location_position != -1 &&
-			this->txtv_attribute_location_UV != -1 &&
-			this->txtv_uniform_location_projection_matrix != -1 &&
-			this->txtv_uniform_location_view_matrix != -1 &&
-			this->txtv_uniform_location_text_offset != -1 &&
-			this->txtv_uniform_location_text_color != -1;
+		this->m_attribute_location_position = this->txtv_program->getAttributeLocation("in_Position");
+		this->m_attribute_location_UV = this->txtv_program->getAttributeLocation("in_UV");
+		this->m_uniform_location_projection_matrix = this->txtv_program->getUniformLocation("u_MatProjection");
+		this->m_uniform_location_view_matrix = this->txtv_program->getUniformLocation("u_MatView");
+		this->m_uniform_location_text_offset = this->txtv_program->getUniformLocation("u_TextOffset");
+		this->m_uniform_location_text_color = this->txtv_program->getUniformLocation("u_TextColor");
+		return this->m_attribute_location_position != -1 &&
+			this->m_attribute_location_UV != -1 &&
+			this->m_uniform_location_projection_matrix != -1 &&
+			this->m_uniform_location_view_matrix != -1 &&
+			this->m_uniform_location_text_offset != -1 &&
+			this->m_uniform_location_text_color != -1;
 	}
 	else
 	{
-		this->txtv_attribute_location_position = -1;
-		this->txtv_attribute_location_UV = -1;
-		this->txtv_uniform_location_projection_matrix = -1;
-		this->txtv_uniform_location_view_matrix = -1;
-		this->txtv_uniform_location_text_offset = -1;
-		this->txtv_uniform_location_text_color = -1;
+		this->m_attribute_location_position = -1;
+		this->m_attribute_location_UV = -1;
+		this->m_uniform_location_projection_matrix = -1;
+		this->m_uniform_location_view_matrix = -1;
+		this->m_uniform_location_text_offset = -1;
+		this->m_uniform_location_text_color = -1;
 		return false;
 	}
 }
@@ -251,9 +251,13 @@ const axl::math::Vec4f& TextView::getPadding() const
 {
 	return this->txtv_padding;
 }
-const axl::math::Vec2i& TextView::getMinSize() const
+axl::math::Vec2i TextView::getMinSize() const
 {
 	return this->txtv_box_size;
+}
+axl::math::Vec2i TextView::getMaxSize() const
+{
+	return axl::math::Vec2i((int)((float)txtv_box_size.x + 1.0f * (txtv_padding.x + txtv_padding.z)), (int)((float)txtv_box_size.y + 1.0f * (txtv_padding.y + txtv_padding.w)));
 }
 const axl::util::WString& TextView::getText() const
 {
@@ -311,7 +315,7 @@ void TextView::updateOffset()
 	}
 	txtv_offset.set(
 		hor_padding + (this->txtv_origin.x * (this->uielement_size.x - this->txtv_box_size.x)),
-		ver_padding + (this->txtv_origin.y * (this->uielement_size.y - this->txtv_box_size.y) + this->txtv_box_size.y * this->txtv_origin.y)
+		ver_padding + (this->txtv_origin.y * (this->uielement_size.y - this->txtv_box_size.y))
 		);
 }
 void TextView::updateAlignment()
@@ -384,15 +388,15 @@ bool TextView::updateBuffers(const axl::util::WString& p_wstring, bool text_size
 				continue;
 		}
 	}
-	this->txtv_box_size.set((int)((float)max_line_width - this->txtv_spacing.x), (int)((float)((line_count) * this->txtv_font->size.y + (line_count - 1) * this->txtv_spacing.y)));
+	this->txtv_box_size.set((int)((float)max_line_width - this->txtv_spacing.x), (int)((float)line_count * this->txtv_font->size.y + (line_count - 1) * this->txtv_spacing.y));
 	this->updateAlignment();
-	this->txtv_actual_text_length = actual_length;
+	this->m_actual_text_length = actual_length;
 	const unsigned int text_count = this->txtv_wstring.size() - 1;
 	const unsigned int vertex_count = 16 * text_count, indeces_count = 6 * text_count;
 	GLCLEARERROR();
-	glBindVertexArray(this->txtv_vertex_array_id);
-	glBindBuffer(GL_ARRAY_BUFFER, this->txtv_vertex_buffer_id);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->txtv_element_array_id);
+	glBindVertexArray(this->m_vertex_array_id);
+	glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer_id);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->m_element_array_id);
 	if(text_size_changed)
 	{
 		glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLfloat) * vertex_count), 0, GL_DYNAMIC_DRAW);
@@ -405,10 +409,10 @@ bool TextView::updateBuffers(const axl::util::WString& p_wstring, bool text_size
 			return false;
 		}
 		const GLsizei stride = (GLsizei)(sizeof(GLfloat) * 4);
-		glEnableVertexAttribArray(this->txtv_attribute_location_position);
-		glEnableVertexAttribArray(this->txtv_attribute_location_UV);
-		glVertexAttribPointer(this->txtv_attribute_location_position, 2, GL_FLOAT, GL_FALSE, stride, 0);
-		glVertexAttribPointer(this->txtv_attribute_location_UV, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(sizeof(GLfloat) * 2));
+		glEnableVertexAttribArray(this->m_attribute_location_position);
+		glEnableVertexAttribArray(this->m_attribute_location_UV);
+		glVertexAttribPointer(this->m_attribute_location_position, 2, GL_FLOAT, GL_FALSE, stride, 0);
+		glVertexAttribPointer(this->m_attribute_location_UV, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(sizeof(GLfloat) * 2));
 	}
 	if((text_changed && text_length > 0) || font_attribute_altered)
 	{
@@ -423,7 +427,7 @@ bool TextView::updateBuffers(const axl::util::WString& p_wstring, bool text_size
 			glBindVertexArray(0);
 			return false;
 		}
-		GLfloat horizontal_advance = 0.0f, vertical_advance = (GLfloat)-this->txtv_font->size.y;
+		GLfloat horizontal_advance = 0.0f, vertical_advance = (float)(line_count-1) * this->txtv_font->size.y;
 		const unsigned int space_glyph_index = this->txtv_font->getCharIndex(L' ');
 		const GLfloat space_advance = (GLfloat)(space_glyph_index == -1 ? this->txtv_font->size.x : this->txtv_font->glyphs[space_glyph_index].horiAdvance);
 		const GLfloat tab_advance = space_advance * 4.0f;
@@ -464,18 +468,6 @@ bool TextView::updateBuffers(const axl::util::WString& p_wstring, bool text_size
 					break;
 				case HorizontalAlignment::TAL_HORIZONTAL_CENTER:
 					offset.x += (max_line_width - line_widths[line_count]) / 2.0f;
-					break;
-			}
-			switch((this->txtv_alignment & 0x0C))
-			{
-				default:
-				case VerticalAlignment::TAL_TOP:
-					break;
-				case VerticalAlignment::TAL_BOTTOM:
-					offset.y += (this->txtv_font->size.y * 1.25f);
-					break;
-				case VerticalAlignment::TAL_VERTICAL_CENTER:
-					offset.y += (this->txtv_font->size.y * 0.75f);
 					break;
 			}
 			const axl::math::Vec2f offsetted_size((float)(offset.x + glyph.width), (float)(offset.y + glyph.height));
@@ -520,7 +512,7 @@ bool TextView::updateBuffers(const axl::util::WString& p_wstring, bool text_size
 bool TextView::irender(const axl::gl::camera::Camera3Df* camera)
 {
 	using namespace GL;
-	if(this->txtv_rec_font_size.notEquals(this->txtv_font->size))
+	if(this->m_rec_font_size.notEquals(this->txtv_font->size))
 		this->updateBuffers(this->txtv_wstring, false, true);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -532,23 +524,23 @@ bool TextView::irender(const axl::gl::camera::Camera3Df* camera)
 	glClearColor(this->txtv_background_color.x, this->txtv_background_color.y, this->txtv_background_color.z, this->txtv_background_color.w);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	// render text {
-	if(txtv_actual_text_length > 0)
+	if(m_actual_text_length > 0)
 	{
 		if(camera)
 		{
 			if(camera->projection)
-				this->txtv_program->setUniformMat4fv(txtv_uniform_location_projection_matrix, camera->projection->matrix.values);
-			this->txtv_program->setUniformMat4fv(txtv_uniform_location_view_matrix, camera->view_transform.values);
+				this->txtv_program->setUniformMat4fv(m_uniform_location_projection_matrix, camera->projection->matrix.values);
+			this->txtv_program->setUniformMat4fv(m_uniform_location_view_matrix, camera->view_transform.values);
 		}
-		this->txtv_program->setUniform2fv(txtv_uniform_location_text_offset, &this->txtv_offset.x);
-		this->txtv_program->setUniform4fv(txtv_uniform_location_text_color, &this->txtv_text_color.x);
+		this->txtv_program->setUniform2fv(m_uniform_location_text_offset, &this->txtv_offset.x);
+		this->txtv_program->setUniform4fv(m_uniform_location_text_color, &this->txtv_text_color.x);
 		if(this->txtv_font->texture.bind() && this->txtv_program->use())
 		{
 			GLCLEARERROR();
-			glBindVertexArray(this->txtv_vertex_array_id);
-			glBindBuffer(GL_ARRAY_BUFFER, this->txtv_vertex_buffer_id);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->txtv_element_array_id);
-			glDrawElements(GL_TRIANGLES, 6 * this->txtv_actual_text_length, GL_UNSIGNED_INT, 0);
+			glBindVertexArray(this->m_vertex_array_id);
+			glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer_id);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->m_element_array_id);
+			glDrawElements(GL_TRIANGLES, 6 * this->m_actual_text_length, GL_UNSIGNED_INT, 0);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);

@@ -29,12 +29,12 @@ UIElement::UIElement(axl::gl::Context* ptr_context) :
 	m_program(ptr_context),
 	m_vertex_array(-1),
 	m_vertex_buffer(-1),
-	uloc_projection(-1),
-	uloc_view(-1),
-	uloc_model(-1),
-	uloc_size(-1),
-	uloc_border(-1),
-	uloc_border_color(-1)
+	m_uloc_projection(-1),
+	m_uloc_view(-1),
+	m_uloc_model(-1),
+	m_uloc_size(-1),
+	m_uloc_border(-1),
+	m_uloc_border_color(-1)
 {}
 UIElement::~UIElement()
 {
@@ -120,12 +120,12 @@ bool UIElement::icreate()
 		this->destroy();
 		return false;
 	}
-	this->uloc_projection = this->m_program.getUniformLocation("u_MatProjection");
-	this->uloc_view = this->m_program.getUniformLocation("u_MatView");
-	this->uloc_model = this->m_program.getUniformLocation("u_MatModel");
-	this->uloc_size = this->m_program.getUniformLocation("u_Size");
-	this->uloc_border = this->m_program.getUniformLocation("u_Border");
-	this->uloc_border_color = this->m_program.getUniformLocation("u_BorderColor");
+	this->m_uloc_projection = this->m_program.getUniformLocation("u_MatProjection");
+	this->m_uloc_view = this->m_program.getUniformLocation("u_MatView");
+	this->m_uloc_model = this->m_program.getUniformLocation("u_MatModel");
+	this->m_uloc_size = this->m_program.getUniformLocation("u_Size");
+	this->m_uloc_border = this->m_program.getUniformLocation("u_Border");
+	this->m_uloc_border_color = this->m_program.getUniformLocation("u_BorderColor");
 	return true;
 }
 bool UIElement::idestroy()
@@ -162,12 +162,12 @@ bool UIElement::render(const camera::Camera3Df* camera)
 	this->uielement_frame_buffer.unbind(axl::gl::gfx::FrameBuffer::FBT_BOTH);
 	if(!camera->makeCurrent(this->ctx_context, true)) return false;
 	if(camera->projection)
-		this->m_program.setUniformMat4fv(uloc_projection, camera->projection->matrix.values);
-	this->m_program.setUniformMat4fv(uloc_view, camera->view_transform.values);
-	this->m_program.setUniformMat4fv(uloc_model, this->transform.getMatrix().values);
-	this->m_program.setUniform2iv(uloc_size, &this->uielement_size.x);
-	this->m_program.setUniform4fv(uloc_border, &this->uielement_border_size.x);
-	this->m_program.setUniform4fv(uloc_border_color, &this->uielement_border_color.x);
+		this->m_program.setUniformMat4fv(m_uloc_projection, camera->projection->matrix.values);
+	this->m_program.setUniformMat4fv(m_uloc_view, camera->view_transform.values);
+	this->m_program.setUniformMat4fv(m_uloc_model, this->transform.getMatrix().values);
+	this->m_program.setUniform2iv(m_uloc_size, &this->uielement_size.x);
+	this->m_program.setUniform4fv(m_uloc_border, &this->uielement_border_size.x);
+	this->m_program.setUniform4fv(m_uloc_border_color, &this->uielement_border_color.x);
 	if(!this->m_program.use() || !this->uielement_texture.bind()) return false;
 	GLCLEARERROR();
 	glEnable(GL_BLEND);

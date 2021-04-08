@@ -77,7 +77,8 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		const axl::math::Vec2f& getSpacing() const;
 		const axl::math::Vec2f& getOrigin() const;
 		const axl::math::Vec4f& getPadding() const;
-		const axl::math::Vec2i& getMinSize() const;
+		axl::math::Vec2i getMinSize() const;
+		axl::math::Vec2i getMaxSize() const;
 		const axl::util::WString& getText() const;
 		const axl::gl::gfx::Font* getFont() const;
 		const axl::gl::gfx::Program* getProgram() const;
@@ -102,17 +103,17 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		const axl::gl::gfx::Program* txtv_program;
 		AlignmentFlag txtv_alignment;
 	private:
-		unsigned int txtv_actual_text_length;
-		axl::math::Vec2i txtv_rec_font_size;
-		axl::glfl::GLuint txtv_vertex_array_id;
-		axl::glfl::GLuint txtv_vertex_buffer_id;
-		axl::glfl::GLuint txtv_element_array_id;
-		axl::glfl::GLint txtv_attribute_location_position;
-		axl::glfl::GLint txtv_attribute_location_UV;
-		axl::glfl::GLint txtv_uniform_location_projection_matrix;
-		axl::glfl::GLint txtv_uniform_location_view_matrix;
-		axl::glfl::GLint txtv_uniform_location_text_offset;
-		axl::glfl::GLint txtv_uniform_location_text_color;
+		unsigned int m_actual_text_length;
+		axl::math::Vec2i m_rec_font_size;
+		axl::glfl::GLuint m_vertex_array_id;
+		axl::glfl::GLuint m_vertex_buffer_id;
+		axl::glfl::GLuint m_element_array_id;
+		axl::glfl::GLint m_attribute_location_position;
+		axl::glfl::GLint m_attribute_location_UV;
+		axl::glfl::GLint m_uniform_location_projection_matrix;
+		axl::glfl::GLint m_uniform_location_view_matrix;
+		axl::glfl::GLint m_uniform_location_text_offset;
+		axl::glfl::GLint m_uniform_location_text_color;
 };
 
 } // axl.gl.gfx.ui

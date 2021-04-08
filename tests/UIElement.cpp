@@ -25,7 +25,7 @@ class GameView : public axl::gl::View
 	public:
 		axl::gl::Context main_context;
 		axl::gl::camera::Camera3Df camera;
-		axl::gl::gfx::Font font_status, font1;
+		axl::gl::gfx::Font font_status, font1, font2;
 		axl::gl::gfx::ui::TextView::Program text_view_program;
 		axl::gl::gfx::ui::TextView status_text;
 		axl::gl::gfx::ui::TextView text_view;
@@ -71,6 +71,7 @@ class GameView : public axl::gl::View
 			text_view_program.setContext(&this->main_context);
 			font_status.setContext(&this->main_context);
 			font1.setContext(&this->main_context);
+			font2.setContext(&this->main_context);
 			status_text.setContext(&this->main_context);
 			status_text.setFont(&this->font_status);
 			status_text.setProgram(&this->text_view_program);
@@ -111,27 +112,36 @@ class GameView : public axl::gl::View
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
 			this->status_text.render(&this->camera);
-			//
-			this->text_view.setSize(axl::math::Vec2i(300,75));
-			this->text_view.transform.setPosition(axl::math::Vec3f(200.0f,40.0f,-0.01f));
-			this->text_view.setTextColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
-			this->text_view.setBackgroundColor(axl::math::Vec4f(0.3f,0.8f,0.8f,1.0f));
-			this->text_view.setBorderColor(axl::math::Vec4f(0.9f,0.9f,0.1f,1.0f));
-			this->text_view.render(&this->camera);
-			//
-			this->text_view.setSize(axl::math::Vec2i(200,40));
-			this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,120.0f,0.0f));
-			this->text_view.setTextColor(axl::math::Vec4f(0.2f,0.2f,0.1f,1.0f));
-			this->text_view.setBackgroundColor(axl::math::Vec4f(0.99f,0.99f,0.99f,1.0f));
-			this->text_view.setBorderColor(axl::math::Vec4f(0.8f,0.1f,0.1f,1.0f));
-			this->text_view.render(&this->camera);
-			//
-			this->text_view.setSize(axl::math::Vec2i(200,40));
-			this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,220.0f,0.0f));
-			this->text_view.setTextColor(axl::math::Vec4f(0.98f,0.98f,0.1f,1.0f));
-			this->text_view.setBackgroundColor(axl::math::Vec4f(0.1f,0.1f,0.1f,0.0f));
-			this->text_view.setBorderColor(axl::math::Vec4f(0.8f,0.1f,0.1f,0.0f));
-			this->text_view.render(&this->camera);
+			{
+				this->text_view.setFont(&this->font1);
+				this->text_view.setText(L"Hello World!");
+				this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,40.0f,-0.01f));
+				this->text_view.setTextColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
+				this->text_view.setBackgroundColor(axl::math::Vec4f(0.3f,0.8f,0.8f,1.0f));
+				this->text_view.setBorderColor(axl::math::Vec4f(0.9f,0.9f,0.1f,1.0f));
+				this->text_view.setSize(axl::math::Vec2i(int)(((float)this->text_view.getMaxSize().x * 0.75f), (int)((float)this->text_view.getMaxSize().y * 0.75f)));
+				this->text_view.render(&this->camera);
+			}
+			{
+				this->text_view.setFont(&this->font2);
+				this->text_view.setText(L"To be or not to be!\nThat is the question.");
+				this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,120.0f,0.0f));
+				this->text_view.setTextColor(axl::math::Vec4f(0.2f,0.2f,0.1f,1.0f));
+				this->text_view.setBackgroundColor(axl::math::Vec4f(0.99f,0.99f,0.99f,1.0f));
+				this->text_view.setBorderColor(axl::math::Vec4f(0.8f,0.1f,0.1f,1.0f));
+				this->text_view.setSize(this->text_view.getMaxSize()*2);
+				this->text_view.render(&this->camera);
+			}
+			{
+				this->text_view.setFont(&this->font2);
+				this->text_view.setText(L"3.1415 @defaltAxel");
+				this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,240.0f,0.0f));
+				this->text_view.setTextColor(axl::math::Vec4f(0.98f,0.98f,0.1f,1.0f));
+				this->text_view.setBackgroundColor(axl::math::Vec4f(0.1f,0.1f,0.1f,0.5f));
+				this->text_view.setBorderColor(axl::math::Vec4f(0.8f,0.1f,0.1f,0.0f));
+				this->text_view.setSize(this->text_view.getMaxSize() + 20);
+				this->text_view.render(&this->camera);
+			}
 		}
 
 		void onDisplayConfig(const axl::gl::Display& display)
@@ -162,6 +172,10 @@ class GameView : public axl::gl::View
 			{
 				Assert(this->font1.loadFromFile("../../common/fonts/Montserrat-Bold.ttf", axl::math::Vec2i(22,22)));
 			}
+			if(this->font2.create())
+			{
+				Assert(this->font2.loadFromFile("../../common/fonts/Roboto-Light.ttf", axl::math::Vec2i(22,22)));
+			}
 			Assert(this->text_view_program.create());
 			//
 			this->status_text.setAlignment(axl::gl::gfx::Text::Alignment::TAL_TOP_RIGHT);
@@ -177,13 +191,15 @@ class GameView : public axl::gl::View
 			Assert(this->status_text.setText(L"{TODO:status}"));
 			//
 			this->text_view.setSize(axl::math::Vec2i(300,200));
+			this->text_view.setSpacing(axl::math::Vec2f(0.0f,0.0f));
 			this->text_view.setSpacing(axl::math::Vec2f(1.0f,3.0f));
-			this->text_view.setPadding(axl::math::Vec4f(10.0f,0.0f,5.0f,5.0f));
+			this->text_view.setPadding(axl::math::Vec4f(5.0f,5.0f,5.0f,5.0f));
 			this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,140.0f,0.0f));
 			this->text_view.setBorderColor(axl::math::Vec4f(0.97f,0.97f,0.97f,1.0f));
-			this->text_view.setBorderSize(axl::math::Vec4f(4.0f,2.0f,2.0f,2.0f));
+			this->text_view.setBorderSize(axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f));
 			Assert(this->text_view.create());
 			Assert(this->text_view.isValid());
+			Assert(this->text_view.setStorageSize(128));
 			return axl::gl::View::onCreate(recreating);
 		}
 
@@ -482,10 +498,7 @@ int main(int argc, char* argv[])
 					view.status_text.setText(fps_string);
 					axl::math::Vec2i status_text_size = view.status_text.getMinSize();
 					axl::math::Vec4f status_text_padding = view.status_text.getPadding();
-					axl::math::Vec2i new_size(
-						status_text_size.x + (int)status_text_padding.x + (int)status_text_padding.z,
-						status_text_size.y + (int)status_text_padding.y + (int)status_text_padding.w
-						);
+					axl::math::Vec2i new_size(view.status_text.getMaxSize());
 					view.status_text.setSize(new_size);
 					view.status_text.transform.setPosition(axl::math::Vec3f(
 						(float)view.camera.viewport_size.x - new_size.x - 10.0f, 

@@ -53,12 +53,12 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		axl::gl::gfx::UIElement::Program m_program;
 		axl::glfl::GLuint m_vertex_array;
 		axl::glfl::GLuint m_vertex_buffer;
-		axl::glfl::GLint uloc_projection;
-		axl::glfl::GLint uloc_view;
-		axl::glfl::GLint uloc_model;
-		axl::glfl::GLint uloc_size;
-		axl::glfl::GLint uloc_border;
-		axl::glfl::GLint uloc_border_color;
+		axl::glfl::GLint m_uloc_projection;
+		axl::glfl::GLint m_uloc_view;
+		axl::glfl::GLint m_uloc_model;
+		axl::glfl::GLint m_uloc_size;
+		axl::glfl::GLint m_uloc_border;
+		axl::glfl::GLint m_uloc_border_color;
 
 };
 
