@@ -314,8 +314,8 @@ void TextView::updateOffset()
 		case VerticalAlignment::TAL_VERTICAL_CENTER: ver_padding = 0.0f; break;
 	}
 	txtv_offset.set(
-		hor_padding + (this->txtv_origin.x * (this->uielement_size.x - this->txtv_box_size.x)),
-		ver_padding + (this->txtv_origin.y * (this->uielement_size.y - this->txtv_box_size.y))
+		float(int(hor_padding + (this->txtv_origin.x * (this->uielement_size.x - this->txtv_box_size.x)))),
+		float(int(ver_padding + (this->txtv_origin.y * (this->uielement_size.y - this->txtv_box_size.y))))
 		);
 }
 void TextView::updateAlignment()
@@ -427,7 +427,7 @@ bool TextView::updateBuffers(const axl::util::WString& p_wstring, bool text_size
 			glBindVertexArray(0);
 			return false;
 		}
-		GLfloat horizontal_advance = 0.0f, vertical_advance = (float)(line_count-1) * this->txtv_font->size.y;
+		GLfloat horizontal_advance = 0.0f, vertical_advance = (GLfloat)(line_count-1) * (this->txtv_font->size.y + this->txtv_spacing.y) + 0.25f * this->txtv_font->size.y;
 		const unsigned int space_glyph_index = this->txtv_font->getCharIndex(L' ');
 		const GLfloat space_advance = (GLfloat)(space_glyph_index == -1 ? this->txtv_font->size.x : this->txtv_font->glyphs[space_glyph_index].horiAdvance);
 		const GLfloat tab_advance = space_advance * 4.0f;

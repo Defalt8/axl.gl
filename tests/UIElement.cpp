@@ -28,7 +28,7 @@ class GameView : public axl::gl::View
 		axl::gl::gfx::Font font_status, font1, font2;
 		axl::gl::gfx::ui::TextView::Program text_view_program;
 		axl::gl::gfx::ui::TextView status_text;
-		axl::gl::gfx::ui::TextView text_view;
+		axl::gl::gfx::ui::TextView text_view[4];
 	private:
 		axl::gl::Cursor NormalCursor;
 		axl::util::uc::Time time, ctime;
@@ -75,9 +75,11 @@ class GameView : public axl::gl::View
 			status_text.setContext(&this->main_context);
 			status_text.setFont(&this->font_status);
 			status_text.setProgram(&this->text_view_program);
-			text_view.setContext(&this->main_context);
-			text_view.setFont(&this->font1);
-			text_view.setProgram(&this->text_view_program);
+			for(int i=0; i < sizeof(text_view)/sizeof(axl::gl::gfx::ui::TextView); ++i)
+			{
+				text_view[i].setContext(&this->main_context);
+				text_view[i].setProgram(&this->text_view_program);
+			}
 			is_animating = false;
 			time.set();
 			ctime.set();
@@ -108,40 +110,14 @@ class GameView : public axl::gl::View
 			if(!this->camera.makeCurrent(&this->main_context)) return;
 			if(p_clear)
 			{
-				GL::glClearColor(0.1f, 0.4f, 0.6f, 0.0f);
+				GL::glClearColor(0.05f, 0.2f, 0.3f, 0.0f);
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
 			this->status_text.render(&this->camera);
-			{
-				this->text_view.setFont(&this->font1);
-				this->text_view.setText(L"Hello World!");
-				this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,40.0f,-0.01f));
-				this->text_view.setTextColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
-				this->text_view.setBackgroundColor(axl::math::Vec4f(0.3f,0.8f,0.8f,1.0f));
-				this->text_view.setBorderColor(axl::math::Vec4f(0.9f,0.9f,0.1f,1.0f));
-				this->text_view.setSize(axl::math::Vec2i(int)(((float)this->text_view.getMaxSize().x * 0.75f), (int)((float)this->text_view.getMaxSize().y * 0.75f)));
-				this->text_view.render(&this->camera);
-			}
-			{
-				this->text_view.setFont(&this->font2);
-				this->text_view.setText(L"To be or not to be!\nThat is the question.");
-				this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,120.0f,0.0f));
-				this->text_view.setTextColor(axl::math::Vec4f(0.2f,0.2f,0.1f,1.0f));
-				this->text_view.setBackgroundColor(axl::math::Vec4f(0.99f,0.99f,0.99f,1.0f));
-				this->text_view.setBorderColor(axl::math::Vec4f(0.8f,0.1f,0.1f,1.0f));
-				this->text_view.setSize(this->text_view.getMaxSize()*2);
-				this->text_view.render(&this->camera);
-			}
-			{
-				this->text_view.setFont(&this->font2);
-				this->text_view.setText(L"3.1415 @defaltAxel");
-				this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,240.0f,0.0f));
-				this->text_view.setTextColor(axl::math::Vec4f(0.98f,0.98f,0.1f,1.0f));
-				this->text_view.setBackgroundColor(axl::math::Vec4f(0.1f,0.1f,0.1f,0.5f));
-				this->text_view.setBorderColor(axl::math::Vec4f(0.8f,0.1f,0.1f,0.0f));
-				this->text_view.setSize(this->text_view.getMaxSize() + 20);
-				this->text_view.render(&this->camera);
-			}
+			this->text_view[0].render(&this->camera);
+			this->text_view[1].render(&this->camera);
+			this->text_view[2].render(&this->camera);
+			this->text_view[3].render(&this->camera);
 		}
 
 		void onDisplayConfig(const axl::gl::Display& display)
@@ -167,14 +143,17 @@ class GameView : public axl::gl::View
 			if(this->font_status.create())
 			{
 				Assert(this->font_status.loadFromFile("../../common/fonts/Roboto-Bold.ttf", axl::math::Vec2i(12,12)));
+				// Assert(this->font_status.setQuality(axl::gl::gfx::Font::Q_LOW));
 			}
 			if(this->font1.create())
 			{
 				Assert(this->font1.loadFromFile("../../common/fonts/Montserrat-Bold.ttf", axl::math::Vec2i(22,22)));
+				// Assert(this->font1.setQuality(axl::gl::gfx::Font::Q_HIGH));
 			}
 			if(this->font2.create())
 			{
 				Assert(this->font2.loadFromFile("../../common/fonts/Roboto-Light.ttf", axl::math::Vec2i(22,22)));
+				// Assert(this->font2.setQuality(axl::gl::gfx::Font::Q_HIGH));
 			}
 			Assert(this->text_view_program.create());
 			//
@@ -189,17 +168,65 @@ class GameView : public axl::gl::View
 			Assert(this->status_text.create());
 			Assert(this->status_text.setStorageSize(256));
 			Assert(this->status_text.setText(L"{TODO:status}"));
+			Assert(this->status_text.setQuality(axl::gl::gfx::UIElement::Q_HIGH));
 			//
-			this->text_view.setSize(axl::math::Vec2i(300,200));
-			this->text_view.setSpacing(axl::math::Vec2f(0.0f,0.0f));
-			this->text_view.setSpacing(axl::math::Vec2f(1.0f,3.0f));
-			this->text_view.setPadding(axl::math::Vec4f(5.0f,5.0f,5.0f,5.0f));
-			this->text_view.transform.setPosition(axl::math::Vec3f(100.0f,140.0f,0.0f));
-			this->text_view.setBorderColor(axl::math::Vec4f(0.97f,0.97f,0.97f,1.0f));
-			this->text_view.setBorderSize(axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f));
-			Assert(this->text_view.create());
-			Assert(this->text_view.isValid());
-			Assert(this->text_view.setStorageSize(128));
+			{
+				this->text_view[0].setFont(&this->font2);
+				this->text_view[0].transform.setPosition(axl::math::Vec3f(100.0f,40.0f,-0.01f));
+				this->text_view[0].setTextColor(axl::math::Vec4f(0.1f,0.1f,0.1f,1.0f));
+				this->text_view[0].setBackgroundColor(axl::math::Vec4f(0.94f,0.94f,0.94f,1.0f));
+				this->text_view[0].setBorderColor(axl::math::Vec4f(0.9f,0.0f,0.1f,1.0f));
+				this->text_view[0].setBorderSize(axl::math::Vec4f(0.0f,2.0f,0.0f,0.0f));
+				this->text_view[0].setPadding(axl::math::Vec4f(4.0f,4.0f,4.0f,6.0f));
+				this->text_view[0].setSpacing(axl::math::Vec2f(2.0f,0.0f));
+				Assert(this->text_view[0].create());
+				Assert(this->text_view[0].setQuality(axl::gl::gfx::UIElement::Q_MEDIUM));
+				this->text_view[0].setText(L"Hello World!");
+				this->text_view[0].setSize(this->text_view[0].getMaxSize() * axl::math::Vec2i(2,1));
+			}
+			{
+				this->text_view[1].setFont(&this->font2);
+				this->text_view[1].transform.setPosition(axl::math::Vec3f(100.0f,100.0f,0.0f));
+				this->text_view[1].setTextColor(axl::math::Vec4f(0.98f,0.98f,0.1f,1.0f));
+				this->text_view[1].setBackgroundColor(axl::math::Vec4f(0.1f,0.1f,0.1f,0.5f));
+				this->text_view[1].setBorderColor(axl::math::Vec4f(0.9f,0.1f,0.9f,0.96f));
+				this->text_view[1].setBorderSize(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
+				this->text_view[1].setPadding(axl::math::Vec4f(2.0f,2.0f,2.0f,2.0f));
+				this->text_view[1].setSpacing(axl::math::Vec2f(1.0f,0.0f));
+				Assert(this->text_view[1].create());
+				Assert(this->text_view[1].setQuality(axl::gl::gfx::UIElement::Q_MEDIUM));
+				this->text_view[1].setText(L"3.1415 @defaltAxel");
+				this->text_view[1].setSize(this->text_view[1].getMaxSize() + 25);
+			}
+			{
+				this->text_view[2].setFont(&this->font1);
+				this->text_view[2].transform.setPosition(axl::math::Vec3f(100.0f,180.0f,0.0f));
+				// this->text_view[2].setTextColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
+				this->text_view[2].setTextColor(axl::math::Vec4f(0.96f,1.0f,0.0f,1.0f));
+				this->text_view[2].setBackgroundColor(axl::math::Vec4f(0.3f,0.9f,0.9f,0.8f));
+				this->text_view[2].setBorderColor(axl::math::Vec4f(0.96f,1.0f,0.0f,1.0f));
+				this->text_view[2].setBorderSize(axl::math::Vec4f(10.0f,1.0f,1.0f,1.0f));
+				this->text_view[2].setPadding(axl::math::Vec4f(18.0f,2.0f,2.0f,2.0f));
+				this->text_view[2].setSpacing(axl::math::Vec2f(1.0f,2.0f));
+				Assert(this->text_view[2].create());
+				Assert(this->text_view[2].setQuality(axl::gl::gfx::UIElement::Q_MEDIUM));
+				this->text_view[2].setText(L"To be or not to be!\nThat is the question.\nOne can only wonder.");
+				this->text_view[2].setSize(this->text_view[2].getMaxSize() + 50);
+			}
+			{
+				this->text_view[3].setFont(&this->font1);
+				this->text_view[3].transform.setPosition(axl::math::Vec3f(100.0f,350.0f,0.0f));
+				this->text_view[3].setTextColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
+				this->text_view[3].setBackgroundColor(axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f));
+				this->text_view[3].setBorderColor(axl::math::Vec4f(0.9f,0.9f,0.9f,1.0f));
+				this->text_view[3].setBorderSize(axl::math::Vec4f(2.0f,0.0f,0.0f,0.0f));
+				this->text_view[3].setPadding(axl::math::Vec4f(10.0f,10.0f,10.0f,10.0f));
+				this->text_view[3].setSpacing(axl::math::Vec2f(1.0f,2.0f));
+				Assert(this->text_view[3].create());
+				Assert(this->text_view[3].setQuality(axl::gl::gfx::UIElement::Q_MEDIUM));
+				this->text_view[3].setText(L"- Learn\n- Adapt\n- Overcome");
+				this->text_view[3].setSize(this->text_view[3].getMaxSize());
+			}
 			return axl::gl::View::onCreate(recreating);
 		}
 
@@ -263,32 +290,38 @@ class GameView : public axl::gl::View
 				{
 					if(bp_left)
 					{
-						switch(this->text_view.getHorizontalAlignment())
+						for(int i=0; i < sizeof(text_view)/sizeof(axl::gl::gfx::ui::TextView); ++i)
 						{
-							case axl::gl::gfx::Text::TAL_LEFT:
-								this->text_view.setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_RIGHT);
-								break;
-							case axl::gl::gfx::Text::TAL_RIGHT:
-								this->text_view.setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_HORIZONTAL_CENTER);
-								break;
-							case axl::gl::gfx::Text::TAL_HORIZONTAL_CENTER:
-								this->text_view.setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_LEFT);
-								break;
+							switch(this->text_view[i].getHorizontalAlignment())
+							{
+								case axl::gl::gfx::Text::TAL_LEFT:
+									this->text_view[i].setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_RIGHT);
+									break;
+								case axl::gl::gfx::Text::TAL_RIGHT:
+									this->text_view[i].setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_HORIZONTAL_CENTER);
+									break;
+								case axl::gl::gfx::Text::TAL_HORIZONTAL_CENTER:
+									this->text_view[i].setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_LEFT);
+									break;
+							}
 						}
 					}
 					else if(bp_right)
 					{
-						switch(this->text_view.getHorizontalAlignment())
+						for(int i=0; i < sizeof(text_view)/sizeof(axl::gl::gfx::ui::TextView); ++i)
 						{
-							case axl::gl::gfx::ui::TextView::TAL_LEFT:
-								this->text_view.setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_HORIZONTAL_CENTER);
-								break;
-							case axl::gl::gfx::ui::TextView::TAL_RIGHT:
-								this->text_view.setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_LEFT);
-								break;
-							case axl::gl::gfx::ui::TextView::TAL_HORIZONTAL_CENTER:
-								this->text_view.setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_RIGHT);
-								break;
+							switch(this->text_view[i].getHorizontalAlignment())
+							{
+								case axl::gl::gfx::ui::TextView::TAL_LEFT:
+									this->text_view[i].setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_HORIZONTAL_CENTER);
+									break;
+								case axl::gl::gfx::ui::TextView::TAL_RIGHT:
+									this->text_view[i].setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_LEFT);
+									break;
+								case axl::gl::gfx::ui::TextView::TAL_HORIZONTAL_CENTER:
+									this->text_view[i].setHorizontalAlignment(axl::gl::gfx::ui::TextView::TAL_RIGHT);
+									break;
+							}
 						}
 					}
 				}
@@ -296,32 +329,38 @@ class GameView : public axl::gl::View
 				{
 					if(bp_up)
 					{
-						switch(this->text_view.getVerticalAlignment())
+						for(int i=0; i < sizeof(text_view)/sizeof(axl::gl::gfx::ui::TextView); ++i)
 						{
-							case axl::gl::gfx::ui::TextView::TAL_TOP:
-								this->text_view.setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_BOTTOM);
-								break;
-							case axl::gl::gfx::ui::TextView::TAL_BOTTOM:
-								this->text_view.setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_VERTICAL_CENTER);
-								break;
-							case axl::gl::gfx::ui::TextView::TAL_VERTICAL_CENTER:
-								this->text_view.setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_TOP);
-								break;
+							switch(this->text_view[i].getVerticalAlignment())
+							{
+								case axl::gl::gfx::ui::TextView::TAL_TOP:
+									this->text_view[i].setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_BOTTOM);
+									break;
+								case axl::gl::gfx::ui::TextView::TAL_BOTTOM:
+									this->text_view[i].setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_VERTICAL_CENTER);
+									break;
+								case axl::gl::gfx::ui::TextView::TAL_VERTICAL_CENTER:
+									this->text_view[i].setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_TOP);
+									break;
+							}
 						}
 					}
 					else if(bp_down)
 					{
-						switch(this->text_view.getVerticalAlignment())
+						for(int i=0; i < sizeof(text_view)/sizeof(axl::gl::gfx::ui::TextView); ++i)
 						{
-							case axl::gl::gfx::ui::TextView::TAL_TOP:
-								this->text_view.setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_VERTICAL_CENTER);
-								break;
-							case axl::gl::gfx::ui::TextView::TAL_BOTTOM:
-								this->text_view.setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_TOP);
-								break;
-							case axl::gl::gfx::ui::TextView::TAL_VERTICAL_CENTER:
-								this->text_view.setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_BOTTOM);
-								break;
+							switch(this->text_view[i].getVerticalAlignment())
+							{
+								case axl::gl::gfx::ui::TextView::TAL_TOP:
+									this->text_view[i].setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_VERTICAL_CENTER);
+									break;
+								case axl::gl::gfx::ui::TextView::TAL_BOTTOM:
+									this->text_view[i].setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_TOP);
+									break;
+								case axl::gl::gfx::ui::TextView::TAL_VERTICAL_CENTER:
+									this->text_view[i].setVerticalAlignment(axl::gl::gfx::ui::TextView::TAL_BOTTOM);
+									break;
+							}
 						}
 					}
 				}
@@ -338,8 +377,8 @@ class GameView : public axl::gl::View
 						if(bk_control && (!bk_shift && !bk_alt)) 
 						{
 							size_delta += (key == KEY_CLOSEBRACE ? 1 : -1);
-							size_delta = this->font_status.size.x + size_delta <= 5 ? 5 - this->font_status.size.x : size_delta;
-							printf("Font.size(%3d)\r", this->font_status.size.x + size_delta);
+							size_delta = this->font1.size.x + size_delta <= 5 ? 5 - this->font1.size.x : size_delta;
+							printf("Font.size(%3d)\r", this->font1.size.x + size_delta);
 						}
 						break;
 					default:
@@ -353,7 +392,7 @@ class GameView : public axl::gl::View
 					case KeyCode::KEY_CONTROL:
 						if(size_delta != 0)
 						{
-							font1.setSize(axl::math::Vec2i::filled(this->font_status.size.x + size_delta));
+							font1.setSize(axl::math::Vec2i::filled(this->font1.size.x + size_delta));
 							size_delta = 0;
 						}
 						break;
@@ -452,11 +491,11 @@ int main(int argc, char* argv[])
 					float fps = rendered_frames / frame_time.deltaTimef();
 					static axl::util::WString fps_string(1024);
 					axl::math::Vec2i font_size = view.font1.size;
-					axl::math::Vec3f text_scale = view.text_view.transform.getScale();
+					axl::math::Vec3f text_scale = view.text_view[0].transform.getScale();
 					axl::math::Vec2i texture_size = view.font1.texture.getSize();
 					unsigned int glyph_count = view.font1.glyphs.count();
 					const wchar_t *halignment_str = L"-", *valignment_str = L"-";
-					switch(view.text_view.getHorizontalAlignment())
+					switch(view.text_view[0].getHorizontalAlignment())
 					{
 						case axl::gl::gfx::Text::TAL_LEFT:
 							halignment_str = L"Left";
@@ -468,7 +507,7 @@ int main(int argc, char* argv[])
 							halignment_str = L"Center";
 							break;
 					}
-					switch(view.text_view.getVerticalAlignment())
+					switch(view.text_view[0].getVerticalAlignment())
 					{
 						case axl::gl::gfx::Text::TAL_TOP:
 							valignment_str = L"Top";
@@ -492,7 +531,7 @@ int main(int argc, char* argv[])
 						font_size.x, font_size.y, 
 						text_scale.x, text_scale.y, text_scale.z,
 						texture_size.x, texture_size.y, 
-						view.text_view.getText().length(),
+						view.text_view[0].getText().length(),
 						halignment_str, valignment_str
 					);
 					view.status_text.setText(fps_string);
