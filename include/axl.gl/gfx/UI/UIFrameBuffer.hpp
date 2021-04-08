@@ -15,8 +15,10 @@ class AXLGLCXXAPI UIFrameBuffer : public axl::gl::gfx::FrameBuffer
 		~UIFrameBuffer();
 		bool isValid() const;
 		void setContext(axl::gl::Context* ptr_context);
+	protected:
 		bool icreate();
 		bool idestroy();
+	public:
 		bool setSize(const axl::math::Vec2i& size);
 		const axl::math::Vec2i& getSize() const;
 	protected:

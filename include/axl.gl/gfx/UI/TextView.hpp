@@ -55,8 +55,10 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		~TextView();
 		bool isValid() const;
 		void setContext(axl::gl::Context* ptr_context);
+	protected:
 		bool icreate();
 		bool idestroy();
+	public:
 		// set methods
 		bool setSize(const axl::math::Vec2i& size);
 		void setBackgroundColor(const axl::math::Vec4f& bg_color);

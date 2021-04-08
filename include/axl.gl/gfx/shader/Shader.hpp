@@ -20,8 +20,10 @@ class AXLGLCXXAPI Shader : public ContextObject
 	public:
 		Shader(axl::gl::Context* ptr_context = (axl::gl::Context*)0, axl::glfl::GLenum shader_type = 0);
 		virtual ~Shader();
+	protected:
 		virtual bool icreate();
 		virtual bool idestroy();
+	public:
 		virtual bool isValid() const;
 		axl::glfl::GLuint getId() const;
 		axl::glfl::GLenum type() const;

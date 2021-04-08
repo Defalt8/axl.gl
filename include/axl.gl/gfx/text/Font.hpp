@@ -38,8 +38,10 @@ class AXLGLCXXAPI Font : public ContextObject
 	public:
 		Font(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Font();
+	protected:
 		bool icreate();
 		bool idestroy();
+	public:
 		bool isValid() const;
 		bool loadFromFile(const axl::util::String& filepath, const axl::math::Vec2i& font_size);
 		bool setSize(const axl::math::Vec2i& font_size);

@@ -19,8 +19,10 @@ class AXLGLCXXAPI Texture : public ContextObject
 		Texture(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Texture();
 		virtual Type type() const = 0;
+	protected:
 		virtual bool icreate() = 0;
 		virtual bool idestroy() = 0;
+	public:
 		virtual bool isValid() const = 0;
 		virtual axl::glfl::GLuint getId() const = 0;
 		virtual bool bind() const = 0;

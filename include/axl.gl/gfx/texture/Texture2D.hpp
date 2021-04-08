@@ -13,8 +13,10 @@ class AXLGLCXXAPI Texture2D : public Texture
 		Texture2D(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Texture2D();
 		Type type() const;
+	protected:
 		bool icreate();
 		bool idestroy();
+	public:
 		bool isValid() const;
 		axl::glfl::GLuint getId() const;
 		bool bind() const;

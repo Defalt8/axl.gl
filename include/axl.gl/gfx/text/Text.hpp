@@ -48,8 +48,10 @@ class AXLGLCXXAPI Text : public ContextObject
 	public:
 		Text(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Text();
+	protected:
 		bool icreate();
 		bool idestroy();
+	public:
 		bool isValid() const;
 		bool render(const axl::gl::camera::Camera3Df* camera = 0);
 		void updateBuffers(void);
