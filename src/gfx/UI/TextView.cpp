@@ -16,7 +16,7 @@ namespace gfx {
 namespace ui {
 
 TextView::TextView(axl::gl::Context* ptr_context, axl::gl::gfx::Font* ptr_font, axl::gl::gfx::Program* ptr_program, axl::math::Vec2i size) :
-	axl::gl::gfx::UIElement(ptr_context),
+	axl::gl::gfx::UIElement(UIElement::T_TextView, ptr_context),
 	enable_shadow(false),
 	txtv_wstring(L"TextView"),
 	txtv_background_color(axl::math::Vec4f(0.9f,0.9f,0.9f,0.0f)),

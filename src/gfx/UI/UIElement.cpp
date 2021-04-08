@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <axl.gl/gfx/UI/UIElement.hpp>
+#include <axl.gl/gfx/UI/UIManager.hpp>
 #include <axl.glfl/glCoreARB.hpp>
 #include <axl.math/mat/transform4.hpp>
 
@@ -18,8 +19,9 @@ namespace gfx {
 // UIElement
 //
 
-UIElement::UIElement(axl::gl::Context* ptr_context) :
+UIElement::UIElement(Type type, axl::gl::Context* ptr_context) :
 	ContextObject(ptr_context),
+	type(type),
 	transform(),
 	uielement_size(0,0),
 	uielement_border_size(0.0f,0.0f,0.0f,0.0f),
@@ -148,6 +150,13 @@ bool UIElement::idestroy()
 	return (glGetError() == GL_NO_ERROR &&
 		this->uielement_texture.destroy() &&
 		this->m_program.destroy());
+}
+bool UIElement::setUIManager(UIManager* ui_manager)
+{
+	if(ui_manager && this->ctx_context && this->ctx_context != ui_manager->getContext())
+		return false;
+	this->uielement_ui_manager = ui_manager;
+	return true;
 }
 bool UIElement::render(const camera::Camera3Df* camera)
 {

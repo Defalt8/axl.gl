@@ -13,6 +13,8 @@ namespace axl {
 namespace gl {
 namespace gfx {
 
+class AXLGLCXXAPI UIManager;
+
 class AXLGLCXXAPI UIElement : public ContextObject
 {
 	public:
@@ -30,14 +32,21 @@ class AXLGLCXXAPI UIElement : public ContextObject
 			Q_MEDIUM,
 			Q_HIGH
 		};
+		enum Type {
+			T_UIElement,
+			T_TextView,
+		};
 	public:
-		UIElement(axl::gl::Context* ptr_context = 0);
+		UIElement(Type type = UIElement::T_UIElement, axl::gl::Context* ptr_context = 0);
 		virtual ~UIElement();
 		virtual bool isValid() const;
 		virtual void setContext(axl::gl::Context* ptr_context);
+	protected:
 		virtual bool icreate();
 		virtual bool idestroy();
 	protected:
+		friend class AXLGLCXXAPI UIManager;
+		virtual bool setUIManager(UIManager* ui_manager);
 		virtual bool irender(const camera::Camera3Df* camera) = 0;
 	public:
 		bool render(const camera::Camera3Df* camera);
@@ -49,8 +58,10 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		const axl::math::Vec4f& getBorderSize() const;
 		const axl::math::Vec4f& getBorderColor() const;
 	public:
+		const Type type;
 		axl::math::Transform4f transform;
 	protected:
+		UIManager* uielement_ui_manager;
 		axl::math::Vec2i uielement_size;
 		axl::math::Vec4f uielement_border_size;
 		axl::math::Vec4f uielement_border_color;
