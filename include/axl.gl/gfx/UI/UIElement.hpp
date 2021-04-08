@@ -25,6 +25,12 @@ class AXLGLCXXAPI UIElement : public ContextObject
 				bool idestroy();
 		};
 	public:
+		enum Quality {
+			Q_LOW,
+			Q_MEDIUM,
+			Q_HIGH
+		};
+	public:
 		UIElement(axl::gl::Context* ptr_context = 0);
 		virtual ~UIElement();
 		virtual bool isValid() const;
@@ -36,6 +42,7 @@ class AXLGLCXXAPI UIElement : public ContextObject
 	public:
 		bool render(const camera::Camera3Df* camera);
 		virtual bool setSize(const axl::math::Vec2i& size);
+		virtual bool setQuality(Quality quality);
 		bool setBorderSize(const axl::math::Vec4f& border_size);
 		bool setBorderColor(const axl::math::Vec4f& border_color);
 		const axl::math::Vec2i& getSize() const;

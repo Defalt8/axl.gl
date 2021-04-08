@@ -221,6 +221,26 @@ bool UIElement::setSize(const axl::math::Vec2i& size)
 	this->uielement_size = size;
 	return true;
 }
+bool UIElement::setQuality(UIElement::Quality quality)
+{
+	using namespace GL;
+	if(!this->isValid())
+		return false;
+	switch(quality)
+	{
+		default:
+		case Q_LOW:
+			return this->uielement_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
+				this->uielement_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		case Q_MEDIUM:
+			return this->uielement_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
+				this->uielement_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		case Q_HIGH:
+			return this->uielement_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_LINEAR) &&
+				this->uielement_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	return false;
+}
 
 bool UIElement::setBorderSize(const axl::math::Vec4f& border_size)
 {
