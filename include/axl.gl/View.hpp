@@ -73,8 +73,7 @@ class AXLGLCXXAPI View
 	public:
 		View(const axl::util::WString& title, const axl::math::Vec2i& position, const axl::math::Vec2i& size, const Cursor& cursor = DefaultCursor);
 		virtual ~View();
-		bool isValid() const;
-		//virtual bool create(bool recreate = false, const ViewConfig* configs = (const ViewConfig*)0, int configs_count = 0, Flags flags = VF_FIXED);
+		virtual bool isValid() const;
 		virtual bool create(Display& display, bool recreate = false, const ViewConfig* configs = (const ViewConfig*)0, int configs_count = 0, Flags flags = VF_FIXED);
 		virtual void destroy();
 		const void* getReserved() const;

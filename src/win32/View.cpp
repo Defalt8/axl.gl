@@ -287,7 +287,7 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 			}
 			((ViewData*)m_reserved)->is_recreating = false;
 		}
-		if(isValid())
+		if(axl::gl::View::isValid())
 		{
 			WGL::load();
 			// set the pixelformat
@@ -676,7 +676,12 @@ void View::onDisplayConfig(const Display& display)
 
 bool View::onCreate(bool recreating)
 {
-	return this->isValid();
+	if(this->isValid())
+	{
+		this->onDisplayConfig(*this->m_display);
+		return true;
+	}
+	return false;
 }
 
 void View::onDestroy(bool recreating)
