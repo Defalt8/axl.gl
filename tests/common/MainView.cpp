@@ -52,7 +52,7 @@ bool MainView::create(axl::gl::Display& _display, bool _recreate, Flags _flags)
 {
 	if(!axl::gl::View::create(_display, _recreate, view_configs, sizeof(view_configs)/sizeof(axl::gl::ViewConfig), _flags))
 		return false;
-	return this->context.create(_recreate, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::ContextConfig));
+	return true;
 }
 void MainView::destroy()
 {
@@ -66,17 +66,16 @@ bool MainView::initialize()
 {
 	if(!this->isValid())
 		return false;
-	this->projection.set(0, (float)this->size.x, 0, (float)this->size.y, .001f, 1000.f);
-	this->main_camera.viewport_size = this->size;
 	this->main_camera.set(axl::math::Vec3f(0.f,0.f,10.f),
 		axl::math::Vec3f::filled(0.f),
 		0.f,
 		axl::math::Vec3f::filled(1.f),
 		axl::math::Vec2i(0,0),
-		axl::math::Vec2i(-1,-1),
+		this->size,
 		&projection,
 		axl::math::Rules::Axis::RHS
 		);
+	this->projection.set(0, (float)this->main_camera.viewport_size.x, 0, (float)this->main_camera.viewport_size.y, .001f, 1000.f);
 	return true;
 }
 bool MainView::update()
@@ -101,7 +100,7 @@ bool MainView::update()
 }
 bool MainView::render()
 {
-	if(!this->isValid() || !this->context.makeCurrent())
+	if(!this->isValid() || !this->main_camera.makeCurrent(&context, true))
 		return false;
 	++m_rendered_frames;
 	return true;
@@ -120,7 +119,8 @@ void MainView::onDisplayConfig(const axl::gl::Display& _display)
 
 bool MainView::onCreate(bool _recreating)
 {
-	return axl::gl::View::onCreate(_recreating);
+	if(!axl::gl::View::onCreate(_recreating)) return false;
+	return this->context.create(_recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::ContextConfig));
 }
 
 void MainView::onDestroy(bool _recreating)
@@ -140,16 +140,16 @@ void MainView::onSize(int w,int h)
 	axl::gl::View::onSize(w, h);
 	if(this->context.makeCurrent())
 	{
+		this->projection.set(0, (float)w, 0, (float)h, .001f, 1000.f);
 		this->main_camera.set(axl::math::Vec3f(0.f,0.f,10.f),
 			axl::math::Vec3f::filled(0.f),
 			0.f,
 			axl::math::Vec3f::filled(1.f),
 			axl::math::Vec2i(0,0),
 			axl::math::Vec2i(w,h),
-			&projection,
+			&this->projection,
 			axl::math::Rules::Axis::RHS
 			);
-		this->projection.set(0, (float)this->main_camera.viewport_size.x, 0, (float)this->main_camera.viewport_size.y, .001f, 1000.f);
 	}
 }
 

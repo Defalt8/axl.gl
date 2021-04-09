@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 	puts("----------------------------------------");
 	{
 		// Create View
-		Assert(g_display.isOpen());
+		Assertve(g_display.isOpen(), verbose);
 		axl::math::Vec2i view_position(40, 60), view_size(640, 480);
 		MainView main_view(L"Base View", view_position, view_size, axl::gl::Cursor::CUR_CROSS);
 		Assertve(main_view.create(g_display, false, MainView::VF_FIXED), verbose);
