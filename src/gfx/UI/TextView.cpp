@@ -17,7 +17,7 @@ namespace ui {
 
 TextView::TextView(axl::gl::Context* ptr_context, axl::gl::gfx::Font* ptr_font, axl::gl::gfx::Program* ptr_program, axl::math::Vec2i size) :
 	axl::gl::gfx::UIElement(UIElement::T_TextView, ptr_context),
-	enable_shadow(false),
+	enable_text_shadow(false),
 	txtv_wstring(L"TextView"),
 	txtv_background_color(axl::math::Vec4f(0.9f,0.9f,0.9f,0.0f)),
 	txtv_text_color(axl::math::Vec4f(0.1f,0.1f,0.1f,1.0f)),
@@ -150,11 +150,11 @@ void TextView::setTextColor(const axl::math::Vec4f& text_color)
 {
 	this->txtv_text_color = text_color;
 }
-void TextView::setShadowColor(const axl::math::Vec4f& shadow_color)
+void TextView::setTextShadowColor(const axl::math::Vec4f& shadow_color)
 {
 	this->txtv_shadow_color = shadow_color;
 }
-void TextView::setShadowOffset(const axl::math::Vec2f& shadow_offset)
+void TextView::setTextShadowOffset(const axl::math::Vec2f& shadow_offset)
 {
 	this->txtv_shadow_offset = shadow_offset;
 }
@@ -261,11 +261,11 @@ const axl::math::Vec4f& TextView::getTextColor() const
 {
 	return this->txtv_text_color;
 }
-const axl::math::Vec4f& TextView::getShadowColor() const
+const axl::math::Vec4f& TextView::getTextShadowColor() const
 {
 	return this->txtv_shadow_color;
 }
-const axl::math::Vec2f& TextView::getShadowOffset() const
+const axl::math::Vec2f& TextView::getTextShadowOffset() const
 {
 	return this->txtv_shadow_offset;
 }
@@ -546,7 +546,7 @@ bool TextView::irender(const axl::gl::camera::Camera3Df* camera)
 		this->updateBuffers(this->txtv_wstring, false, true);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	if(this->txtv_background_color.w > 0.0f || this->enable_shadow)
+	if(this->txtv_background_color.w > 0.0f || this->enable_text_shadow)
 	{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -562,7 +562,7 @@ bool TextView::irender(const axl::gl::camera::Camera3Df* camera)
 				this->txtv_program->setUniformMat4fv(m_uloc_projection_matrix, camera->projection->matrix.values);
 			this->txtv_program->setUniformMat4fv(m_uloc_view_matrix, camera->view_transform.values);
 		}
-		if(this->enable_shadow)
+		if(this->enable_text_shadow)
 		{
 			this->txtv_program->setUniform1f(m_uloc_depth, -1.f);
 			this->txtv_program->setUniformMat4fv(m_uloc_model_matrix, this->txtv_transform.getMatrix().values);

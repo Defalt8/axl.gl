@@ -26,6 +26,14 @@ class AXLGLCXXAPI UIElement : public ContextObject
 				bool icreate();
 				bool idestroy();
 		};
+		class AXLGLCXXAPI ShadowProgram : public axl::gl::gfx::Program
+		{
+			public:
+				ShadowProgram(axl::gl::Context* ptr_context = 0);
+				~ShadowProgram();
+				bool icreate();
+				bool idestroy();
+		};
 	public:
 		enum Quality {
 			Q_LOW,
@@ -54,21 +62,29 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		virtual bool setQuality(Quality quality);
 		bool setBorderSize(const axl::math::Vec4f& border_size);
 		bool setBorderColor(const axl::math::Vec4f& border_color);
+		bool setShadowColor(const axl::math::Vec4f& shadow_color);
+		bool setShadowOffset(const axl::math::Vec4f& shadow_offset);
 		const axl::math::Vec2i& getSize() const;
 		const axl::math::Vec4f& getBorderSize() const;
 		const axl::math::Vec4f& getBorderColor() const;
+		const axl::math::Vec4f& getShadowColor() const;
+		const axl::math::Vec4f& getShadowOffset() const;
 	public:
 		const Type type;
+		bool enable_shadow;
 		axl::math::Transform4f transform;
 	protected:
 		UIManager* uielement_ui_manager;
 		axl::math::Vec2i uielement_size;
 		axl::math::Vec4f uielement_border_size;
 		axl::math::Vec4f uielement_border_color;
+		axl::math::Vec4f uielement_shadow_color;
+		axl::math::Vec4f uielement_shadow_offset;
 		gfx::Texture2D uielement_texture;
 		axl::gl::gfx::UIFrameBuffer uielement_frame_buffer;
 	private:
 		axl::gl::gfx::UIElement::Program m_program;
+		axl::gl::gfx::UIElement::ShadowProgram m_shadow_program;
 		axl::glfl::GLuint m_vertex_array;
 		axl::glfl::GLuint m_vertex_buffer;
 		axl::glfl::GLint m_uloc_projection;
@@ -77,6 +93,11 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		axl::glfl::GLint m_uloc_size;
 		axl::glfl::GLint m_uloc_border;
 		axl::glfl::GLint m_uloc_border_color;
+		axl::glfl::GLint m_uloc_shadow_projection;
+		axl::glfl::GLint m_uloc_shadow_view;
+		axl::glfl::GLint m_uloc_shadow_model;
+		axl::glfl::GLint m_uloc_shadow_color;
+		axl::glfl::GLint m_uloc_shadow_offset;
 
 };
 

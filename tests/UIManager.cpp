@@ -30,17 +30,23 @@ class MainView : public Test::MainView
 			Assert(m_uimanager.create());
 			m_default_font.setContext(&context);
 			Assert(m_default_font.create());
-			Assert(m_default_font.loadFromFile("../../common/fonts/OpenSans-Light.ttf", axl::math::Vec2i(64,64)));
+			Assert(m_default_font.loadFromFile("../../common/fonts/OpenSans-Regular.ttf", axl::math::Vec2i(64,64)));
 			m_default_text_program.setContext(&context);
 			Assert(m_default_text_program.create());
 			m_text.setFont(&m_default_font);
 			m_text.setContext(&context);
 			m_text.setProgram(&m_default_text_program);
 			m_text.setBorderColor(axl::math::Vec4f(1.f,1.f,1.f,1.f));
-			m_text.setBorderSize(axl::math::Vec4f(1.f,1.f,1.f,1.f));
-			m_text.setBackgroundColor(axl::math::Vec4f(1.f,1.f,1.f,.0f));
-			m_text.setTextColor(axl::math::Vec4f(1.f,0.9f,.8f,1.f));
-			m_text.setPadding(axl::math::Vec4f(15.f,15.f,15.f,15.f));
+			m_text.setBorderSize(axl::math::Vec4f(6.f,6.f,6.f,6.f));
+			m_text.setBackgroundColor(axl::math::Vec4f(1.f,0.f,.3f,1.0f));
+			m_text.setTextColor(axl::math::Vec4f(1.f,1.f,1.f,1.f));
+			m_text.setTextShadowOffset(axl::math::Vec2f(1.f,-1.f));
+			m_text.setTextShadowColor(axl::math::Vec4f(.1f,.1f,.1f,0.69f));
+			m_text.setShadowColor(axl::math::Vec4f(.1f,.1f,.1f,0.69f));
+			m_text.setShadowOffset(axl::math::Vec4f(2.f,-2.f,2.f,-2.f));
+			m_text.setPadding(axl::math::Vec4f(25.f,25.f,25.f,25.f));
+			m_text.enable_shadow = true;
+			// m_text.enable_text_shadow = true;
 			Assert(m_text.create());
 			Assert(m_text.setQuality(axl::gl::gfx::ui::TextView::Q_HIGH));
 			Assert(m_text.setText(L"Hello World!"));
@@ -66,7 +72,7 @@ class MainView : public Test::MainView
 		{
 			using namespace GL;
 			if(!Test::MainView::render()) return false;
-			glClearColor(.1f, .1f, .4f, .0f);
+			glClearColor(.87f, .87f, .87f, .0f);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 			m_text.render(&main_camera);
 			return true;

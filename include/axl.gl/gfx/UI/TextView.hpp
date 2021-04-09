@@ -63,8 +63,8 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		bool setSize(const axl::math::Vec2i& size);
 		void setBackgroundColor(const axl::math::Vec4f& bg_color);
 		void setTextColor(const axl::math::Vec4f& text_color);
-		void setShadowColor(const axl::math::Vec4f& shadow_color);
-		void setShadowOffset(const axl::math::Vec2f& shadow_offset);
+		void setTextShadowColor(const axl::math::Vec4f& shadow_color);
+		void setTextShadowOffset(const axl::math::Vec2f& shadow_offset);
 		bool setSpacing(const axl::math::Vec2f& spacing);
 		bool setOrigin(const axl::math::Vec2f& origin);
 		bool setPadding(const axl::math::Vec4f& padding);
@@ -78,8 +78,8 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		// get methods
 		const axl::math::Vec4f& getBackgroundColor() const;
 		const axl::math::Vec4f& getTextColor() const;
-		const axl::math::Vec4f& getShadowColor() const;
-		const axl::math::Vec2f& getShadowOffset() const;
+		const axl::math::Vec4f& getTextShadowColor() const;
+		const axl::math::Vec2f& getTextShadowOffset() const;
 		const axl::math::Vec2f& getSpacing() const;
 		const axl::math::Vec2f& getOrigin() const;
 		const axl::math::Vec4f& getPadding() const;
@@ -92,7 +92,7 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		HorizontalAlignment getHorizontalAlignment() const;
 		VerticalAlignment getVerticalAlignment() const;
 	public:
-		bool enable_shadow;
+		bool enable_text_shadow;
 	protected:
 		void updateOffset();
 		void updateAlignment();
