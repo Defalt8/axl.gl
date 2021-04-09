@@ -1,26 +1,12 @@
-
-#include <windows.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <axl.gl/lib.hpp>
-#include <axl.gl/Display.hpp>
-#include <axl.gl/Application.hpp>
-#include <axl.gl/input/Keyboard.hpp>
-#include <axl.gl/input/Key.hpp>
-#include <axl.gl/View.hpp>
-#include <axl.gl/Context.hpp>
-#include <axl.gl/gfx/texture/Texture3D.hpp>
-#include <axl.glfl/glCoreARB.hpp>
-#include <axl.util/uc/Clock.hpp>
-#include <axl.util/uc/Time.hpp>
-#include <axl.math/constants.hpp>
-#include <axl.math/angle.hpp>
-#include <axl.math/basic.hpp>
-#include <axl.math/util.hpp>
-#include <gl/GL.h>
-#include "Assert.hpp"
-#include "GLC.h"
+#include "common/Legacy.h"
+#include <axl.gl/everything.hpp>
+#include <axl.util/everything.hpp>
+#include <axl.math/everything.hpp>
+#include "common/Assert.hpp"
+#include "common/GLC.h"
 
 class GameView : public axl::gl::View
 {

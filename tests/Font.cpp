@@ -1,5 +1,3 @@
-
-#include <windows.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -7,8 +5,8 @@
 #include <axl.util/everything.hpp>
 #include <axl.math/everything.hpp>
 #include <axl.glfl/glCoreARB.hpp>
-#include "Assert.hpp"
-#include "GLC.h"
+#include "common/Assert.hpp"
+#include "common/GLC.h"
 
 namespace GL {
 	using namespace axl::glfl;

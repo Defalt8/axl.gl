@@ -1,12 +1,10 @@
-
-#include <windows.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <axl.gl/lib.hpp>
 #include <axl.gl/Display.hpp>
 #include <axl.math/float.hpp>
-#include "Assert.hpp"
+#include "common/Assert.hpp"
 
 int main(int argc, char* argv[])
 {

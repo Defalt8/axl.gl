@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <axl.gl/lib.hpp>
-#include "Assert.hpp"
+#include "common/Assert.hpp"
 
 int main(int argc, char* argv[])
 {

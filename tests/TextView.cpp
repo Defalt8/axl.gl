@@ -11,8 +11,8 @@
 #include <axl.util/everything.hpp>
 #include <axl.math/everything.hpp>
 #include <axl.glfl/glCoreARB.hpp>
-#include "GL.hpp"
-#include "Assert.hpp"
+#include "common/GL.hpp"
+#include "common/Assert.hpp"
 
 
 namespace GL {

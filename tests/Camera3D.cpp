@@ -1,15 +1,12 @@
-
-#include <windows.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <axl.gl/everything.hpp>
 #include <axl.util/everything.hpp>
 #include <axl.math/everything.hpp>
-#include <axl.glfl/glCoreARB.hpp>
-#include <gl/GL.h>
-#include "Assert.hpp"
-#include "GLC.h"
+#include "common/Legacy.h"
+#include "common/Assert.hpp"
+#include "common/GLC.h"
 
 namespace GL = axl::glfl::core::GL;
 
