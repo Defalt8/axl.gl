@@ -17,9 +17,6 @@ Projection::Projection(Projection::Type p_type, axl::math::Mat4d p_matrix) :
 	projection_matrix(p_matrix)
 {}
 
-Projection::~Projection()
-{}
-
 void Projection::updateTransform()
 {
 	Projection::projection_matrix = axl::math::Mat4d::Identity;
@@ -34,9 +31,6 @@ Projectionf::Projectionf(Projectionf::Type p_type, axl::math::Mat4f p_matrix) :
 	matrix(projection_matrix),
 	m_type(p_type),
 	projection_matrix(p_matrix)
-{}
-
-Projectionf::~Projectionf()
 {}
 
 void Projectionf::updateTransform()
