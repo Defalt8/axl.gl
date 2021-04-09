@@ -7,6 +7,9 @@
 
 namespace GL {
 
+using namespace axl::glfl;
+using namespace axl::glfl::core::GL;
+
 extern axl::glfl::GLenum _gl_error;
 
 bool loadVFShaders(axl::gl::gfx::Program& program, const axl::util::String& vertex_shader_file, const axl::util::String& fragment_shader_file);
