@@ -1,10 +1,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include "common/Legacy.h"
 #include <axl.gl/everything.hpp>
 #include <axl.util/everything.hpp>
 #include <axl.math/everything.hpp>
-#include "common/Legacy.h"
 #include "common/Assert.hpp"
 #include "common/GLC.h"
 
