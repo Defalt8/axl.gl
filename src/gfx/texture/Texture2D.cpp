@@ -38,7 +38,8 @@ Texture2D::~Texture2D()
 bool Texture2D::icreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_1_0 || this->isValid() || !(this->ctx_context && this->ctx_context->makeCurrent())) return false;
+	if(!GL_VERSION_1_0 || this->txr_id != -1 || !this->ctx_context || !this->ctx_context->makeCurrent())
+		return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	glGenTextures(1, &tmp_id);
