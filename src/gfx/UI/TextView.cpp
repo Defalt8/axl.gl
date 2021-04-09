@@ -457,7 +457,7 @@ bool TextView::updateBuffers(const axl::util::WString& p_wstring, bool text_size
 			glBindVertexArray(0);
 			return false;
 		}
-		GLfloat horizontal_advance = 0.0f, vertical_advance = (GLfloat)(line_count-1) * (this->txtv_font->size.y + this->txtv_spacing.y) + 0.25f * this->txtv_font->size.y;
+		GLfloat horizontal_advance = 0.0f, vertical_advance = (GLfloat)(line_count-1) * (this->txtv_font->size.y + this->txtv_spacing.y) + 0.2f * this->txtv_font->size.y;
 		const unsigned int space_glyph_index = this->txtv_font->getCharIndex(L' ');
 		const GLfloat space_advance = (GLfloat)(space_glyph_index == -1 ? this->txtv_font->size.x : this->txtv_font->glyphs[space_glyph_index].horiAdvance);
 		const GLfloat tab_advance = space_advance * 4.0f;
