@@ -25,10 +25,9 @@ Orthographic::Orthographic(double p_left, double p_right, double p_bottom, doubl
 	m_top(p_top),
 	m_zNear(p_zNear),
 	m_zFar(p_zFar)
-{}
-
-Orthographic::~Orthographic()
-{}
+{
+	this->updateTransform();
+}
 
 void Orthographic::updateTransform()
 {
@@ -48,6 +47,7 @@ void Orthographic::set(double p_left, double p_right, double p_bottom, double p_
 	m_top = p_top;
 	m_zNear = p_zNear;
 	m_zFar = p_zFar;
+	this->updateTransform();
 }
 
 //
@@ -68,10 +68,9 @@ Orthographicf::Orthographicf(float p_left, float p_right, float p_bottom, float 
 	m_top(p_top),
 	m_zNear(p_zNear),
 	m_zFar(p_zFar)
-{}
-
-Orthographicf::~Orthographicf()
-{}
+{
+	this->updateTransform();
+}
 
 void Orthographicf::updateTransform()
 {
@@ -91,6 +90,7 @@ void Orthographicf::set(float p_left, float p_right, float p_bottom, float p_top
 	m_top = p_top;
 	m_zNear = p_zNear;
 	m_zFar = p_zFar;
+	this->updateTransform();
 }
 
 } // axl::gl::projection

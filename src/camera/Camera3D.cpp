@@ -39,10 +39,9 @@ Camera3D::Camera3D(const axl::math::Vec3d& p_position,
 	viewport_size(p_viewport_size),
 	projection(p_projection),
 	view_transform(axl::math::Mat4d::Identity)
-{}
-
-Camera3D::~Camera3D()
-{}
+{
+	this->updateTransform();
+}
 
 bool Camera3D::makeCurrent(axl::gl::Context* context, bool set_viewport) const
 {
@@ -50,9 +49,9 @@ bool Camera3D::makeCurrent(axl::gl::Context* context, bool set_viewport) const
 	using namespace axl::glfl::core::GL;
 	GLCLEARERROR();
 	if(set_viewport)
-		glViewport((axl::glfl::GLint)Camera3D::viewport_position.x, (axl::glfl::GLint)Camera3D::viewport_position.y,
-			(axl::glfl::GLsizei)(Camera3D::viewport_size.x < 0 ? context->view->size.x : Camera3D::viewport_size.x),
-			(axl::glfl::GLsizei)(Camera3D::viewport_size.y < 0 ? context->view->size.y : Camera3D::viewport_size.y));
+		glViewport((axl::glfl::GLint)this->viewport_position.x, (axl::glfl::GLint)this->viewport_position.y,
+			(axl::glfl::GLsizei)(this->viewport_size.x < 0 ? context->view->size.x : this->viewport_size.x),
+			(axl::glfl::GLsizei)(this->viewport_size.y < 0 ? context->view->size.y : this->viewport_size.y));
 	return glGetError() == GL_NO_ERROR;
 }
 
@@ -75,10 +74,10 @@ void Camera3D::updateTransform()
 
 void Camera3D::lookAt(const axl::math::Vec3d& p_position, const axl::math::Vec3d& p_target, double p_roll_angle)
 {
-	Camera3D::target = p_target;
-	Camera3D::position = p_position;
-	Camera3D::roll_angle = p_roll_angle;
-	Camera3D::updateTransform();
+	this->target = p_target;
+	this->position = p_position;
+	this->roll_angle = p_roll_angle;
+	this->updateTransform();
 }
 
 void Camera3D::set(const axl::math::Vec3d& p_position, const axl::math::Vec3d& p_target, double p_roll_angle, const axl::math::Vec3d& p_scale, const axl::math::Vec2i& p_viewport_position, const axl::math::Vec2i& p_viewport_size, axl::gl::projection::Projection* p_projection, axl::math::Rules::Axis p_axis_rule)
@@ -91,6 +90,7 @@ void Camera3D::set(const axl::math::Vec3d& p_position, const axl::math::Vec3d& p
 	this->viewport_size = p_viewport_size;
 	this->projection = p_projection;
 	this->axis_rule = p_axis_rule;
+	this->updateTransform();
 }
 
 axl::math::Vec3d Camera3D::screenToWorld(const axl::math::Vec2i& vec2) const
@@ -162,10 +162,9 @@ Camera3Df::Camera3Df(const axl::math::Vec3f& p_position,
 	viewport_size(p_viewport_size),
 	projection(p_projection),
 	view_transform(axl::math::Mat4f::Identity)
-{}
-
-Camera3Df::~Camera3Df()
-{}
+{
+	this->updateTransform();
+}
 
 bool Camera3Df::makeCurrent(axl::gl::Context* context, bool set_viewport) const
 {
@@ -173,9 +172,9 @@ bool Camera3Df::makeCurrent(axl::gl::Context* context, bool set_viewport) const
 	using namespace axl::glfl::core::GL;
 	GLCLEARERROR();
 	if(set_viewport)
-		glViewport((axl::glfl::GLint)Camera3Df::viewport_position.x, (axl::glfl::GLint)Camera3Df::viewport_position.y,
-			(axl::glfl::GLsizei)(Camera3Df::viewport_size.x < 0 ? context->view->size.x : Camera3Df::viewport_size.x),
-			(axl::glfl::GLsizei)(Camera3Df::viewport_size.y < 0 ? context->view->size.y : Camera3Df::viewport_size.y));
+		glViewport((axl::glfl::GLint)this->viewport_position.x, (axl::glfl::GLint)this->viewport_position.y,
+			(axl::glfl::GLsizei)(this->viewport_size.x < 0 ? context->view->size.x : this->viewport_size.x),
+			(axl::glfl::GLsizei)(this->viewport_size.y < 0 ? context->view->size.y : this->viewport_size.y));
 	return glGetError() == GL_NO_ERROR;
 }
 
@@ -193,15 +192,15 @@ void Camera3Df::updateTransform()
 	}
 	angle.x = (axl::math::atan2(hyp, delta.y) - axl::math::Constants::F_HALF_PI);
 	angle.z = -this->roll_angle;
-	Camera3Df::view_transform = axl::math::Transform4::rotateZXY(angle, this->axis_rule) * axl::math::Transform4::scaleTranslate(this->scale, -this->position);
+	this->view_transform = axl::math::Transform4::rotateZXY(angle, this->axis_rule) * axl::math::Transform4::scaleTranslate(this->scale, -this->position);
 }
 
 void Camera3Df::lookAt(const axl::math::Vec3f& p_position, const axl::math::Vec3f& p_target, float p_roll_angle)
 {
-	Camera3Df::target = p_target;
-	Camera3Df::position = p_position;
-	Camera3Df::roll_angle = p_roll_angle;
-	Camera3Df::updateTransform();
+	this->target = p_target;
+	this->position = p_position;
+	this->roll_angle = p_roll_angle;
+	this->updateTransform();
 }
 
 void Camera3Df::set(const axl::math::Vec3f& p_position, const axl::math::Vec3f& p_target, float p_roll_angle, const axl::math::Vec3f& p_scale, const axl::math::Vec2i& p_viewport_position, const axl::math::Vec2i& p_viewport_size, axl::gl::projection::Projectionf* p_projection, axl::math::Rules::Axis p_axis_rule)
@@ -214,6 +213,7 @@ void Camera3Df::set(const axl::math::Vec3f& p_position, const axl::math::Vec3f& 
 	this->viewport_size = p_viewport_size;
 	this->projection = p_projection;
 	this->axis_rule = p_axis_rule;
+	this->updateTransform();
 }
 
 axl::math::Vec3f Camera3Df::screenToWorld(const axl::math::Vec2i& vec2) const

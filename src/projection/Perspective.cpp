@@ -29,10 +29,9 @@ Perspective::Perspective(double p_zNear, double p_zFar, double p_aspect_ratio, d
 	m_zFar(p_zFar),
 	m_aspect_ratio(p_aspect_ratio),
 	m_fov(aspect_ratio)
-{}
-
-Perspective::~Perspective()
-{}
+{
+	this->updateTransform();
+}
 
 void Perspective::updateTransform()
 {
@@ -55,6 +54,7 @@ void Perspective::set(double p_zNear, double p_zFar, double p_aspect_ratio, doub
 	m_zFar = p_zFar;
 	m_aspect_ratio = p_aspect_ratio;
 	m_fov = p_fov;
+	this->updateTransform();
 }
 
 
@@ -80,10 +80,9 @@ Perspectivef::Perspectivef(float p_zNear, float p_zFar, float p_aspect_ratio, fl
 	m_zFar(p_zFar),
 	m_aspect_ratio(p_aspect_ratio),
 	m_fov(aspect_ratio)
-{}
-
-Perspectivef::~Perspectivef()
-{}
+{
+	this->updateTransform();
+}
 
 void Perspectivef::updateTransform()
 {
@@ -106,6 +105,7 @@ void Perspectivef::set(float p_zNear, float p_zFar, float p_aspect_ratio, float 
 	m_zFar = p_zFar;
 	m_aspect_ratio = p_aspect_ratio;
 	m_fov = p_fov;
+	this->updateTransform();
 }
 
 } // axl::gl::projection

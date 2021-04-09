@@ -11,7 +11,6 @@ class AXLGLCXXAPI Perspective : public Projection
 {
 	public:
 		Perspective(double zNear = 0.001, double zFar = 1000.0, double aspect_ratio = 1.0, double fov = 70.0);
-		~Perspective();
 		void updateTransform();
 		void set(double zNear, double zFar, double aspect_ratio, double fov);
 	public:
@@ -38,7 +37,6 @@ class AXLGLCXXAPI Perspectivef : public Projectionf
 {
 	public:
 		Perspectivef(float zNear = 0.001f, float zFar = 1000.0f, float aspect_ratio = 1.0f, float fov = 70.0f);
-		~Perspectivef();
 		void updateTransform();
 		void set(float zNear, float zFar, float aspect_ratio, float fov);
 	public:

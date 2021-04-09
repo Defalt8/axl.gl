@@ -11,7 +11,6 @@ class AXLGLCXXAPI Orthographic : public Projection
 {
 	public:
 		Orthographic(double left = -1.0, double right = 1.0, double bottom = -1.0, double top = 1.0, double zNear = -1.0, double zFar = 1.0);
-		~Orthographic();
 		void updateTransform();
 		void set(double left, double right, double bottom, double top, double zNear, double zFar);
 	public:
@@ -34,7 +33,6 @@ class AXLGLCXXAPI Orthographicf : public Projectionf
 {
 	public:
 		Orthographicf(float left = -1.0f, float right = 1.0f, float bottom = -1.0f, float top = 1.0f, float zNear = -1.0f, float zFar = 1.0f);
-		~Orthographicf();
 		void updateTransform();
 		void set(float left, float right, float bottom, float top, float zNear, float zFar);
 	public:

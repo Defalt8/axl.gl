@@ -27,7 +27,6 @@ class AXLGLCXXAPI Camera3D
 				const axl::math::Vec2i& viewport_size = axl::math::Vec2i(-1,-1),
 				axl::gl::projection::Projection* projection = &DefaultCamera3DProjection,
 				axl::math::Rules::Axis axis_rule = DefaultCamera3DAxisRule);
-		virtual ~Camera3D();
 	public:
 		bool makeCurrent(axl::gl::Context* context, bool set_viewport = true) const;
 		void updateTransform();
@@ -61,7 +60,6 @@ class AXLGLCXXAPI Camera3Df
 				const axl::math::Vec2i& viewport_size = axl::math::Vec2i(-1,-1),
 				axl::gl::projection::Projectionf* projection = &DefaultCamera3DfProjection,
 				axl::math::Rules::Axis axis_rule = DefaultCamera3DfAxisRule);
-		virtual ~Camera3Df();
 	public:
 		bool makeCurrent(axl::gl::Context* context, bool set_viewport = true) const;
 		void updateTransform();

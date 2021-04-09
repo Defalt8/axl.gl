@@ -14,7 +14,6 @@ class AXLGLCXXAPI Projection
 		AXLGL_ENUM_CLASS Type { PT_IDENTITY, PT_ORTHOGRAPHIC, PT_PERSPECTIVE, PT_OTHER };
 	public:
 		Projection(Projection::Type type = Projection::Type::PT_IDENTITY, axl::math::Mat4d matrix = axl::math::Mat4d::Identity);
-		virtual ~Projection();
 		virtual void updateTransform();
 	public:
 		const Type& type;
@@ -31,7 +30,6 @@ class AXLGLCXXAPI Projectionf
 		AXLGL_ENUM_CLASS Type { PT_IDENTITY, PT_ORTHOGRAPHIC, PT_PERSPECTIVE, PT_OTHER };
 	public:
 		Projectionf(Projectionf::Type type = Projectionf::Type::PT_IDENTITY, axl::math::Mat4f matrix = axl::math::Mat4f::Identity);
-		virtual ~Projectionf();
 		virtual void updateTransform();
 	public:
 		const Type& type;
