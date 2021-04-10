@@ -74,6 +74,7 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		bool enable_shadow;
 		axl::math::Transform4f transform;
 	protected:
+		bool uielement_modified;
 		UIManager* uielement_ui_manager;
 		axl::math::Vec2i uielement_size;
 		axl::math::Vec4f uielement_border_size;

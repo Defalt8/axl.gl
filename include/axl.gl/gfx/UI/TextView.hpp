@@ -115,7 +115,6 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::UIElement
 		axl::math::Transform4f txtv_transform;
 	private:
 		unsigned int m_actual_text_length;
-		axl::math::Vec2i m_rec_font_size;
 		axl::glfl::GLuint m_vertex_array_id;
 		axl::glfl::GLuint m_vertex_buffer_id;
 		axl::glfl::GLuint m_element_array_id;

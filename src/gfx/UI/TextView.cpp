@@ -33,7 +33,6 @@ TextView::TextView(axl::gl::Context* ptr_context, axl::gl::gfx::Font* ptr_font, 
 	txtv_alignment(axl::gl::gfx::ui::TextView::TAL_LEFT_CENTER),
 	txtv_transform(),
 	m_actual_text_length(0),
-	m_rec_font_size(-1,-1),
 	m_vertex_array_id(-1),
 	m_vertex_buffer_id(-1),
 	m_element_array_id(-1),
@@ -94,6 +93,7 @@ bool TextView::icreate()
 	if(!this->updateBuffers(this->txtv_wstring, true, true))
 		return false;
 	this->updateAlignment();
+	this->uielement_modified = true;
 	return true;
 }
 bool TextView::idestroy()
@@ -197,14 +197,14 @@ void TextView::setFont(const Font* font)
 {
 	this->txtv_font = font;
 	if(font)
-		this->m_rec_font_size = font->size;
-	this->updateBuffers(this->txtv_wstring, false, true);
+		this->updateBuffers(this->txtv_wstring, false, true);
 }
 bool TextView::setProgram(const axl::gl::gfx::Program* text_shader_program)
 {
 	this->txtv_program = text_shader_program;
 	if(text_shader_program)
 	{
+		this->uielement_modified = true;
 		this->m_attribute_location_position = this->txtv_program->getAttributeLocation("in_Position");
 		this->m_attribute_location_UV = this->txtv_program->getAttributeLocation("in_UV");
 		this->m_uloc_projection_matrix = this->txtv_program->getUniformLocation("u_MatProjection");
@@ -287,7 +287,10 @@ axl::math::Vec2i TextView::getMinSize() const
 }
 axl::math::Vec2i TextView::getMaxSize() const
 {
-	return axl::math::Vec2i((int)((float)txtv_box_size.x + 1.0f * (txtv_padding.x + txtv_padding.z)), (int)((float)txtv_box_size.y + 1.0f * (txtv_padding.y + txtv_padding.w)));
+	return axl::math::Vec2i(
+		(int)((float)txtv_box_size.x + (txtv_padding.x + txtv_padding.z) + (uielement_border_color.w > 0.0f ? (uielement_border_size.x + uielement_border_size.z) : 0.0f)),
+		(int)((float)txtv_box_size.y + (txtv_padding.y + txtv_padding.w) + (uielement_border_color.w > 0.0f ? (uielement_border_size.y + uielement_border_size.w) : 0.0f))
+		);
 }
 const axl::util::WString& TextView::getText() const
 {
@@ -332,21 +335,22 @@ void TextView::updateOffset()
 	switch((this->txtv_alignment & 0x03))
 	{
 		default:
-		case HorizontalAlignment::TAL_LEFT: hor_padding = this->txtv_padding.x; break;
-		case HorizontalAlignment::TAL_RIGHT: hor_padding = -this->txtv_padding.z; break;
-		case HorizontalAlignment::TAL_HORIZONTAL_CENTER: hor_padding = 0.0f; break;
+		case HorizontalAlignment::TAL_LEFT: hor_padding = this->txtv_padding.x + uielement_border_size.x; break;
+		case HorizontalAlignment::TAL_RIGHT: hor_padding = -this->txtv_padding.z - uielement_border_size.z; break;
+		case HorizontalAlignment::TAL_HORIZONTAL_CENTER: hor_padding = (uielement_border_size.x - uielement_border_size.z); break;
 	}
 	switch((this->txtv_alignment & 0x0C))
 	{
 		default:
-		case VerticalAlignment::TAL_TOP: ver_padding = -this->txtv_padding.w; break;
-		case VerticalAlignment::TAL_BOTTOM: ver_padding = this->txtv_padding.y; break;
-		case VerticalAlignment::TAL_VERTICAL_CENTER: ver_padding = 0.0f; break;
+		case VerticalAlignment::TAL_TOP: ver_padding = -this->txtv_padding.w - uielement_border_size.w; break;
+		case VerticalAlignment::TAL_BOTTOM: ver_padding = this->txtv_padding.y + uielement_border_size.y; break;
+		case VerticalAlignment::TAL_VERTICAL_CENTER: ver_padding = (uielement_border_size.y - uielement_border_size.w); break;
 	}
 	txtv_offset.set(
 		float(int(hor_padding + (this->txtv_origin.x * (this->uielement_size.x - this->txtv_box_size.x)))),
 		float(int(ver_padding + (this->txtv_origin.y * (this->uielement_size.y - this->txtv_box_size.y))))
 		);
+	this->uielement_modified = true;
 }
 void TextView::updateAlignment()
 {
@@ -376,12 +380,14 @@ void TextView::updateAlignment()
 			this->setOrigin(axl::math::Vec2f(this->txtv_origin.x, 0.5f));
 			break;
 	}
+	this->uielement_modified = true;
 }
 bool TextView::updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed, bool font_attribute_altered)
 {
 	using namespace GL;
 	if(!this->isValid())
 		return false;
+	this->uielement_modified = true;
 	const bool text_changed = &p_wstring != &this->txtv_wstring;
 	unsigned int text_length = this->txtv_wstring.length(), actual_length = 0, line_count = 0;
 	float max_line_width = 0.0f, max_line_height = 0.0f, line_width_accum = 0.0f;
@@ -537,13 +543,12 @@ bool TextView::updateBuffers(const axl::util::WString& p_wstring, bool text_size
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	this->uielement_modified = true;
 	return glGetError() == GL_NO_ERROR;
 }
 bool TextView::irender(const axl::gl::camera::Camera3Df* camera)
 {
 	using namespace GL;
-	if(this->m_rec_font_size.notEquals(this->txtv_font->size))
-		this->updateBuffers(this->txtv_wstring, false, true);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	if(this->txtv_background_color.w > 0.0f || this->enable_text_shadow)

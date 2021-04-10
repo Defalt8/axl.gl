@@ -203,26 +203,26 @@ class GameView : public axl::gl::View
 			{
 				this->text_view[2].setFont(&this->font1);
 				this->text_view[2].transform.setPosition(axl::math::Vec3f(69.0f,209.0f,0.0f));
-				this->text_view[2].enable_shadow = true;
-				this->text_view[2].setShadowOffset(axl::math::Vec2f(1.0f,-1.0f));
+				this->text_view[2].enable_text_shadow = true;
+				this->text_view[2].setTextShadowOffset(axl::math::Vec2f(1.0f,-1.0f));
 				this->text_view[2].setTextColor(axl::math::Vec4f(0.96f,1.0f,0.0f,1.0f));
 				this->text_view[2].setBackgroundColor(axl::math::Vec4f(0.3f,0.9f,0.9f,0.8f));
 				this->text_view[2].setBorderColor(axl::math::Vec4f(0.96f,1.0f,0.0f,1.0f));
 				this->text_view[2].setBorderSize(axl::math::Vec4f(10.0f,1.0f,1.0f,1.0f));
-				this->text_view[2].setPadding(axl::math::Vec4f(18.0f,2.0f,2.0f,2.0f));
+				this->text_view[2].setPadding(axl::math::Vec4f(10.0f,15.0f,10.0f,15.0f));
 				this->text_view[2].setSpacing(axl::math::Vec2f(1.0f,2.0f));
 				Assert(this->text_view[2].create());
 				Assert(this->text_view[2].setQuality(axl::gl::gfx::UIElement::Q_MEDIUM));
 				this->text_view[2].setText(L"To be or not to be!\nThat is the question.\nOne can only wonder.");
-				this->text_view[2].setSize(this->text_view[2].getMaxSize() + 50);
+				this->text_view[2].setSize(this->text_view[2].getMaxSize() + 20);
 			}
 			{
 				this->text_view[3].setFont(&this->font1);
 				this->text_view[3].transform.setPosition(axl::math::Vec3f(69.0f,379.0f,0.0f));
 				this->text_view[3].setTextColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
-				this->text_view[3].enable_shadow = true;
-				this->text_view[3].setShadowOffset(axl::math::Vec2f(1.0f,-2.0f));
-				this->text_view[3].setShadowColor(axl::math::Vec4f(1.0f,0.0f,0.0f,0.9f));
+				this->text_view[3].enable_text_shadow = true;
+				this->text_view[3].setTextShadowOffset(axl::math::Vec2f(1.0f,-2.0f));
+				this->text_view[3].setTextShadowColor(axl::math::Vec4f(1.0f,0.0f,0.0f,0.9f));
 				this->text_view[3].setBackgroundColor(axl::math::Vec4f(0.0f,0.0f,0.0f,0.1f));
 				this->text_view[3].setBorderColor(axl::math::Vec4f(1.0f,1.0f,1.0f,1.0f));
 				this->text_view[3].setBorderSize(axl::math::Vec4f(2.0f,0.0f,0.0f,0.0f));
@@ -231,7 +231,7 @@ class GameView : public axl::gl::View
 				Assert(this->text_view[3].create());
 				Assert(this->text_view[3].setQuality(axl::gl::gfx::UIElement::Q_MEDIUM));
 				this->text_view[3].setText(L"- Learn\n- Adapt\n- Overcome");
-				this->text_view[3].setSize(this->text_view[3].getMaxSize());
+				this->text_view[3].setSize(this->text_view[3].getMaxSize() + 15);
 			}
 			return axl::gl::View::onCreate(recreating);
 		}

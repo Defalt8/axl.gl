@@ -24,6 +24,8 @@ UIElement::UIElement(Type type, axl::gl::Context* ptr_context) :
 	type(type),
 	enable_shadow(false),
 	transform(),
+	uielement_modified(true),
+	uielement_ui_manager(),
 	uielement_size(0,0),
 	uielement_border_size(0.0f,0.0f,0.0f,0.0f),
 	uielement_border_color(0.1f,0.1f,0.1f,1.0f),
@@ -131,6 +133,7 @@ bool UIElement::icreate()
 		this->destroy();
 		return false;
 	}
+	uielement_modified = true;
 	this->m_uloc_projection = this->m_program.getUniformLocation("u_MatProjection");
 	this->m_uloc_view = this->m_program.getUniformLocation("u_MatView");
 	this->m_uloc_model = this->m_program.getUniformLocation("u_MatModel");
@@ -187,15 +190,24 @@ bool UIElement::setUIManager(UIManager* ui_manager)
 bool UIElement::render(const camera::Camera3Df* camera)
 {
 	using namespace GL;
-	if(!this->isValid() || !camera || !camera->makeCurrent(this->ctx_context, false)) return false;
-	if(!this->uielement_frame_buffer.bind(axl::gl::gfx::FrameBuffer::FBT_BOTH)) return false;
-	if(!this->irender(camera))
-	{
-		this->uielement_frame_buffer.unbind(axl::gl::gfx::FrameBuffer::FBT_BOTH);
+	if(!this->isValid() || !camera)
 		return false;
+	if(uielement_modified)
+	{
+		if(!camera->makeCurrent(this->ctx_context, false))
+			return false;
+		if(!this->uielement_frame_buffer.bind(axl::gl::gfx::FrameBuffer::FBT_DRAW))
+			return false;
+		if(!this->irender(camera))
+		{
+			this->uielement_frame_buffer.unbind(axl::gl::gfx::FrameBuffer::FBT_DRAW);
+			return false;
+		}
+		this->uielement_frame_buffer.unbind(axl::gl::gfx::FrameBuffer::FBT_DRAW);
+		this->uielement_modified = false;
 	}
-	this->uielement_frame_buffer.unbind(axl::gl::gfx::FrameBuffer::FBT_BOTH);
-	if(!camera->makeCurrent(this->ctx_context, true)) return false;
+	if(!camera->makeCurrent(this->ctx_context, true))
+		return false;
 	if(camera->projection)
 	{
 		this->m_program.setUniformMat4fv(m_uloc_projection, camera->projection->matrix.values);
@@ -270,6 +282,7 @@ bool UIElement::setSize(const axl::math::Vec2i& size)
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 	this->uielement_size = size;
+	this->uielement_modified = true;
 	return true;
 }
 bool UIElement::setQuality(UIElement::Quality quality)
@@ -290,6 +303,7 @@ bool UIElement::setQuality(UIElement::Quality quality)
 			return this->uielement_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_LINEAR) &&
 				this->uielement_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
+	this->uielement_modified = true;
 	return false;
 }
 
