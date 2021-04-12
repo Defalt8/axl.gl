@@ -100,6 +100,8 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		axl::glfl::GLint m_uloc_size;
 		axl::glfl::GLint m_uloc_border;
 		axl::glfl::GLint m_uloc_border_color;
+		axl::glfl::GLint m_uloc_shadow_texture_bound;
+		axl::glfl::GLint m_uloc_shadow_texture;
 		axl::glfl::GLint m_uloc_shadow_projection;
 		axl::glfl::GLint m_uloc_shadow_view;
 		axl::glfl::GLint m_uloc_shadow_model;

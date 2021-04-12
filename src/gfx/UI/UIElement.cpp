@@ -47,6 +47,8 @@ UIElement::UIElement(Type type, axl::gl::Context* ptr_context) :
 	m_uloc_size(-1),
 	m_uloc_border(-1),
 	m_uloc_border_color(-1),
+	m_uloc_shadow_texture_bound(-1),
+	m_uloc_shadow_texture(-1),
 	m_uloc_shadow_color(-1),
 	m_uloc_shadow_offset(-1)
 {}
@@ -138,15 +140,17 @@ bool UIElement::icreate()
 		return false;
 	}
 	uielement_modified = true;
-	this->m_uloc_texture_bound = this->m_program.getUniformLocation("u_BoolTextureBound");
 	this->m_uloc_texture = this->m_program.getUniformLocation("texture");
 	this->m_uloc_texture1 = this->m_program.getUniformLocation("texture1");
+	this->m_uloc_texture_bound = this->m_program.getUniformLocation("u_BoolTextureBound");
 	this->m_uloc_projection = this->m_program.getUniformLocation("u_MatProjection");
 	this->m_uloc_view = this->m_program.getUniformLocation("u_MatView");
 	this->m_uloc_model = this->m_program.getUniformLocation("u_MatModel");
 	this->m_uloc_size = this->m_program.getUniformLocation("u_Size");
 	this->m_uloc_border = this->m_program.getUniformLocation("u_Border");
 	this->m_uloc_border_color = this->m_program.getUniformLocation("u_BorderColor");
+	this->m_uloc_shadow_texture = this->m_shadow_program.getUniformLocation("texture");
+	this->m_uloc_shadow_texture_bound = this->m_shadow_program.getUniformLocation("u_BoolTextureBound");
 	this->m_uloc_shadow_projection = this->m_shadow_program.getUniformLocation("u_MatProjection");
 	this->m_uloc_shadow_view = this->m_shadow_program.getUniformLocation("u_MatView");
 	this->m_uloc_shadow_model = this->m_shadow_program.getUniformLocation("u_MatModel");
@@ -174,6 +178,7 @@ bool UIElement::idestroy()
 	m_uloc_texture_bound = -1;
 	m_uloc_texture = -1;
 	m_uloc_texture1 = -1;
+	m_uloc_shadow_texture = -1;
 	m_uloc_projection = -1;
 	m_uloc_view = -1;
 	m_uloc_model = -1;
@@ -223,13 +228,6 @@ bool UIElement::render(const camera::Camera3Df* camera)
 		this->m_program.setUniformMat4fv(m_uloc_projection, camera->projection->matrix.values);
 		this->m_shadow_program.setUniformMat4fv(m_uloc_shadow_projection, camera->projection->matrix.values);
 	}
-	if(enable_shadow)
-	{
-		this->m_shadow_program.setUniformMat4fv(m_uloc_shadow_view, camera->view_transform.values);
-		this->m_shadow_program.setUniformMat4fv(m_uloc_shadow_model, this->transform.getMatrix().values);
-		this->m_shadow_program.setUniform4fv(m_uloc_shadow_color, &this->uielement_shadow_color.x);
-		this->m_shadow_program.setUniform4fv(m_uloc_shadow_offset, &this->uielement_shadow_offset.x);
-	}
 	this->m_program.setUniform1i(m_uloc_texture, 0);
 	this->m_program.setUniform1i(m_uloc_texture1, 1);
 	this->m_program.setUniformMat4fv(m_uloc_view, camera->view_transform.values);
@@ -237,11 +235,25 @@ bool UIElement::render(const camera::Camera3Df* camera)
 	this->m_program.setUniform2iv(m_uloc_size, &this->uielement_size.x);
 	this->m_program.setUniform4fv(m_uloc_border, &this->uielement_border_size.x);
 	this->m_program.setUniform4fv(m_uloc_border_color, &this->uielement_border_color.x);
+	if(enable_shadow)
+	{
+		this->m_shadow_program.setUniform1i(m_uloc_shadow_texture, 1);
+		this->m_shadow_program.setUniformMat4fv(m_uloc_shadow_view, camera->view_transform.values);
+		this->m_shadow_program.setUniformMat4fv(m_uloc_shadow_model, this->transform.getMatrix().values);
+		this->m_shadow_program.setUniform4fv(m_uloc_shadow_color, &this->uielement_shadow_color.x);
+		this->m_shadow_program.setUniform4fv(m_uloc_shadow_offset, &this->uielement_shadow_offset.x);
+	}
 	if(!this->uielement_render_texture.bind(0)) return false;
 	if(this->uielement_bg_texture && this->uielement_bg_texture->bind(1))
+	{
 		this->m_program.setUniform1i(m_uloc_texture_bound, true);
+		this->m_shadow_program.setUniform1i(m_uloc_shadow_texture_bound, true);
+	}
 	else
+	{
 		this->m_program.setUniform1i(m_uloc_texture_bound, false);
+		this->m_shadow_program.setUniform1i(m_uloc_shadow_texture_bound, false);
+	}
 	GLCLEARERROR();
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -259,7 +271,8 @@ bool UIElement::render(const camera::Camera3Df* camera)
 	glDisable(GL_BLEND);
 	if(glGetError() != GL_NO_ERROR) return false;
 	this->m_program.unuse();
-	this->uielement_render_texture.unbind();
+	this->uielement_render_texture.unbind(0);
+	if(this->uielement_bg_texture) this->uielement_bg_texture->unbind(1);
 	return true;
 }
 
@@ -475,6 +488,8 @@ bool UIElement::ShadowProgram::icreate()
 	vertex_shader.setSource(
 		"# version 330 core\n"
 		"layout(location = 0) in vec2 in_Position;\n"
+		"layout(location = 1) in vec2 in_UV;\n"
+		"out vec2 v_TexCoord;"
 		"uniform mat4 u_MatProjection = mat4(1);\n"
 		"uniform mat4 u_MatView = mat4(1);\n"
 		"uniform mat4 u_MatModel = mat4(1);\n"
@@ -508,13 +523,22 @@ bool UIElement::ShadowProgram::icreate()
 		"			break;"
 		"	}\n"
 		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(position, -1.0, 1.0);\n"
+		"	v_TexCoord = in_UV;\n"
 		"}\n"
 		);
 	fragment_shader.setSource(
 		"# version 330 core\n"
-		"uniform vec4 u_ShadowColor = vec4(0,0,0,0.69);"
+		"uniform sampler2D texture;\n"
+		"uniform bool u_BoolTextureBound = false;\n"
+		"uniform vec4 u_ShadowColor = vec4(0,0,0,0.69);\n"
+		"in vec2 v_TexCoord;\n"
 		"void main() {\n"
-		"	gl_FragColor = u_ShadowColor;\n"
+		"	if(u_BoolTextureBound) {\n"
+		"		vec4 sample = texture2D(texture, v_TexCoord);"
+		"		gl_FragColor = u_ShadowColor * sample.a;\n"
+		"	} else {\n"
+		"		gl_FragColor = u_ShadowColor;\n"
+		"	}\n"
 		"}\n"
 		);
 	if(!vertex_shader.compile() || !fragment_shader.compile())
