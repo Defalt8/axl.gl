@@ -32,11 +32,15 @@ UIElement::UIElement(Type type, axl::gl::Context* ptr_context) :
 	uielement_shadow_color(0.1f,0.1f,0.1f,0.69f),
 	uielement_shadow_offset(1.0f,-1.0f,1.0f,-1.0f),
 	uielement_frame_buffer(ptr_context),
-	uielement_texture(ptr_context),
+	uielement_render_texture(ptr_context),
+	uielement_bg_texture(),
 	m_program(ptr_context),
 	m_shadow_program(ptr_context),
 	m_vertex_array(-1),
 	m_vertex_buffer(-1),
+	m_uloc_texture_bound(-1),
+	m_uloc_texture(-1),
+	m_uloc_texture1(-1),
 	m_uloc_projection(-1),
 	m_uloc_view(-1),
 	m_uloc_model(-1),
@@ -54,7 +58,7 @@ bool UIElement::isValid() const
 {
 	return this->ctx_context && this->ctx_context->isValid() &&
 		this->m_vertex_array != -1 && this->m_vertex_buffer != -1 &&
-		this->uielement_texture.isValid() &&
+		this->uielement_render_texture.isValid() &&
 		this->uielement_frame_buffer.isValid() &&
 		this->m_program.isLinked() &&
 		this->m_shadow_program.isLinked();
@@ -63,7 +67,7 @@ void UIElement::setContext(axl::gl::Context* ptr_context)
 {
 	ContextObject::setContext(ptr_context);
 	this->uielement_frame_buffer.setContext(ptr_context);
-	this->uielement_texture.setContext(ptr_context);
+	this->uielement_render_texture.setContext(ptr_context);
 	this->m_program.setContext(ptr_context);
 	this->m_shadow_program.setContext(ptr_context);
 }
@@ -71,7 +75,10 @@ bool UIElement::icreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->ctx_context->makeCurrent() ||
-		!uielement_frame_buffer.create()
+		!uielement_frame_buffer.create() ||
+		!this->uielement_render_texture.create() ||
+		!this->m_program.create() ||
+		!this->m_shadow_program.create()
 		)
 		return false;
 	GLCLEARERROR();
@@ -123,17 +130,17 @@ bool UIElement::icreate()
 	glBindVertexArray(0);
 	if(!this->uielement_frame_buffer.setSize(axl::math::Vec2i(width, height)) ||
 		GL::glGetError() != GL_NO_ERROR ||
-		!this->uielement_texture.create() ||
-		!this->m_program.create() ||
-		!this->m_shadow_program.create() ||
-		!this->uielement_texture.allocate(0, width, height, GL::GL_RGBA8) ||
-		!this->uielement_frame_buffer.attachTexture2D(GL_COLOR_ATTACHMENT0, &this->uielement_texture)
+		!this->uielement_render_texture.allocate(0, width, height, GL::GL_RGBA8) ||
+		!this->uielement_frame_buffer.attachTexture2D(GL_COLOR_ATTACHMENT0, &this->uielement_render_texture)
 		)
 	{
 		this->destroy();
 		return false;
 	}
 	uielement_modified = true;
+	this->m_uloc_texture_bound = this->m_program.getUniformLocation("u_BoolTextureBound");
+	this->m_uloc_texture = this->m_program.getUniformLocation("texture");
+	this->m_uloc_texture1 = this->m_program.getUniformLocation("texture1");
 	this->m_uloc_projection = this->m_program.getUniformLocation("u_MatProjection");
 	this->m_uloc_view = this->m_program.getUniformLocation("u_MatView");
 	this->m_uloc_model = this->m_program.getUniformLocation("u_MatModel");
@@ -164,6 +171,9 @@ bool UIElement::idestroy()
 			this->m_vertex_array = -1;
 		}
 	}
+	m_uloc_texture_bound = -1;
+	m_uloc_texture = -1;
+	m_uloc_texture1 = -1;
 	m_uloc_projection = -1;
 	m_uloc_view = -1;
 	m_uloc_model = -1;
@@ -176,7 +186,7 @@ bool UIElement::idestroy()
 	m_uloc_shadow_color = -1;
 	m_uloc_shadow_offset = -1;
 	return (glGetError() == GL_NO_ERROR &&
-		this->uielement_texture.destroy() &&
+		this->uielement_render_texture.destroy() &&
 		this->m_shadow_program.destroy() &&
 		this->m_program.destroy());
 }
@@ -213,11 +223,6 @@ bool UIElement::render(const camera::Camera3Df* camera)
 		this->m_program.setUniformMat4fv(m_uloc_projection, camera->projection->matrix.values);
 		this->m_shadow_program.setUniformMat4fv(m_uloc_shadow_projection, camera->projection->matrix.values);
 	}
-	this->m_program.setUniformMat4fv(m_uloc_view, camera->view_transform.values);
-	this->m_program.setUniformMat4fv(m_uloc_model, this->transform.getMatrix().values);
-	this->m_program.setUniform2iv(m_uloc_size, &this->uielement_size.x);
-	this->m_program.setUniform4fv(m_uloc_border, &this->uielement_border_size.x);
-	this->m_program.setUniform4fv(m_uloc_border_color, &this->uielement_border_color.x);
 	if(enable_shadow)
 	{
 		this->m_shadow_program.setUniformMat4fv(m_uloc_shadow_view, camera->view_transform.values);
@@ -225,7 +230,18 @@ bool UIElement::render(const camera::Camera3Df* camera)
 		this->m_shadow_program.setUniform4fv(m_uloc_shadow_color, &this->uielement_shadow_color.x);
 		this->m_shadow_program.setUniform4fv(m_uloc_shadow_offset, &this->uielement_shadow_offset.x);
 	}
-	if(!this->uielement_texture.bind()) return false;
+	this->m_program.setUniform1i(m_uloc_texture, 0);
+	this->m_program.setUniform1i(m_uloc_texture1, 1);
+	this->m_program.setUniformMat4fv(m_uloc_view, camera->view_transform.values);
+	this->m_program.setUniformMat4fv(m_uloc_model, this->transform.getMatrix().values);
+	this->m_program.setUniform2iv(m_uloc_size, &this->uielement_size.x);
+	this->m_program.setUniform4fv(m_uloc_border, &this->uielement_border_size.x);
+	this->m_program.setUniform4fv(m_uloc_border_color, &this->uielement_border_color.x);
+	if(!this->uielement_render_texture.bind(0)) return false;
+	if(this->uielement_bg_texture && this->uielement_bg_texture->bind(1))
+		this->m_program.setUniform1i(m_uloc_texture_bound, true);
+	else
+		this->m_program.setUniform1i(m_uloc_texture_bound, false);
 	GLCLEARERROR();
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -243,7 +259,7 @@ bool UIElement::render(const camera::Camera3Df* camera)
 	glDisable(GL_BLEND);
 	if(glGetError() != GL_NO_ERROR) return false;
 	this->m_program.unuse();
-	this->uielement_texture.unbind();
+	this->uielement_render_texture.unbind();
 	return true;
 }
 
@@ -253,7 +269,7 @@ bool UIElement::setSize(const axl::math::Vec2i& size)
 	if(size.x < 0 || size.y < 0) return false;
 	if(this->isValid())
 	{
-		if(!this->uielement_texture.allocate(0, (GLsizei)size.x, (GLsizei)size.y, GL_RGBA8) ||
+		if(!this->uielement_render_texture.allocate(0, (GLsizei)size.x, (GLsizei)size.y, GL_RGBA8) ||
 			!this->uielement_frame_buffer.setSize(size))
 			return false;
 		glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer);
@@ -294,17 +310,22 @@ bool UIElement::setQuality(UIElement::Quality quality)
 	{
 		default:
 		case Q_LOW:
-			return this->uielement_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
-				this->uielement_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			return this->uielement_render_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
+				this->uielement_render_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		case Q_MEDIUM:
-			return this->uielement_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
-				this->uielement_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			return this->uielement_render_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_NEAREST) &&
+				this->uielement_render_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		case Q_HIGH:
-			return this->uielement_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_LINEAR) &&
-				this->uielement_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			return this->uielement_render_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_LINEAR) &&
+				this->uielement_render_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 	this->uielement_modified = true;
 	return false;
+}
+bool UIElement::setBackgroundTexture(axl::gl::gfx::Texture2D* texture)
+{
+	this->uielement_bg_texture = texture;
+	return true;
 }
 
 bool UIElement::setBorderSize(const axl::math::Vec4f& border_size)
@@ -334,6 +355,10 @@ bool UIElement::setShadowOffset(const axl::math::Vec4f& shadow_offset)
 const axl::math::Vec2i& UIElement::getSize() const
 {
 	return this->uielement_size;
+}
+const axl::gl::gfx::Texture2D* UIElement::getBackgroundTexture() const
+{
+	return this->uielement_bg_texture;
 }
 const axl::math::Vec4f& UIElement::getBorderSize() const
 {
@@ -373,29 +398,43 @@ bool UIElement::Program::icreate()
 		"# version 330 core\n"
 		"layout(location = 0) in vec2 in_Position;\n"
 		"layout(location = 1) in vec2 in_UV;\n"
+		"uniform sampler2D texture1;\n"
 		"uniform mat4 u_MatProjection = mat4(1);\n"
 		"uniform mat4 u_MatView = mat4(1);\n"
 		"uniform mat4 u_MatModel = mat4(1);\n"
 		"out vec2 v_TexCoord;"
+		"out vec2 v_TexCoord1;"
 		"void main() {\n"
 		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position, 0.0, 1.0);\n"
+		"	v_TexCoord1 = in_UV;\n"
 		"	v_TexCoord = in_UV;\n"
 		"}\n"
 		);
 	fragment_shader.setSource(
 		"# version 330 core\n"
 		"in vec2 v_TexCoord;\n"
+		"in vec2 v_TexCoord1;\n"
 		"uniform sampler2D texture;\n"
+		"uniform sampler2D texture1;\n"
+		"uniform bool u_BoolTextureBound = false;\n"
 		"uniform ivec2 u_Size = ivec2(0,0);"
 		"uniform vec4 u_Border = vec4(0,0,0,0);"
 		"uniform vec4 u_BorderColor = vec4(0,0,0,0);"
 		"void main() {\n"
 		"	vec4 sample = texture2D(texture, v_TexCoord);\n"
-		"	gl_FragColor = (v_TexCoord.x <= (u_Border.x / u_Size.x) || \n"
+		"	vec4 sample1 = texture2D(texture1, v_TexCoord1);\n"
+		"	bool on_border = (v_TexCoord.x <= (u_Border.x / u_Size.x) || \n"
 		"		v_TexCoord.x >= ((u_Size.x - u_Border.z) / u_Size.x) || \n"
 		"		v_TexCoord.y <= (u_Border.y / u_Size.y) || \n"
 		"		v_TexCoord.y >= ((u_Size.y - u_Border.w) / u_Size.y) \n"
-		"		) ? u_BorderColor : sample;\n"
+		"		);\n"
+		"	vec4 result_color;"
+		"	if(u_BoolTextureBound) {\n"
+		"		result_color = sample * sample.a + sample1 * (1.0-sample.a);\n"
+		"	} else {\n"
+		"		result_color = sample;\n"
+		"	}\n"
+		"	gl_FragColor = on_border ? u_BorderColor : result_color;\n"
 		"}\n"
 		);
 	if(!vertex_shader.compile() || !fragment_shader.compile())

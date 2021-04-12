@@ -60,11 +60,13 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		bool render(const camera::Camera3Df* camera);
 		virtual bool setSize(const axl::math::Vec2i& size);
 		virtual bool setQuality(Quality quality);
+		virtual bool setBackgroundTexture(axl::gl::gfx::Texture2D* texture);
 		bool setBorderSize(const axl::math::Vec4f& border_size);
 		bool setBorderColor(const axl::math::Vec4f& border_color);
 		bool setShadowColor(const axl::math::Vec4f& shadow_color);
 		bool setShadowOffset(const axl::math::Vec4f& shadow_offset);
 		const axl::math::Vec2i& getSize() const;
+		const axl::gl::gfx::Texture2D* getBackgroundTexture() const;
 		const axl::math::Vec4f& getBorderSize() const;
 		const axl::math::Vec4f& getBorderColor() const;
 		const axl::math::Vec4f& getShadowColor() const;
@@ -81,13 +83,17 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		axl::math::Vec4f uielement_border_color;
 		axl::math::Vec4f uielement_shadow_color;
 		axl::math::Vec4f uielement_shadow_offset;
-		gfx::Texture2D uielement_texture;
 		axl::gl::gfx::UIFrameBuffer uielement_frame_buffer;
+		gfx::Texture2D uielement_render_texture;
+		gfx::Texture2D* uielement_bg_texture;
 	private:
 		axl::gl::gfx::UIElement::Program m_program;
 		axl::gl::gfx::UIElement::ShadowProgram m_shadow_program;
 		axl::glfl::GLuint m_vertex_array;
 		axl::glfl::GLuint m_vertex_buffer;
+		axl::glfl::GLint m_uloc_texture_bound;
+		axl::glfl::GLint m_uloc_texture;
+		axl::glfl::GLint m_uloc_texture1;
 		axl::glfl::GLint m_uloc_projection;
 		axl::glfl::GLint m_uloc_view;
 		axl::glfl::GLint m_uloc_model;
@@ -99,7 +105,6 @@ class AXLGLCXXAPI UIElement : public ContextObject
 		axl::glfl::GLint m_uloc_shadow_model;
 		axl::glfl::GLint m_uloc_shadow_color;
 		axl::glfl::GLint m_uloc_shadow_offset;
-
 };
 
 } // axl.gl.gfx
