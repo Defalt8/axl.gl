@@ -93,6 +93,16 @@ bool Texture1D::bind() const
 	glBindTexture(GL_TEXTURE_1D, this->txr_id);
 	return glGetError() == GL_NO_ERROR;
 }
+bool Texture1D::bind(axl::glfl::GLuint texture_slot) const
+{
+	using namespace GL;
+	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	GLCLEARERROR();
+	glActiveTexture(GL_TEXTURE0 + texture_slot);
+	if(glGetError() != GL_NO_ERROR) return false;
+	glBindTexture(GL_TEXTURE_2D, this->txr_id);
+	return glGetError() == GL_NO_ERROR;
+}
 bool Texture1D::unbind() const
 {
 	using namespace GL;
