@@ -28,6 +28,7 @@ class AXLGLCXXAPI Texture : public ContextObject
 		virtual bool bind() const = 0;
 		virtual bool bind(axl::glfl::GLuint texture_slot) const = 0;
 		virtual bool unbind() const = 0;
+		virtual bool unbind(axl::glfl::GLuint texture_slot) const = 0;
 		virtual bool setParami(axl::glfl::GLenum tex_param, axl::glfl::GLint value) = 0;
 		virtual bool setParamf(axl::glfl::GLenum tex_param, axl::glfl::GLfloat value) = 0;
 		virtual bool setParamiv(axl::glfl::GLenum tex_param, const axl::glfl::GLint* value) = 0;

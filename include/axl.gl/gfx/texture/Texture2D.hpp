@@ -22,6 +22,7 @@ class AXLGLCXXAPI Texture2D : public Texture
 		bool bind() const;
 		bool bind(axl::glfl::GLuint texture_slot) const;
 		bool unbind() const;
+		bool unbind(axl::glfl::GLuint texture_slot) const;
 		bool setParami(axl::glfl::GLenum tex_param, axl::glfl::GLint value);
 		bool setParamf(axl::glfl::GLenum tex_param, axl::glfl::GLfloat value);
 		bool setParamiv(axl::glfl::GLenum tex_param, const axl::glfl::GLint* value);
