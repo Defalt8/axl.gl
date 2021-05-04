@@ -1,4 +1,5 @@
 #include <axl.gl/gfx/UI/Layout.hpp>
+#include <axl.gl/gfx/UI/Group.hpp>
 
 namespace axl {
 namespace gl {
@@ -7,7 +8,6 @@ namespace ui {
 
 Layout::Layout()
 {}
-
 Layout::~Layout()
 {}
 

@@ -45,19 +45,21 @@ bool UIManager::contains(axl::gl::gfx::UIElement* ui_element) const
 	{
 		if(ui_element == *it)
 			return true;
+		++it;
 	}
 	return false;
 }
 bool UIManager::add(axl::gl::gfx::UIElement* ui_element)
 {
-	if(!this->isValid() || !ui_element || this->contains(ui_element) || !this->uiman_uielements.insertLast(ui_element))
+	if(!this->isValid() || !ui_element || this->contains(ui_element))
 		return false;
-	ui_element->setUIManager(this);
 	switch(ui_element->type)
 	{
 		default:
-		case UIElement::T_UIElement: break;
-		case UIElement::T_TextView: break;
+		case UIElement::T_UIElement:
+		case UIElement::T_Group:
+		case UIElement::T_TextView:
+			return ui_element->setUIManager(this) && this->uiman_uielements.insertLast(ui_element);
 	}
 	return true;
 }
@@ -66,14 +68,48 @@ bool UIManager::remove(axl::gl::gfx::UIElement* ui_element)
 	if(!this->isValid() || !ui_element || !this->uiman_uielements.remove(ui_element))
 		return false;
 	ui_element->setUIManager(0);
-	switch(ui_element->type)
-	{
-		default:
-		case UIElement::T_UIElement: break;
-		case UIElement::T_TextView: break;
-	}
 	return true;
 }
+
+//// Event callbacks
+
+void UIManager::onDisplayConfig(const axl::gl::Display& display)
+{}
+void UIManager::onSize(int w, int h)
+{
+	axl::util::ds::UniList<axl::gl::gfx::UIElement*>::Iterator it = this->uiman_uielements.first();
+	while(!it.isNull())
+	{
+		switch((*it)->type)
+		{
+			default:
+			case axl::gl::gfx::UIElement::T_UIElement:
+			case axl::gl::gfx::UIElement::T_Group:
+			case axl::gl::gfx::UIElement::T_TextView:
+				switch((*it)->getHorizontalWrapMethod())
+				{
+					case axl::gl::gfx::UIElement::W_FIXED_SIZE:
+						break;
+					case axl::gl::gfx::UIElement::W_WRAP_CONTENT:
+						break;
+					case axl::gl::gfx::UIElement::W_MATCH_PARENT:
+						break;
+				}
+				break;
+		}
+		++it;
+	}
+}
+void UIManager::onKey(axl::gl::input::KeyCode key_code, bool is_down)
+{}
+void UIManager::onChar(wchar_t char_code)
+{}
+void UIManager::onPointer(int index, int x, int y, bool is_down)
+{}
+void UIManager::onPointerMove(int index, int x, int y)
+{}
+void UIManager::onScroll(bool is_vertical, int delta, int x, int y)
+{}
 
 } // axl.gl.gfx
 } // axl.gl

@@ -34,6 +34,7 @@ class MainView : public axl::gl::View
 		axl::gl::Context context;
 		axl::gl::projection::Orthographicf projection;
 		axl::gl::camera::Camera3Df main_camera;
+		axl::gl::gfx::UIManager m_ui_manager;
 		float FPS;
 	private:
 		int m_rendered_frames;

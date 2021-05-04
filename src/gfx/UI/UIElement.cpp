@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <axl.gl/gfx/UI/UIElement.hpp>
 #include <axl.gl/gfx/UI/UIManager.hpp>
+#include <axl.gl/gfx/UI/Group.hpp>
 #include <axl.glfl/glCoreARB.hpp>
 #include <axl.math/mat/transform4.hpp>
 
@@ -26,6 +27,9 @@ UIElement::UIElement(Type type, axl::gl::Context* ptr_context) :
 	transform(),
 	uielement_modified(true),
 	uielement_ui_manager(),
+	uielement_ui_group(),
+	uielement_horizontal_wrap(UIElement::W_WRAP_CONTENT),
+	uielement_vertical_wrap(UIElement::W_WRAP_CONTENT),
 	uielement_size(0,0),
 	uielement_border_size(0.0f,0.0f,0.0f,0.0f),
 	uielement_border_color(0.1f,0.1f,0.1f,1.0f),
@@ -202,7 +206,14 @@ bool UIElement::setUIManager(UIManager* ui_manager)
 	this->uielement_ui_manager = ui_manager;
 	return true;
 }
-bool UIElement::render(const camera::Camera3Df* camera)
+bool UIElement::setUIGroup(axl::gl::gfx::ui::Group* ui_group)
+{
+	if(ui_group && this->ctx_context && this->ctx_context != ui_group->getContext())
+		return false;
+	this->uielement_ui_group = ui_group;
+	return true;
+}
+bool UIElement::render(const camera::Camera3Df* camera, const axl::gl::gfx::FrameBuffer* ptr_frame_buffer)
 {
 	using namespace GL;
 	if(!this->isValid() || !camera)
@@ -221,6 +232,8 @@ bool UIElement::render(const camera::Camera3Df* camera)
 		this->uielement_frame_buffer.unbind(axl::gl::gfx::FrameBuffer::FBT_DRAW);
 		this->uielement_modified = false;
 	}
+	if(ptr_frame_buffer)
+		ptr_frame_buffer->bind(axl::gl::gfx::FrameBuffer::FBT_DRAW);
 	if(!camera->makeCurrent(this->ctx_context, true))
 		return false;
 	if(camera->projection)
@@ -273,6 +286,8 @@ bool UIElement::render(const camera::Camera3Df* camera)
 	this->m_program.unuse();
 	this->uielement_render_texture.unbind(0);
 	if(this->uielement_bg_texture) this->uielement_bg_texture->unbind(1);
+	if(ptr_frame_buffer)
+		ptr_frame_buffer->unbind(axl::gl::gfx::FrameBuffer::FBT_DRAW);
 	return true;
 }
 
@@ -339,6 +354,31 @@ bool UIElement::setBackgroundTexture(axl::gl::gfx::Texture2D* texture)
 {
 	this->uielement_bg_texture = texture;
 	return true;
+}
+void UIElement::setHorizontalWrapMethod(UIElement::Wrap horizontal_wrap)
+{
+	this->uielement_horizontal_wrap = horizontal_wrap;
+	this->uielement_modified = true;
+}
+void UIElement::setVerticalWrapMethod(UIElement::Wrap vertical_wrap)
+{
+	this->uielement_vertical_wrap = vertical_wrap;
+	this->uielement_modified = true;
+}
+void UIElement::setWrapMethods(UIElement::Wrap horizontal_wrap, UIElement::Wrap vertical_wrap)
+{
+	this->uielement_horizontal_wrap = horizontal_wrap;
+	this->uielement_vertical_wrap = vertical_wrap;
+	this->uielement_modified = true;
+}
+
+UIElement::Wrap UIElement::getHorizontalWrapMethod() const
+{
+		return this->uielement_horizontal_wrap;
+}
+UIElement::Wrap UIElement::getVerticalWrapMethod() const
+{
+		return this->uielement_vertical_wrap;
 }
 
 bool UIElement::setBorderSize(const axl::math::Vec4f& border_size)

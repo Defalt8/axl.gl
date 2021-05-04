@@ -42,7 +42,9 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"gfx/UI/UIElement.cpp"
 	"gfx/UI/UIManager.cpp"
 	"gfx/UI/Layout.cpp"
+	"gfx/UI/Group.cpp"
 	"gfx/UI/TextView.cpp"
+	"gfx/UI/layouts/Linear.cpp"
 
 	"${AXLGL_INCLUDE_DIR}/axl.gl/everything.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/lib.hpp"
@@ -82,7 +84,9 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/UIElement.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/UIManager.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Layout.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Group.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/TextView.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/layouts/Linear.hpp"
 )
 target_link_directories( axl.gl
 	PUBLIC "${THIRD_PARTY_LIB_DIR}"
@@ -171,7 +175,9 @@ if( AXLGL_INSTALL_HEADERS )
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/UIElement.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/UIManager.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Layout.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Group.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/TextView.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/layouts/Linear.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx.hpp"
 		DESTINATION "include/axl.gl"
 	)

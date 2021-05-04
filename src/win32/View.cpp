@@ -250,7 +250,7 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 			wc.cbSize = sizeof(WNDCLASSEXW);
 			wc.hInstance = hinst;
 			wc.lpszClassName = class_name.cwstr();
-			wc.style = CS_OWNDC|CS_HREDRAW|CS_VREDRAW;
+			wc.style = CS_OWNDC;
 			wc.lpfnWndProc = MWindowProc;
 			wc.hbrBackground = (HBRUSH)_hbrush_black;
 			registered = FALSE != RegisterClassExW(&wc);
