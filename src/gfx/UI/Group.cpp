@@ -101,7 +101,7 @@ axl::math::Vec2i Group::getMaxSize() const
 {
 	if(this->grp_layout)
 	{
-		return this->grp_layout->getMaxSize(*this, this->grp_children);
+		// return this->grp_layout->getMaxSize(*this, this->grp_children);
 	}
 	else
 	{
@@ -169,8 +169,8 @@ bool Group::irender(const camera::Camera3Df* camera)
 void Group::organize()
 {
 	this->uielement_modified = true;
-	if(this->grp_layout)
-		this->grp_layout->organize(*this, this->grp_children);
+	// if(this->grp_layout)
+		// this->grp_layout->organize(*this, this->grp_children);
 }
 
 } // axl.gl.gfx.ui
