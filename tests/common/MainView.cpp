@@ -34,7 +34,6 @@ MainView::MainView(const axl::util::WString& _title, const axl::math::Vec2i& _po
 	context(),
 	projection(),
 	main_camera(),
-	m_ui_manager(&context),
 	FPS(0.0f),
 	m_rendered_frames(0),
 	m_frame_time(),
@@ -80,7 +79,6 @@ bool MainView::initialize()
 	this->projection.set(0, (float)this->main_camera.viewport_size.x, 0, (float)this->main_camera.viewport_size.y, .001f, 1000.f);
 	FPS = 0.0f;
 	m_rendered_frames = 0;
-	m_ui_manager.setContext(&context);
 	return true;
 }
 bool MainView::update()
@@ -120,14 +118,12 @@ void MainView::onDisplayConfig(const axl::gl::Display& _display)
 	axl::math::Vec2i display_size(_display.settings.width, _display.settings.height);
 	axl::math::Vec2i center_position((display_size - this->size) / 2);
 	this->setPosition(center_position);
-	m_ui_manager.onDisplayConfig(_display);
 }
 
 bool MainView::onCreate(bool _recreating)
 {
 	if(!axl::gl::View::onCreate(_recreating)) return false;
-	return this->context.create(_recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::ContextConfig)) &&
-		m_ui_manager.create();
+	return this->context.create(_recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::ContextConfig));
 }
 
 void MainView::onDestroy(bool _recreating)
@@ -158,7 +154,6 @@ void MainView::onSize(int w,int h)
 			axl::math::Rules::Axis::RHS
 			);
 	}
-	m_ui_manager.onSize(w, h);
 }
 
 void MainView::onPause()
@@ -180,31 +175,26 @@ void MainView::onKey(axl::gl::input::KeyCode key_code, bool is_down)
 	{
 		this->show(this->visiblity == VS_FULLSCREEN ? SM_SHOW : SM_FULLSCREEN);
 	}
-	m_ui_manager.onKey(key_code, is_down);
 }
 
 void MainView::onChar(wchar_t char_code)
 {
 	axl::gl::View::onChar(char_code);
-	m_ui_manager.onChar(char_code);
 }
 
 void MainView::onPointer(int index, int x, int y, bool is_down)
 {
 	axl::gl::View::onPointer(index, x, y, is_down);
-	m_ui_manager.onPointer(index, x, y, is_down);
 }
 
 void MainView::onPointerMove(int index, int x, int y)
 {
 	axl::gl::View::onPointerMove(index, x, y);
-	m_ui_manager.onPointerMove(index, x, y);
 }
 
 void MainView::onScroll(bool is_vertical, int delta, int x, int y)
 {
 	axl::gl::View::onScroll(is_vertical, delta, x, y);
-	m_ui_manager.onScroll(is_vertical, delta, x, y);
 }
 
 }

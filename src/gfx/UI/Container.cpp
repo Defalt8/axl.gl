@@ -9,7 +9,7 @@ namespace ui {
 Container::Container(axl::gl::Context* ptr_context,
 			axl::gl::gfx::ui::Container* container,
 			const axl::math::Vec3f& position,
-			const axl::math::Vec2f& size,
+			const axl::math::Vec2i& size,
 			const axl::math::Vec4f& margin,
 			const axl::math::Vec4f& padding):
 	Component(Component::CONTAINER, ptr_context, container, position, size, margin, padding),
@@ -20,11 +20,6 @@ Container::~Container()
 	this->destroy();
 }
 
-bool Container::render(axl::gl::camera::Camera3Df* camera)
-{
-	if(!component_is_visible) return false;
-	return true;
-}
 bool Container::addComponent(axl::gl::gfx::ui::Component* component)
 {
 	if(m_components.positionOf(component).isNotNull()) return false;

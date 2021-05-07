@@ -11,7 +11,7 @@ Element::Element(Element::Type type,
 			axl::gl::Context* ptr_context,
 			axl::gl::gfx::ui::Container* container,
 			const axl::math::Vec3f& position,
-			const axl::math::Vec2f& size,
+			const axl::math::Vec2i& size,
 			const axl::math::Vec4f& margin,
 			const axl::math::Vec4f& padding):
 	axl::gl::gfx::ui::Component(axl::gl::gfx::ui::Component::ELEMENT, ptr_context, container, position, size, margin, padding),
@@ -22,12 +22,6 @@ Element::Element(Element::Type type,
 Element::~Element()
 {
 	this->destroy();
-}
-
-bool Element::render(axl::gl::camera::Camera3Df* camera)
-{
-	if(!component_is_visible) return false;
-	return true;
 }
 
 } // axl.gl.gfx.ui

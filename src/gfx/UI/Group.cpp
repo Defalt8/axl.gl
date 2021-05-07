@@ -97,19 +97,19 @@ axl::math::Vec2i Group::getMinSize() const
 {
 	return this->uielement_size;
 }
-axl::math::Vec2i Group::getMaxSize() const
-{
-	if(this->grp_layout)
-	{
-		// return this->grp_layout->getMaxSize(*this, this->grp_children);
-	}
-	else
-	{
-		return axl::math::Vec2i(
-			this->uielement_size.x + (int)(this->uielement_border_size.x + this->uielement_border_size.z),
-			this->uielement_size.y + (int)(this->uielement_border_size.y + this->uielement_border_size.w)
-			);
-	}
+// axl::math::Vec2i Group::getMaxSize() const
+// {
+// 	if(this->grp_layout)
+// 	{
+// 		// return this->grp_layout->getMaxSize(*this, this->grp_children);
+// 	}
+// 	else
+// 	{
+// 		return axl::math::Vec2i(
+// 			this->uielement_size.x + (int)(this->uielement_border_size.x + this->uielement_border_size.z),
+// 			this->uielement_size.y + (int)(this->uielement_border_size.y + this->uielement_border_size.w)
+// 			);
+// 	}
 }
 
 bool Group::isValid() const
