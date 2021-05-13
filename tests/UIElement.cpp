@@ -1,4 +1,3 @@
-#include <thread>
 #include "common/stdafx.hpp"
 #include "common/MainView.hpp"
 
@@ -14,33 +13,23 @@ axl::gl::Display g_display;
 class TestElement : public axl::gl::gfx::ui::Element
 {
 	public:
-		axl::math::Vec4f bg_color;
-	public:
 		TestElement(axl::gl::Context* ptr_context = 0,
 			axl::gl::gfx::ui::Container* container = 0,
 			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
-			const axl::math::Vec2i& size = axl::math::Vec2i(0,0),
+			const axl::math::Vec2i& size = axl::math::Vec2i(60,30),
 			const axl::math::Vec4f& margin = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f)
 		) :
-			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::IMAGE, ptr_context, container, position, size, margin, padding),
-				bg_color(.1f,.1f,.2f,1.f)
+			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::IMAGE, ptr_context, container, position, size, margin, padding)
 		{}
 		~TestElement()
 		{
 			this->destroy();
 		}
-		void setBGColor(axl::math::Vec4f bg_color)
-		{
-			this->bg_color = bg_color;
-			this->component_is_modified = true;
-		}
 	protected:
 		bool iRender(axl::gl::camera::Camera3Df* camera)
 		{
 			using namespace GL;
-			glClearColor(bg_color.x, bg_color.y, bg_color.z, bg_color.w);
-			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 			return true;
 		}
 };
@@ -88,14 +77,27 @@ class MainView : public Test::MainView
 			if(!Test::MainView::update()) return false;
 			if(status_clock.checkAndSet(true))
 			{
-				new_title.format(L"UI Manager | FPS: %.2f", FPS);
+				new_title.format(L"UIElement test | FPS: %.2f", FPS);
 				this->setTitle(new_title);
 			}
 			{
 				static axl::util::uc::Time time;
 				float elapsed_time = time.deltaTimef();
-				test_element.setBGColor(axl::math::Vec4f(axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI), -1.f, 1.f, 0.f, 1.f), test_element.bg_color.y, test_element.bg_color.z, test_element.bg_color.w));
-				test_element.transform.setPosition(axl::math::Vec3f(100.f+axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI), -1.f, 1.f, -50.f, 50.f),80.f,0.f));
+				test_element.setBackgroundColor(
+					axl::math::Vec4f(
+						axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI), -1.f, 1.f, 0.f, 1.f),
+						axl::math::map(axl::math::cos(elapsed_time * axl::math::Constants::F_PI*0.5f), -1.f, 1.f, 1.f, 0.5f),
+						axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI*2.f), -1.f, 1.f, 1.f, 0.5f),
+						1.f
+					)
+				);
+				test_element.transform.setPosition(
+					axl::math::Vec3f(
+						200.f+axl::math::map(axl::math::cos(elapsed_time * axl::math::Constants::F_PI*4.f), -1.f, 1.f, -150.f, 150.f),
+						200.f+axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI), -1.f, 1.f, -150.f, 100.f),
+						0.f
+					)
+				);
 			}
 			return true;
 		}
@@ -103,7 +105,7 @@ class MainView : public Test::MainView
 		{
 			using namespace GL;
 			if(!Test::MainView::render()) return false;
-			glClearColor(.87f, .87f, .93f, .0f);
+			glClearColor(.07f, .07f, .13f, .0f);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 			test_element.render(&main_camera);
 			return true;
@@ -113,14 +115,7 @@ class MainView : public Test::MainView
 			Test::MainView::onSize(w, h);
 		}
 		void onKey(axl::gl::input::KeyCode key_code, bool down)
-		{
-			if(down)
-			{
-			}
-			else
-			{
-			}
-		}
+		{}
 	
 };
 
@@ -130,7 +125,7 @@ int main(int argc, char* argv[])
 	bool verbose = argc > 1 && (0 == strcmp(argv[1], "-v") || 0 == strcmp(argv[1], "--verbose"));
 	using namespace axl::gl;
 	using namespace axl::gl::lib;
-	printf(">> axl.gl.base test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
+	printf(">> axl.gl.uielement test -- axl.gl %s library %u.%u.%u\n", (BUILD == Build::SHARED ? "SHARED" : "STATIC"), VERSION.major, VERSION.minor, VERSION.patch);
 	puts("----------------------------------------");
 	{
 		// Create View

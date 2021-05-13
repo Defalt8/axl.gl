@@ -36,7 +36,9 @@ Component::Component(Type type,
 	component_type(type),
 	component_size(size),
 	component_margin(margin),
-	component_padding(padding)
+	component_padding(padding),
+	component_background_color(0.f,0.f,0.f,0.f),
+	component_foreground_color(.9f,.9f,.9f,1.f)
 {
 	this->setContainer(container);
 }
@@ -112,6 +114,7 @@ bool Component::icreate()
 		return false;
 	}
 	component_is_modified = true;
+	return true;
 }
 bool Component::idestroy()
 {using namespace GL;
@@ -155,17 +158,36 @@ void Component::setVisiblity(bool is_visible)
 }
 bool Component::setSize(const axl::math::Vec2i& size)
 {
-	if(size.x < 0 || size.y < 0) return false;
+	if(size.x < 0 || size.y < 0 || !m_framebuffer.setSize(size))
+		return false;
 	component_size = size;
+	component_is_modified = true;
 	return true;
 }
-void Component::setMargin(const axl::math::Vec4f& margin)
+bool Component::setMargin(const axl::math::Vec4f& margin)
 {
+	if(
+		margin.x < 0.f || margin.y < 0.f || margin.z < 0.f || margin.w < 0.f ||
+		(component_size.x - (int)(margin.x + margin.z)) < 0 ||
+		(component_size.y - (int)(margin.y + margin.w)) < 0
+	)
+		return false;
 	component_margin = margin;
+	return true;
 }
 void Component::setPadding(const axl::math::Vec4f& padding)
 {
 	component_padding = padding;
+}
+void Component::setBackgroundColor(const axl::math::Vec4f& background_color)
+{
+	component_background_color = background_color;
+	component_is_modified = true;
+}
+void Component::setForegroundColor(const axl::math::Vec4f& foreground_color)
+{
+	component_foreground_color = foreground_color;
+	component_is_modified = true;
 }
 axl::gl::gfx::ui::Container* Component::getContainer() const
 {
@@ -187,9 +209,21 @@ const axl::math::Vec4f& Component::getPadding() const
 {
 	return component_padding;
 }
+const axl::math::Vec4f& Component::getBackgroundColor() const
+{
+	return component_background_color;
+}
+const axl::math::Vec4f& Component::getForegroundColor() const
+{
+	return component_foreground_color;
+}
 const axl::gl::gfx::Texture2D& Component::getTexture() const
 {
 	return m_framebuffer.fb_render_texture;
+}
+axl::math::Vec2i Component::getClientSize() const
+{
+	return axl::math::Vec2i(component_size.x - (int)(component_margin.x + component_margin.z), component_size.y - (int)(component_margin.y + component_margin.w));
 }
 bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::FrameBuffer* ptr_frame_buffer)
 {
@@ -206,6 +240,8 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 	{
 		if(!m_framebuffer.bind(FrameBuffer::FBT_BOTH))
 			return false;
+		glClearColor(component_background_color.x, component_background_color.y, component_background_color.z, component_background_color.w);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		fully_rendered = this->iRender(camera);
 		m_framebuffer.unbind(FrameBuffer::FBT_BOTH);
 		component_is_modified = false;

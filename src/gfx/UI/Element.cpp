@@ -13,15 +13,40 @@ Element::Element(Element::Type type,
 			const axl::math::Vec3f& position,
 			const axl::math::Vec2i& size,
 			const axl::math::Vec4f& margin,
-			const axl::math::Vec4f& padding):
+			const axl::math::Vec4f& padding,
+			axl::gl::gfx::ui::Layout::Size layout_width,
+			axl::gl::gfx::ui::Layout::Size layout_height):
 	axl::gl::gfx::ui::Component(axl::gl::gfx::ui::Component::ELEMENT, ptr_context, container, position, size, margin, padding),
-	element_type(type)
+	element_type(type),
+	element_layout_width(layout_width),
+	element_layout_height(layout_height)
 {
 	this->setContainer(container);
 }
 Element::~Element()
 {
 	this->destroy();
+}
+
+axl::math::Vec2i Element::getContentSize() const
+{
+	return axl::math::Vec2i(0,0);
+}
+axl::gl::gfx::ui::Layout::Size Element::getLayoutWidth() const
+{
+	return element_layout_width;
+}
+axl::gl::gfx::ui::Layout::Size Element::getLayoutHeight() const
+{
+	return element_layout_height;
+}
+void Element::setLayoutWidth(axl::gl::gfx::ui::Layout::Size layout_width)
+{
+	element_layout_width = layout_width;
+}
+void Element::setLayoutHeight(axl::gl::gfx::ui::Layout::Size layout_height)
+{
+	element_layout_width = layout_height;
 }
 
 } // axl.gl.gfx.ui

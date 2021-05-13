@@ -13,7 +13,8 @@ add_executable( axl.gl.camera3d "Camera3D.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.shader "Shader.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.font "Font.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.text "Text.cpp" "common/GL.cpp" )
-add_executable( axl.gl.uicomponent "UIComponent.cpp" "common/GL.cpp" "common/MainView.cpp" )
+add_executable( axl.gl.uielement "UIElement.cpp" "common/GL.cpp" "common/MainView.cpp" )
+add_executable( axl.gl.uicontainer "UIContainer.cpp" "common/GL.cpp" "common/MainView.cpp" )
 
 set_target_properties( axl.gl.lib
 	axl.gl.display
@@ -27,6 +28,7 @@ set_target_properties( axl.gl.lib
 	axl.gl.shader
 	axl.gl.font
 	axl.gl.text
-	axl.gl.uicomponent
+	axl.gl.uielement
+	axl.gl.uicontainer
 	PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${AXLGL_RUNTIME_DIR}"
 )

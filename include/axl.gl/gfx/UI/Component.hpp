@@ -77,14 +77,19 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		virtual bool setContainer(axl::gl::gfx::ui::Container* container);
 		void setVisiblity(bool is_visible);
 		bool setSize(const axl::math::Vec2i& size);
-		void setMargin(const axl::math::Vec4f& margin);
+		bool setMargin(const axl::math::Vec4f& margin);
 		void setPadding(const axl::math::Vec4f& padding);
+		void setBackgroundColor(const axl::math::Vec4f& background_color);
+		void setForegroundColor(const axl::math::Vec4f& foreground_color);
 		axl::gl::gfx::ui::Container* getContainer() const;
 		bool isVisible() const;
 		const axl::math::Vec2i& getSize() const;
 		const axl::math::Vec4f& getMargin() const;
 		const axl::math::Vec4f& getPadding() const;
+		const axl::math::Vec4f& getBackgroundColor() const;
+		const axl::math::Vec4f& getForegroundColor() const;
 		const axl::gl::gfx::Texture2D& getTexture() const;
+		axl::math::Vec2i getClientSize() const;
 		bool render(axl::gl::camera::Camera3Df* camera = 0, const axl::gl::gfx::FrameBuffer* ptr_frame_buffer = 0);
 	protected:
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera) = 0;
@@ -103,6 +108,8 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		axl::math::Vec2i component_size;
 		axl::math::Vec4f component_margin;
 		axl::math::Vec4f component_padding;
+		axl::math::Vec4f component_background_color;
+		axl::math::Vec4f component_foreground_color;
 		friend class axl::gl::gfx::ui::Container;
 };
 

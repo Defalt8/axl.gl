@@ -14,9 +14,11 @@ class AXLGLCXXAPI Container;
 class AXLGLCXXAPI Layout
 {
 	public:
+		enum Size { FIXED_SIZE, WRAP_CONTENT, MATCH_PARENT };
+	public:
 		Layout();
 		virtual ~Layout();
-		virtual void organize(axl::gl::gfx::ui::Container& container, axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components) = 0;
+		virtual void organize(axl::gl::gfx::ui::Container& container) = 0;
 };
 
 } // axl.gl.gfx.ui
