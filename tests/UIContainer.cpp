@@ -10,6 +10,10 @@ namespace GL {
 
 axl::gl::Display g_display;
 
+//
+// TestElement
+//
+
 class TestElement : public axl::gl::gfx::ui::Element
 {
 	public:
@@ -17,10 +21,9 @@ class TestElement : public axl::gl::gfx::ui::Element
 			axl::gl::gfx::ui::Container* container = 0,
 			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
 			const axl::math::Vec2i& size = axl::math::Vec2i(60,30),
-			const axl::math::Vec4f& margin = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f)
 		) :
-			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::IMAGE, ptr_context, container, position, size, margin, padding)
+			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::IMAGE, ptr_context, container, position, size, padding)
 		{}
 		~TestElement()
 		{
@@ -30,18 +33,16 @@ class TestElement : public axl::gl::gfx::ui::Element
 		bool iRender(axl::gl::camera::Camera3Df* camera)
 		{
 			using namespace GL;
-			// glClearColor(bg_color.x, bg_color.y, bg_color.z, bg_color.w);
-			// glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 			return true;
 		}
 };
 
+//
+// MainView
+//
+
 class MainView : public Test::MainView
 {
-	private:
-		axl::gl::gfx::Font m_default_font;
-		axl::util::uc::Clock status_clock;
-		TestElement test_element;
 	public:
 		MainView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const axl::gl::Cursor& _cursor) :
 			Test::MainView(_title, _position, _size, _cursor),
@@ -51,6 +52,12 @@ class MainView : public Test::MainView
 		{
 			this->destroy();
 		}
+	private:
+		axl::util::uc::Clock status_clock;
+		axl::gl::gfx::Font m_default_font;
+		axl::gl::gfx::ui::Container container, container1, container2;
+		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
+		TestElement elements1[5], elements2[3];
 	public:
 		bool onCreate(bool recreating)
 		{
@@ -61,12 +68,65 @@ class MainView : public Test::MainView
 			Assert(m_default_font.create());
 			Assert(m_default_font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(22,22)) ||
 				m_default_font.loadFromFile("/windows/fonts/consola.ttf", axl::math::Vec2i(22,22)));
-			// test element
-			test_element.setContext(&context);
-			test_element.transform.setPosition(axl::math::Vec3f(100.f,80.f, 0.f));
-			test_element.setSize(axl::math::Vec2i(200,160));
-			test_element.setBackgroundColor(axl::math::Vec4f(.9f,.9f,.9f,1.f));
-			Assert(test_element.create());
+			// linear_layout
+			linear_layout.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_HORIZONTAL);
+			linear_layout.setSpacing(axl::math::Vec2f(10.f,0.f));
+			// linear_layout1
+			linear_layout1.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_VERTICAL);
+			linear_layout1.setSpacing(axl::math::Vec2f(0.f,5.f));
+			// linear_layout2
+			linear_layout2.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_HORIZONTAL);
+			linear_layout2.setSpacing(axl::math::Vec2f(5.f,0.f));
+			// container
+			container.setContext(&context);
+			container.setBackgroundColor(axl::math::Vec4f(.8f,.8f,.78f,1.f));
+			container.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
+			container.setSize(axl::math::Vec2i(300, 260));
+			container.setLayout(&linear_layout);
+			Assert(container.create());
+			// container1
+			container1.setContext(&context);
+			container1.setContainer(&container);
+			container1.setBackgroundColor(axl::math::Vec4f(0.9f,.9f,.85f,1.f));
+			container1.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
+			container1.setLayout(&linear_layout1);
+			Assert(container1.create());
+			// container2
+			container2.setContext(&context);
+			container2.setContainer(&container);
+			container2.setBackgroundColor(axl::math::Vec4f(.85f,0.9f,.9f,1.f));
+			container2.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
+			container2.setLayout(&linear_layout2);
+			Assert(container2.create());
+			{ // test elements1
+				axl::util::size_t element_count = sizeof(elements1)/sizeof(TestElement);
+				for(axl::util::size_t i=0; i<element_count; ++i)
+				{
+					elements1[i].setContext(&context);
+					elements1[i].setContainer(&container1);
+					elements1[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, -((float)i / element_count)));
+					elements1[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
+					elements1[i].setSize(axl::math::Vec2i(100,40));
+					elements1[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
+					elements1[i].setBackgroundColor(axl::math::Vec4f(.1f, 0.5f+0.5f*((float)i / element_count), .1f, 1.f));
+					Assert(elements1[i].create());
+				}
+			}
+			{ // test elements2
+				axl::util::size_t element_count = sizeof(elements2)/sizeof(TestElement);
+				for(axl::util::size_t i=0; i<element_count; ++i)
+				{
+					elements2[i].setContext(&context);
+					elements2[i].setContainer(&container2);
+					elements2[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, -((float)i / element_count)));
+					elements2[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
+					elements2[i].setSize(axl::math::Vec2i(100,40));
+					elements2[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
+					elements2[i].setBackgroundColor(axl::math::Vec4f(.1f, .1f, 0.5f+0.5f*((float)i / element_count), 1.f));
+					Assert(elements2[i].create());
+				}
+			}
+			container.organize();
 			return true;
 		}
 		bool initialize()
@@ -83,10 +143,6 @@ class MainView : public Test::MainView
 				new_title.format(L"UIContainer test | FPS: %.2f", FPS);
 				this->setTitle(new_title);
 			}
-			{
-				static axl::util::uc::Time time;
-				float elapsed_time = time.deltaTimef();
-			}
 			return true;
 		}
 		bool render()
@@ -95,12 +151,14 @@ class MainView : public Test::MainView
 			if(!Test::MainView::render()) return false;
 			glClearColor(.07f, .07f, .13f, .0f);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-			test_element.render(&main_camera);
+			container.render(&main_camera);
 			return true;
 		}
 		void onSize(int w, int h)
 		{
 			Test::MainView::onSize(w, h);
+			container.setSize(axl::math::Vec2i(w, h));
+			container.organize();
 		}
 		void onKey(axl::gl::input::KeyCode key_code, bool down)
 		{}

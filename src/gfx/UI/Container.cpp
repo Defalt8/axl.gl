@@ -18,9 +18,8 @@ Container::Container(axl::gl::Context* ptr_context,
 			Layout* layout,
 			const axl::math::Vec3f& position,
 			const axl::math::Vec2i& size,
-			const axl::math::Vec4f& margin,
 			const axl::math::Vec4f& padding):
-	Component(Component::CONTAINER, ptr_context, container, position, size, margin, padding),
+	Component(Component::CONTAINER, ptr_context, container, position, size, padding),
 	m_components()
 {}
 Container::~Container()
@@ -52,6 +51,8 @@ const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& Container::getCompon
 }
 void Container::organize() const
 {
+	if(m_layout)
+		m_layout->organize(*(Container*)(this));
 	for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = m_components.first(); it.isNotNull(); ++it)
 	{
 		axl::gl::gfx::ui::Component* component = *it;
@@ -64,7 +65,14 @@ void Container::organize() const
 				break;
 		}
 	}
-	m_layout->organize(*(Container*)(this));
+}
+Layout* Container::getLayout() const
+{
+	return m_layout;
+}
+void Container::setLayout(Layout* layout)
+{
+	m_layout = layout;
 }
 
 bool Container::iRender(axl::gl::camera::Camera3Df* camera)

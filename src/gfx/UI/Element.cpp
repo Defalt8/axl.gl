@@ -12,11 +12,10 @@ Element::Element(Element::Type type,
 			axl::gl::gfx::ui::Container* container,
 			const axl::math::Vec3f& position,
 			const axl::math::Vec2i& size,
-			const axl::math::Vec4f& margin,
 			const axl::math::Vec4f& padding,
 			axl::gl::gfx::ui::Layout::Size layout_width,
 			axl::gl::gfx::ui::Layout::Size layout_height):
-	axl::gl::gfx::ui::Component(axl::gl::gfx::ui::Component::ELEMENT, ptr_context, container, position, size, margin, padding),
+	axl::gl::gfx::ui::Component(axl::gl::gfx::ui::Component::ELEMENT, ptr_context, container, position, size, padding),
 	element_type(type),
 	element_layout_width(layout_width),
 	element_layout_height(layout_height)

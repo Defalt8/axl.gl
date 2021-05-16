@@ -17,7 +17,6 @@ class AXLGLCXXAPI Container : public axl::gl::gfx::ui::Component
 			Layout* layout = 0,
 			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
 			const axl::math::Vec2i& size = axl::math::Vec2i(0,0),
-			const axl::math::Vec4f& margin = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f));
 		virtual ~Container();
 	public:
@@ -26,6 +25,8 @@ class AXLGLCXXAPI Container : public axl::gl::gfx::ui::Component
 		bool containsComponent(axl::gl::gfx::ui::Component* component);
 		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& getComponents() const;
 		void organize() const;
+		Layout* getLayout() const;
+		void setLayout(Layout* layout);
 	protected:
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera);
 	private:

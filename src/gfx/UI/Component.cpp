@@ -24,7 +24,6 @@ Component::Component(Type type,
 		axl::gl::gfx::ui::Container* container,
 		const axl::math::Vec3f& position,
 		const axl::math::Vec2i& size,
-		const axl::math::Vec4f& margin,
 		const axl::math::Vec4f& padding) :
 	axl::gl::ContextObject(ptr_context),
 	component_is_visible(true),
@@ -35,7 +34,6 @@ Component::Component(Type type,
 	m_vertex_buffer(-1),
 	component_type(type),
 	component_size(size),
-	component_margin(margin),
 	component_padding(padding),
 	component_background_color(0.f,0.f,0.f,0.f),
 	component_foreground_color(.9f,.9f,.9f,1.f)
@@ -161,23 +159,35 @@ bool Component::setSize(const axl::math::Vec2i& size)
 	if(size.x < 0 || size.y < 0 || !m_framebuffer.setSize(size))
 		return false;
 	component_size = size;
+	if(ctx_context && ctx_context->makeCurrent())
+	{
+		using namespace GL;
+		glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer);
+		GLfloat* buffer = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		if(buffer)
+		{
+			GLsizei width = (GLsizei)this->component_size.x;
+			GLsizei height = (GLsizei)this->component_size.y;
+			buffer[4] = (GLfloat)width; buffer[5] = 0.0f;
+			buffer[8] = (GLfloat)width; buffer[9] = (GLfloat)height;
+			buffer[12] = (GLfloat)width; buffer[13] = (GLfloat)height;
+			buffer[16] = 0.0f; buffer[17] = (GLfloat)height;
+			glUnmapBuffer(GL_ARRAY_BUFFER);
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 	component_is_modified = true;
 	return true;
 }
-bool Component::setMargin(const axl::math::Vec4f& margin)
+bool Component::setPadding(const axl::math::Vec4f& padding)
 {
 	if(
-		margin.x < 0.f || margin.y < 0.f || margin.z < 0.f || margin.w < 0.f ||
-		(component_size.x - (int)(margin.x + margin.z)) < 0 ||
-		(component_size.y - (int)(margin.y + margin.w)) < 0
+		padding.x < 0.f || padding.y < 0.f || padding.z < 0.f || padding.w < 0.f
 	)
 		return false;
-	component_margin = margin;
-	return true;
-}
-void Component::setPadding(const axl::math::Vec4f& padding)
-{
 	component_padding = padding;
+	component_is_modified = true;
+	return true;
 }
 void Component::setBackgroundColor(const axl::math::Vec4f& background_color)
 {
@@ -201,10 +211,6 @@ const axl::math::Vec2i& Component::getSize() const
 {
 	return component_size;
 }
-const axl::math::Vec4f& Component::getMargin() const
-{
-	return component_margin;
-}
 const axl::math::Vec4f& Component::getPadding() const
 {
 	return component_padding;
@@ -223,7 +229,7 @@ const axl::gl::gfx::Texture2D& Component::getTexture() const
 }
 axl::math::Vec2i Component::getClientSize() const
 {
-	return axl::math::Vec2i(component_size.x - (int)(component_margin.x + component_margin.z), component_size.y - (int)(component_margin.y + component_margin.w));
+	return axl::math::Vec2i(component_size.x - (int)(component_padding.x + component_padding.z), component_size.y - (int)(component_padding.y + component_padding.w));
 }
 bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::FrameBuffer* ptr_frame_buffer)
 {

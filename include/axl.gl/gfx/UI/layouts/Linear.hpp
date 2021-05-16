@@ -10,8 +10,6 @@ namespace gfx {
 namespace ui {
 namespace layouts {
 
-class AXLGLCXXAPI Group;
-
 class AXLGLCXXAPI Linear : public axl::gl::gfx::ui::Layout
 {
 	public:
@@ -29,28 +27,23 @@ class AXLGLCXXAPI Linear : public axl::gl::gfx::ui::Layout
 	public:
 		Linear(Orientation orientation = OR_HORIZONTAL,
 			Alignment alignment = AL_CENTER,
-			const axl::math::Vec2f& spacing = axl::math::Vec2f(0.0f,0.0f),
-			const axl::math::Vec4f& padding = axl::math::Vec2f(0.0f,0.0f)
+			const axl::math::Vec2f& spacing = axl::math::Vec2f(0.0f,0.0f)
 			);
 		virtual ~Linear();
-		virtual axl::math::Vec2i getMaxSize(const axl::gl::gfx::ui::Group& group, const axl::util::ds::UniList<axl::gl::gfx::UIElement*>& group_children) const;
-		virtual void organize(axl::gl::gfx::ui::Group& group, axl::util::ds::UniList<axl::gl::gfx::UIElement*>& group_children);
+		virtual void organize(axl::gl::gfx::ui::Container& container);
 		// set methods
-		void set(Orientation orientation, Alignment alignment, const axl::math::Vec2f& spacing, const axl::math::Vec4f& padding);
+		void set(Orientation orientation, Alignment alignment, const axl::math::Vec2f& spacing);
 		void setOrientation(Orientation orientation);
 		void setAlignment(Alignment alignment);
 		void setSpacing(const axl::math::Vec2f& spacing);
-		void setPadding(const axl::math::Vec4f& padding);
 		// get methods
 		Orientation getOrientation() const;
 		Alignment getAlignment() const;
 		const axl::math::Vec2f& getSpacing() const;
-		const axl::math::Vec4f& getPadding() const;
 	private:
 		Orientation lin_orientation;
 		Alignment lin_alignment;
 		axl::math::Vec2f lin_spacing;
-		axl::math::Vec4f lin_padding;
 };
 
 } // axl.gl.gfx.ui.layouts

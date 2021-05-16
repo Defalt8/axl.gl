@@ -33,7 +33,6 @@ class AXLGLCXXAPI Element : public axl::gl::gfx::ui::Component
 			axl::gl::gfx::ui::Container* container = 0,
 			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
 			const axl::math::Vec2i& size = axl::math::Vec2i(0,0),
-			const axl::math::Vec4f& margin = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f),
 			axl::gl::gfx::ui::Layout::Size layout_width = axl::gl::gfx::ui::Layout::WRAP_CONTENT,
 			axl::gl::gfx::ui::Layout::Size layout_height = axl::gl::gfx::ui::Layout::WRAP_CONTENT);
