@@ -168,7 +168,7 @@ class MainView : public Test::MainView
 			// container1
 			container1.setContext(&context);
 			container1.setContainer(&container);
-			container1.setBackgroundColor(axl::math::Vec4f(0.9f,.9f,.9f,1.f));
+			container1.setBackgroundColor(axl::math::Vec4f(0.6f,.8f,.1f,1.f));
 			container1.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
 			container1.setLayout(&linear_layout1);
 			Assert(container1.create());
