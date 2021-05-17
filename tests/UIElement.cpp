@@ -17,10 +17,9 @@ class TestElement : public axl::gl::gfx::ui::Element
 			axl::gl::gfx::ui::Container* container = 0,
 			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
 			const axl::math::Vec2i& size = axl::math::Vec2i(60,30),
-			const axl::math::Vec4f& margin = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f)
 		) :
-			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::IMAGE, ptr_context, container, position, size, margin, padding)
+			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::IMAGE, ptr_context, container, position, size, padding)
 		{}
 		~TestElement()
 		{

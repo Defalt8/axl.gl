@@ -24,8 +24,8 @@ if( BUILD_SHARED_LIBS )
 	set( AXLGL_TYPE SHARED )
 endif()
 
-set( THIRD_PARTY_INCLUDE_DIR "../../ThirdParty/include" )
-set( THIRD_PARTY_LIB_DIR "../../ThirdParty/lib" )
+set( THIRD_PARTY_INCLUDE_DIR "../include" )
+set( THIRD_PARTY_LIB_DIR "../../lib" )
 
 set( AXLMATH_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../axl.math" CACHE PATH "Path to axl.math library source." )
 set( AXLMATH_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )

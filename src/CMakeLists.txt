@@ -167,7 +167,6 @@ if( AXLGL_INSTALL_HEADERS )
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Font.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text/Text.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/text.hpp"
-	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/UIFrameBuffer.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Component.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Container.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Element.hpp"
