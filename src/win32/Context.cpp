@@ -6,6 +6,7 @@
 #include <axl.glfl/win/wglext.hpp>
 #include <axl.gl/View.hpp>
 #include <axl.gl/Context.hpp>
+#include <axl.gl/gfx/ui/Component.hpp>
 #include "ViewData.hpp"
 
 namespace axl {
@@ -214,6 +215,7 @@ void Context::destroy()
 			ContextObject* context_object = this->m_context_objects.removeFirst();
 			if(context_object) context_object->destroy();
 		}
+		m_components.removeAll();
 		if(((ContextData*)m_reserved)->hglrc)
 		{
 			if(((ContextData*)m_reserved)->hdc)
@@ -241,6 +243,10 @@ const axl::util::ds::UniList<ContextObject*>& Context::getContextObjects() const
 {
 	return this->m_context_objects;
 }
+const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& Context::getComponents() const
+{
+	return this->m_components;
+}
 bool Context::getVSync() const
 {
 	if (axl::glfl::WGL::WGL_EXT_swap_control && this->makeCurrent())
@@ -251,6 +257,25 @@ bool Context::setVSync(bool v_sync) const
 {
 	if (axl::glfl::WGL::WGL_EXT_swap_control && this->makeCurrent())
 		return axl::glfl::WGL::wglSwapIntervalEXT((int)v_sync);
+	return false;
+}
+
+bool Context::addComponent(axl::gl::gfx::ui::Component* component)
+{
+	if(this->containsComponent(component)) return false;
+	return m_components.insertLast(component);
+}
+bool Context::removeComponent(axl::gl::gfx::ui::Component* component)
+{
+	return m_components.remove(component);
+}
+bool Context::containsComponent(const axl::gl::gfx::ui::Component* component) const
+{
+	for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = m_components.first(); it.isNotNull(); ++it)
+	{
+		if((*it) == component)
+			return true;
+	}
 	return false;
 }
 

@@ -11,6 +11,10 @@
 #include <axl.gl/input/Mouse.hpp>
 #include <axl.gl/input/Keyboard.hpp>
 #include <axl.gl/input/Touch.hpp>
+#include <axl.gl/gfx/ui/Component.hpp>
+#include <axl.gl/gfx/ui/Container.hpp>
+#include <axl.gl/gfx/ui/Element.hpp>
+#include <axl.gl/gfx/ui/elements/Button.hpp>
 #include "ViewData.hpp"
 
 namespace axl {
@@ -697,6 +701,25 @@ void View::onMove(int x, int y)
 void View::onSize(int w,int h)
 {
 	this->m_size.set(w, h);
+	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
+	{
+		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
+		for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
+		{
+			axl::gl::gfx::ui::Component* component = *it;
+			switch(component->component_type)
+			{
+				case axl::gl::gfx::ui::Component::CONTAINER:
+					{
+						axl::gl::gfx::ui::Container* container = (axl::gl::gfx::ui::Container*)component;
+						container->onViewSize(w, h);
+					}
+					break;
+				case axl::gl::gfx::ui::Component::ELEMENT:
+					break;
+			}
+		}
+	}
 }
 
 void View::onPause()
@@ -721,12 +744,100 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 }
 
 void View::onChar(wchar_t char_code)
-{}
+{
+	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
+	{
+		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
+		for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
+		{
+			axl::gl::gfx::ui::Component* component = *it;
+			if(!component->isVisible()) continue;
+			switch(component->component_type)
+			{
+				case axl::gl::gfx::ui::Component::CONTAINER:
+					break;
+				case axl::gl::gfx::ui::Component::ELEMENT:
+					{
+						axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
+						switch(element->element_type)
+						{
+							case axl::gl::gfx::ui::Element::OTHER:
+							case axl::gl::gfx::ui::Element::IMAGE_VIEW:
+							case axl::gl::gfx::ui::Element::TEXT_VIEW:
+							case axl::gl::gfx::ui::Element::TEXT_INPUT:
+								{
+									// axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
+								}
+								break;
+							case axl::gl::gfx::ui::Element::LIST:
+							case axl::gl::gfx::ui::Element::BUTTON:
+								break;
+						}
+					}
+					break;
+			}
+		}
+	}
+}
 
 void View::onPointer(int index, int x, int y, bool is_down)
 {
 	if(index >= 0 && index < MAX_POINTERS)
 		m_pointers[index] = is_down;
+	int tx = x, ty = this->size.y - y;
+	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
+	{
+		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
+		for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
+		{
+			axl::gl::gfx::ui::Component* component = *it;
+			if(!component->isVisible()) continue;
+			switch(component->component_type)
+			{
+				case axl::gl::gfx::ui::Component::CONTAINER:
+					break;
+				case axl::gl::gfx::ui::Component::ELEMENT:
+					{
+						axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
+						switch(element->element_type)
+						{
+							case axl::gl::gfx::ui::Element::OTHER:
+							case axl::gl::gfx::ui::Element::IMAGE_VIEW:
+							case axl::gl::gfx::ui::Element::TEXT_VIEW:
+							case axl::gl::gfx::ui::Element::TEXT_INPUT:
+							case axl::gl::gfx::ui::Element::LIST:
+								break;
+							case axl::gl::gfx::ui::Element::BUTTON:
+								{
+									axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
+									axl::math::Mat4f final_transform = button->transform.getMatrix();
+									axl::gl::gfx::ui::Container* parent = button->getContainer();
+									while(parent)
+									{
+										final_transform = parent->transform.getMatrix() * final_transform;
+										parent = parent->getContainer();
+									}
+									axl::math::Vec2i button_size = button->getSize();
+									axl::math::Vec4f final_position = final_transform * axl::math::Vec4f(0.f,0.f,0.f,1.f);
+									axl::math::Vec4f final_size = final_transform * axl::math::Vec4f((float)button_size.x,(float)button_size.y,0.f,1.f);
+									if(is_down)
+									{
+										if((tx >= final_position.x && tx <= final_size.x) && (ty >= final_position.y && ty <= final_size.y))
+											button->onPress(index);
+									}
+									else
+									{
+										if(button->getState() == axl::gl::gfx::ui::elements::Button::PRESSED)
+											button->onRelease(index);
+									}
+								}
+								break;
+						}
+					}
+					break;
+			}
+		}
+	}
 }
 
 void View::onPointerMove(int index, int x, int y)
@@ -735,6 +846,59 @@ void View::onPointerMove(int index, int x, int y)
 	if(GetCursor() != hcursor)
 	{
 		SetCursor(hcursor);
+	}
+	int tx = x, ty = this->size.y - y;
+	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
+	{
+		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
+		for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
+		{
+			axl::gl::gfx::ui::Component* component = *it;
+			if(!component->isVisible()) continue;
+			switch(component->component_type)
+			{
+				case axl::gl::gfx::ui::Component::CONTAINER:
+					break;
+				case axl::gl::gfx::ui::Component::ELEMENT:
+					{
+						axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
+						switch(element->element_type)
+						{
+							case axl::gl::gfx::ui::Element::OTHER:
+							case axl::gl::gfx::ui::Element::IMAGE_VIEW:
+							case axl::gl::gfx::ui::Element::TEXT_VIEW:
+							case axl::gl::gfx::ui::Element::TEXT_INPUT:
+							case axl::gl::gfx::ui::Element::LIST:
+								break;
+							case axl::gl::gfx::ui::Element::BUTTON:
+								{
+									axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
+									axl::math::Mat4f final_transform = button->transform.getMatrix();
+									axl::gl::gfx::ui::Container* parent = button->getContainer();
+									while(parent)
+									{
+										final_transform = parent->transform.getMatrix() * final_transform;
+										parent = parent->getContainer();
+									}
+									axl::math::Vec2i button_size = button->getSize();
+									axl::math::Vec4f final_position = final_transform * axl::math::Vec4f(0.f,0.f,0.f,1.f);
+									axl::math::Vec4f final_size = final_transform * axl::math::Vec4f((float)button_size.x,(float)button_size.y,0.f,1.f);
+									if((tx >= final_position.x && tx <= final_size.x) && (ty >= final_position.y && ty <= final_size.y))
+									{
+										if(!button->isHovered())
+											button->onHover();
+									}
+									else if(button->isHovered())
+									{
+										button->onDrift();
+									}
+								}
+								break;
+						}
+					}
+					break;
+			}
+		}
 	}
 }
 

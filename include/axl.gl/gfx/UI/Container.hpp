@@ -20,6 +20,7 @@ class AXLGLCXXAPI Container : public axl::gl::gfx::ui::Component
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f));
 		virtual ~Container();
 	public:
+		virtual bool isValid() const;
 		virtual bool addComponent(axl::gl::gfx::ui::Component* component);
 		virtual bool removeComponent(axl::gl::gfx::ui::Component* component);
 		bool containsComponent(axl::gl::gfx::ui::Component* component);
@@ -27,6 +28,8 @@ class AXLGLCXXAPI Container : public axl::gl::gfx::ui::Component
 		void organize() const;
 		Layout* getLayout() const;
 		void setLayout(Layout* layout);
+	public:
+		virtual void onViewSize(int w, int h);
 	protected:
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera);
 	private:

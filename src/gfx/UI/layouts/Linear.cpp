@@ -9,10 +9,9 @@ namespace gfx {
 namespace ui {
 namespace layouts {
 
-Linear::Linear(Linear::Orientation orientation, Linear::Alignment alignment, const axl::math::Vec2f& spacing) :
+Linear::Linear(Linear::Orientation orientation, const axl::math::Vec2f& spacing) :
 	axl::gl::gfx::ui::Layout(),
 	lin_orientation(orientation),
-	lin_alignment(alignment),
 	lin_spacing(spacing)
 {}
 Linear::~Linear()
@@ -66,19 +65,14 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 	}
 }
 // set methods
-void Linear::set(Orientation orientation, Alignment alignment, const axl::math::Vec2f& spacing)
+void Linear::set(Orientation orientation, const axl::math::Vec2f& spacing)
 {
 	this->lin_orientation = orientation;
-	this->lin_alignment = alignment;
 	this->lin_spacing = spacing;
 }
 void Linear::setOrientation(Linear::Orientation orientation)
 {
 	this->lin_orientation = orientation;
-}
-void Linear::setAlignment(Linear::Alignment alignment)
-{
-	this->lin_alignment = alignment;
 }
 void Linear::setSpacing(const axl::math::Vec2f& spacing)
 {
@@ -88,10 +82,6 @@ void Linear::setSpacing(const axl::math::Vec2f& spacing)
 Linear::Orientation Linear::getOrientation() const
 {
 	return this->lin_orientation;
-}
-Linear::Alignment Linear::getAlignment() const
-{
-	return this->lin_alignment;
 }
 const axl::math::Vec2f& Linear::getSpacing() const
 {

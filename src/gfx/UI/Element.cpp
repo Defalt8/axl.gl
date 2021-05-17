@@ -27,6 +27,10 @@ Element::~Element()
 	this->destroy();
 }
 
+bool Element::isValid() const
+{
+	return axl::gl::gfx::ui::Component::isValid();
+}
 axl::math::Vec2i Element::getContentSize() const
 {
 	return axl::math::Vec2i(0,0);

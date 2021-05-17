@@ -17,32 +17,21 @@ class AXLGLCXXAPI Linear : public axl::gl::gfx::ui::Layout
 			OR_HORIZONTAL,
 			OR_VERTICAL
 		};
-		enum Alignment {
-			AL_CENTER = 0,
-			AL_LEFT = 1,
-			AL_RIGHT = 2,
-			AL_BOTTOM = 1,
-			AL_TOP = 2,
-		};
 	public:
 		Linear(Orientation orientation = OR_HORIZONTAL,
-			Alignment alignment = AL_CENTER,
 			const axl::math::Vec2f& spacing = axl::math::Vec2f(0.0f,0.0f)
 			);
 		virtual ~Linear();
 		virtual void organize(axl::gl::gfx::ui::Container& container);
 		// set methods
-		void set(Orientation orientation, Alignment alignment, const axl::math::Vec2f& spacing);
+		void set(Orientation orientation, const axl::math::Vec2f& spacing);
 		void setOrientation(Orientation orientation);
-		void setAlignment(Alignment alignment);
 		void setSpacing(const axl::math::Vec2f& spacing);
 		// get methods
 		Orientation getOrientation() const;
-		Alignment getAlignment() const;
 		const axl::math::Vec2f& getSpacing() const;
 	private:
 		Orientation lin_orientation;
-		Alignment lin_alignment;
 		axl::math::Vec2f lin_spacing;
 };
 

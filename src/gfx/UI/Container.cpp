@@ -27,6 +27,10 @@ Container::~Container()
 	this->destroy();
 }
 
+bool Container::isValid() const
+{
+	return axl::gl::gfx::ui::Component::isValid();
+}
 bool Container::addComponent(axl::gl::gfx::ui::Component* component)
 {
 	if(m_components.positionOf(component).isNotNull()) return false;
@@ -74,6 +78,9 @@ void Container::setLayout(Layout* layout)
 {
 	m_layout = layout;
 }
+
+void Container::onViewSize(int w, int h)
+{}
 
 bool Container::iRender(axl::gl::camera::Camera3Df* camera)
 {

@@ -32,7 +32,8 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 			public:
 				FrameBuffer(axl::gl::Context* ptr_context = 0);
 				~FrameBuffer();
-				bool isValid() const;
+			public:
+				virtual bool isValid() const;
 				void setContext(axl::gl::Context* ptr_context);
 			protected:
 				bool icreate();
@@ -74,11 +75,11 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		virtual bool isValid() const;
 		virtual void setContext(axl::gl::Context* ptr_context);
 		virtual bool setContainer(axl::gl::gfx::ui::Container* container);
-		void setVisiblity(bool is_visible);
-		bool setSize(const axl::math::Vec2i& size);
-		bool setPadding(const axl::math::Vec4f& padding);
-		void setBackgroundColor(const axl::math::Vec4f& background_color);
-		void setForegroundColor(const axl::math::Vec4f& foreground_color);
+		virtual void setVisiblity(bool is_visible);
+		virtual bool setSize(const axl::math::Vec2i& size);
+		virtual bool setPadding(const axl::math::Vec4f& padding);
+		virtual void setBackgroundColor(const axl::math::Vec4f& background_color);
+		virtual void setForegroundColor(const axl::math::Vec4f& foreground_color);
 		axl::gl::gfx::ui::Container* getContainer() const;
 		bool isVisible() const;
 		const axl::math::Vec2i& getSize() const;

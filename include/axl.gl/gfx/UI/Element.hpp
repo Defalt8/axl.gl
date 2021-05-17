@@ -21,10 +21,10 @@ class AXLGLCXXAPI Element : public axl::gl::gfx::ui::Component
 	public:
 		enum Type {
 			OTHER,
-			IMAGE,
+			IMAGE_VIEW,
 			TEXT_VIEW,
 			TEXT_INPUT,
-			PUSH_BUTTON,
+			BUTTON,
 			LIST
 		};
 	public:
@@ -38,11 +38,14 @@ class AXLGLCXXAPI Element : public axl::gl::gfx::ui::Component
 			axl::gl::gfx::ui::Layout::Size layout_height = axl::gl::gfx::ui::Layout::WRAP_CONTENT);
 		virtual ~Element();
 	public:
+		virtual bool isValid() const;
 		virtual axl::math::Vec2i getContentSize() const;
 		axl::gl::gfx::ui::Layout::Size getLayoutWidth() const;
 		axl::gl::gfx::ui::Layout::Size getLayoutHeight() const;
 		void setLayoutWidth(axl::gl::gfx::ui::Layout::Size layout_width);
 		void setLayoutHeight(axl::gl::gfx::ui::Layout::Size layout_height);
+	protected:
+		virtual bool iRender(axl::gl::camera::Camera3Df* camera) = 0;
 	public:
 		const axl::gl::gfx::ui::Element::Type element_type;
 	protected:

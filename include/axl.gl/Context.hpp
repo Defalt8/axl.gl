@@ -5,9 +5,18 @@
 
 namespace axl {
 namespace gl {
+namespace gfx {
+namespace ui {
+
+class AXLGLCXXAPI Component;
+
+} // axl::gl::gfx::ui
+} // axl::gl::gfx
 
 class AXLGLCXXAPI View;
 
+template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::gfx::ui::Component*>;
+template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator;
 template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::ContextObject*>;
 template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::ContextObject*>::Iterator;
 
@@ -41,7 +50,6 @@ class AXLGLCXXAPI ContextConfig
 class AXLGLCXXAPI Context
 {
 	public:
-	public:
 		Context();
 		virtual ~Context();
 		virtual bool isCurrent() const;
@@ -51,8 +59,13 @@ class AXLGLCXXAPI Context
 		virtual bool makeCurrent() const;
 		virtual bool clearCurrent() const;
 		const axl::util::ds::UniList<ContextObject*>& getContextObjects() const;
+		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& getComponents() const;
 		bool getVSync() const;
 		bool setVSync(bool v_sync) const;
+	private:
+		bool addComponent(axl::gl::gfx::ui::Component* component);
+		bool removeComponent(axl::gl::gfx::ui::Component* component);
+		bool containsComponent(const axl::gl::gfx::ui::Component* component) const;
 	public:
 		View*const& view;
 		const Context::ContextConfig& config;
@@ -61,11 +74,13 @@ class AXLGLCXXAPI Context
 		View* m_view;
 		Context::ContextConfig m_config;
 		axl::util::ds::UniList<ContextObject*> m_context_objects;
+		axl::util::ds::UniList<axl::gl::gfx::ui::Component*> m_components;
 		void *m_reserved;
 	private:
 		Context(const Context& context);
 		Context& operator=(const Context& context);
 		friend class AXLGLCXXAPI axl::gl::ContextObject;
+		friend class AXLGLCXXAPI axl::gl::gfx::ui::Component;
 };
 
 } // namespace axl.gl

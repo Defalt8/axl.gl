@@ -33,6 +33,7 @@ Component::Component(Type type,
 	m_vertex_array(-1),
 	m_vertex_buffer(-1),
 	component_type(type),
+	component_container(0),
 	component_size(size),
 	component_padding(padding),
 	component_background_color(0.f,0.f,0.f,0.f),
@@ -111,6 +112,7 @@ bool Component::icreate()
 		this->destroy();
 		return false;
 	}
+	ctx_context->addComponent((Component*)this);
 	component_is_modified = true;
 	return true;
 }
@@ -130,6 +132,7 @@ bool Component::idestroy()
 			m_vertex_array = -1;
 		}
 	}
+	ctx_context->removeComponent((Component*)this);
 	return glGetError() == GL_NO_ERROR &&
 		m_program.destroy() &&
 		m_framebuffer.destroy();
@@ -242,7 +245,7 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 	}
 	bool fully_rendered = false;
 	// render component offscreen if the component has been modified
-	if(component_is_modified)
+	if(this->component_type == CONTAINER || component_is_modified)
 	{
 		if(!m_framebuffer.bind(FrameBuffer::FBT_BOTH))
 			return false;
