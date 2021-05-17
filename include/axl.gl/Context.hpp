@@ -46,7 +46,7 @@ class AXLGLCXXAPI Context
 		virtual ~Context();
 		virtual bool isCurrent() const;
 		virtual bool isValid() const;
-		virtual bool create(bool recreate, View* view, const Context::ContextConfig* configs, int num_configs);
+		virtual bool create(bool recreate, View* view, const ContextConfig* configs, int num_configs);
 		virtual void destroy();
 		virtual bool makeCurrent() const;
 		virtual bool clearCurrent() const;
