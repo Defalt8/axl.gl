@@ -16,11 +16,11 @@ A simple and multiplatform C++ game library.
   - Visual Studio 2017 or higher on windows.
   - [CMake](https://cmake.org/download). *"An open-source, cross-platform family of tools designed to build, test and package software."*
 - **Depends on**
-  - *{ `axl.glfl` } -- The C++ OpenGL function loader library.*
+  - *{ `axl.glfl` } -- A local C++ OpenGL function loader library.*
   - *{ `axl.util` } -- A local C++ data structures and utilities library.*
   - *{ `axl.math` } -- A local C++ maths library.*
   - **These libraries { `axl.glfl`, `axl.util`, `axl.math` } need to be presented to this CMake project. By default in the same directory.**
-  - *[Freetype2]("https://www.freetype.org/") library*.
+  - *[Freetype2](https://www.freetype.org/) library*.
   - *OpenGL library*: { `opengl32` } on windows and { `GL` } on linux.
   - *Platform specific libraries:* { `gdi32`, `user32` } on windows, { `X11` } on linux.
 
@@ -31,7 +31,7 @@ A simple and multiplatform C++ game library.
   - `git clone https://github.com/defalt8/axl.glfl.git`
   - `git clone https://github.com/defalt8/axl.util.git`
   - `git clone https://github.com/defalt8/axl.math.git`
-- Place the [Freetype2]("https://www.freetype.org/") **built** static library in the directory `lib` under the same directory.
+- Place the [Freetype2](https://www.freetype.org/) **built** static library in the directory `lib` under the same directory.
 - Initialize CMake build directory.
   - `cd axl.gl`
   - `mkdir out`
