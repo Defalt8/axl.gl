@@ -84,10 +84,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Layout.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/layouts/Linear.hpp"
 )
-target_link_directories( axl.gl
-	PUBLIC "${THIRD_PARTY_LIB_DIR}"
-)
-find_library( LIBFREETYPE "freetype" )
+set( LIBFREETYPE "${THIRD_PARTY_LIB_DIR}/freetype.lib" )
 target_include_directories( axl.gl
 	PUBLIC "${AXLGL_INCLUDE_DIR}"
 	PUBLIC "${THIRD_PARTY_INCLUDE_DIR}"
