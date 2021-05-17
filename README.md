@@ -31,7 +31,7 @@ A simple and multiplatform C++ game library.
   - `git clone https://github.com/defalt8/axl.glfl.git`
   - `git clone https://github.com/defalt8/axl.util.git`
   - `git clone https://github.com/defalt8/axl.math.git`
-- Place the [Freetype2](https://www.freetype.org/) **built** static library in the directory `lib` under the same directory.
+- Place the [Freetype2](https://www.freetype.org/) **built** static library in the directory `lib`, and the headers in `include` directory under the same directory. **NOTE: The ft2build.h must be in `include` directory not `incude/freetype2` directory.**
 - Initialize CMake build directory.
   - `cd axl.gl`
   - `mkdir out`
