@@ -39,8 +39,8 @@ class AXLGLCXXAPI FrameBuffer : public ContextObject
 		FrameBuffer(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~FrameBuffer();
 	protected:
-		bool icreate();
-		bool idestroy();
+		bool iCreate();
+		bool iDestroy();
 	public:
 		bool isValid() const;
 		axl::glfl::GLuint getId() const;

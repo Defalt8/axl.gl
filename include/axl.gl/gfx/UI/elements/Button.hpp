@@ -51,8 +51,8 @@ class AXLGLCXXAPI Button : public axl::gl::gfx::ui::Element
 		virtual void onPress(int pointer_index);
 		virtual void onRelease(int pointer_index);
 	protected:
-		virtual bool icreate();
-		virtual bool idestroy();
+		virtual bool iCreate();
+		virtual bool iDestroy();
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera);
 	protected:
 		State button_state;

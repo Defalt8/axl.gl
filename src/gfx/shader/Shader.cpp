@@ -27,7 +27,7 @@ Shader::~Shader()
 	this->destroy();
 }
 
-bool Shader::icreate()
+bool Shader::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_3_0 || this->isValid() || !(this->ctx_context && this->ctx_context->makeCurrent())) return false;
@@ -44,7 +44,7 @@ bool Shader::icreate()
 	return true;
 }
 
-bool Shader::idestroy()
+bool Shader::iDestroy()
 {
 	using namespace GL;
 	if(this->isValid() && this->ctx_context->makeCurrent())

@@ -25,7 +25,7 @@ Program::~Program()
 	this->destroy();
 }
 
-bool Program::icreate()
+bool Program::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_2_0 || this->isValid() || !(this->ctx_context && this->ctx_context->config.major_version >= 2 && this->ctx_context->makeCurrent())) return false;
@@ -42,7 +42,7 @@ bool Program::icreate()
 	return true;
 }
 
-bool Program::idestroy()
+bool Program::iDestroy()
 {
 	using namespace GL;
 	if(this->isValid() && this->ctx_context->makeCurrent())

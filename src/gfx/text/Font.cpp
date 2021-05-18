@@ -66,14 +66,14 @@ Font::~Font()
 	}
 }
 
-bool Font::icreate()
+bool Font::iCreate()
 {
 	if(!Font::init() || !this->font_reserved) return false;
 	this->font_texture.setContext(this->ctx_context);
 	return this->font_texture.create();
 }
 
-bool Font::idestroy()
+bool Font::iDestroy()
 {
 	if(!this->isValid() || !this->font_reserved) return false;
 	FontData* font_data = (FontData*)font_reserved;

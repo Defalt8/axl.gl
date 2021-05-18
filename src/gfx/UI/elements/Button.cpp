@@ -133,16 +133,16 @@ void Button::onRelease(int pointer_index)
 	this->setForegroundColor(button_hovered_text_color);
 }
 
-bool Button::icreate()
+bool Button::iCreate()
 {
-	if(!axl::gl::gfx::ui::Element::icreate() || !button_text.create()) return false;
+	if(!axl::gl::gfx::ui::Element::iCreate() || !button_text.create()) return false;
 	this->setBackgroundColor(button_released_color);
 	this->setForegroundColor(button_released_text_color);
 	return true;
 }
-bool Button::idestroy()
+bool Button::iDestroy()
 {
-	return axl::gl::gfx::ui::Element::idestroy() && button_text.destroy();
+	return axl::gl::gfx::ui::Element::iDestroy() && button_text.destroy();
 }
 bool Button::iRender(axl::gl::camera::Camera3Df* camera)
 {

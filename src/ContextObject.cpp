@@ -20,7 +20,7 @@ ContextObject::~ContextObject()
 
 bool ContextObject::create()
 {
-	if(!ContextObject::m_created && this->icreate())
+	if(!ContextObject::m_created && this->iCreate())
 		ContextObject::m_created = true;
 	return ContextObject::m_created;
 }
@@ -30,7 +30,7 @@ bool ContextObject::destroy()
 	if(ContextObject::m_being_destroyed) return false;
 	else if(!ContextObject::m_created) return true;
 	ContextObject::m_being_destroyed = true;
-	if(this->idestroy())
+	if(this->iDestroy())
 		ContextObject::m_created = false;
 	ContextObject::m_being_destroyed = false;
 	return !ContextObject::m_created;

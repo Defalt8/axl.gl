@@ -57,7 +57,7 @@ FrameBuffer::~FrameBuffer()
 {
 	this->destroy();
 }
-bool FrameBuffer::icreate()
+bool FrameBuffer::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_3_0 || this->isValid() || !(this->ctx_context && this->ctx_context->makeCurrent())) return false;
@@ -73,7 +73,7 @@ bool FrameBuffer::icreate()
 	this->fb_id = tmp_id;
 	return true;
 }
-bool FrameBuffer::idestroy()
+bool FrameBuffer::iDestroy()
 {
 	using namespace GL;
 	if(this->unbind())

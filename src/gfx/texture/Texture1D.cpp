@@ -33,10 +33,10 @@ Texture1D::Texture1D(axl::gl::Context* ptr_context) :
 
 Texture1D::~Texture1D()
 {
-	this->idestroy();
+	this->iDestroy();
 }
 
-bool Texture1D::icreate()
+bool Texture1D::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_1_0 || this->txr_id != -1 || !this->ctx_context || !this->ctx_context->makeCurrent())
@@ -65,7 +65,7 @@ bool Texture1D::icreate()
 	this->txr_id = tmp_id;
 	return glGetError() == GL_NO_ERROR;
 }
-bool Texture1D::idestroy()
+bool Texture1D::iDestroy()
 {
 	using namespace GL;
 	if(this->unbind())

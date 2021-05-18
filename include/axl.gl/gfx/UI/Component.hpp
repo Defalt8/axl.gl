@@ -36,8 +36,8 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 				virtual bool isValid() const;
 				void setContext(axl::gl::Context* ptr_context);
 			protected:
-				bool icreate();
-				bool idestroy();
+				bool iCreate();
+				bool iDestroy();
 			public:
 				bool setSize(const axl::math::Vec2i& size);
 				const axl::math::Vec2i& getSize() const;
@@ -52,8 +52,8 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 			public:
 				Program(axl::gl::Context* ptr_context = 0);
 				~Program();
-				bool icreate();
-				bool idestroy();
+				bool iCreate();
+				bool iDestroy();
 			protected:
 				axl::glfl::GLint uloc_texture0;
 				axl::glfl::GLint uloc_projection;
@@ -69,8 +69,8 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 			const axl::math::Vec4f& padding);
 		virtual ~Component();
 	protected:
-		virtual bool icreate();
-		virtual bool idestroy();
+		virtual bool iCreate();
+		virtual bool iDestroy();
 	public:
 		virtual bool isValid() const;
 		virtual void setContext(axl::gl::Context* ptr_context);

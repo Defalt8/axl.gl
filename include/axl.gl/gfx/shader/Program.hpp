@@ -20,8 +20,8 @@ class AXLGLCXXAPI Program : public ContextObject
 		Program(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Program();
 	protected:
-		virtual bool icreate();
-		virtual bool idestroy();
+		virtual bool iCreate();
+		virtual bool iDestroy();
 	public:
 		virtual bool isValid() const;
 		axl::glfl::GLuint getId() const;

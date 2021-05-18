@@ -20,8 +20,8 @@ class AXLGLCXXAPI Texture : public ContextObject
 		virtual ~Texture();
 		virtual Type type() const = 0;
 	protected:
-		virtual bool icreate() = 0;
-		virtual bool idestroy() = 0;
+		virtual bool iCreate() = 0;
+		virtual bool iDestroy() = 0;
 	public:
 		virtual bool isValid() const = 0;
 		virtual axl::glfl::GLuint getId() const = 0;

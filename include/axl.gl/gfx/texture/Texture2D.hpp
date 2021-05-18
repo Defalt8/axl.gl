@@ -14,8 +14,8 @@ class AXLGLCXXAPI Texture2D : public Texture
 		virtual ~Texture2D();
 		Type type() const;
 	protected:
-		bool icreate();
-		bool idestroy();
+		bool iCreate();
+		bool iDestroy();
 	public:
 		bool isValid() const;
 		axl::glfl::GLuint getId() const;

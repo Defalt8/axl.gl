@@ -46,7 +46,7 @@ Component::~Component()
 	this->destroy();
 }
 
-bool Component::icreate()
+bool Component::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_3_0 ||
@@ -116,7 +116,7 @@ bool Component::icreate()
 	component_is_modified = true;
 	return true;
 }
-bool Component::idestroy()
+bool Component::iDestroy()
 {using namespace GL;
 	if(this->ctx_context && this->ctx_context->isValid() && this->ctx_context->makeCurrent())
 	{
@@ -320,10 +320,10 @@ void Component::FrameBuffer::setContext(axl::gl::Context* ptr_context)
 	this->fb_render_texture.setContext(ptr_context);
 	this->fb_render_buffer_depth.setContext(ptr_context);
 }
-bool Component::FrameBuffer::icreate()
+bool Component::FrameBuffer::iCreate()
 {
 	using namespace GL;
-	if(!axl::gl::gfx::FrameBuffer::icreate() ||
+	if(!axl::gl::gfx::FrameBuffer::iCreate() ||
 		!this->fb_render_texture.create() ||
 		!this->fb_render_buffer_depth.create()
 	)
@@ -336,14 +336,14 @@ bool Component::FrameBuffer::icreate()
 		this->attachTexture2D(GL_COLOR_ATTACHMENT0, &this->fb_render_texture) &&
 		this->attachRenderBuffer(GL_DEPTH_ATTACHMENT, &this->fb_render_buffer_depth);
 }
-bool Component::FrameBuffer::idestroy()
+bool Component::FrameBuffer::iDestroy()
 {
 	using namespace GL;
 	return this->attachTexture2D(GL_COLOR_ATTACHMENT0, 0) &&
 		   this->attachRenderBuffer(GL_DEPTH_ATTACHMENT, 0) &&
 		   this->fb_render_texture.destroy() &&
 		   this->fb_render_buffer_depth.destroy() &&
-		   axl::gl::gfx::FrameBuffer::idestroy();
+		   axl::gl::gfx::FrameBuffer::iDestroy();
 }
 bool Component::FrameBuffer::setSize(const axl::math::Vec2i& size)
 {
@@ -379,10 +379,10 @@ Component::Program::~Program()
 {
 	this->destroy();
 }
-bool Component::Program::icreate()
+bool Component::Program::iCreate()
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Program::icreate()) return false;
+	if(!axl::gl::gfx::Program::iCreate()) return false;
 	Shader vertex_shader(this->ctx_context, GL_VERTEX_SHADER), fragment_shader(this->ctx_context, GL_FRAGMENT_SHADER);
 	if(!vertex_shader.create() || !fragment_shader.create()) return false;
 	vertex_shader.setSource(
@@ -427,13 +427,13 @@ bool Component::Program::icreate()
 		uloc_view != -1 &&
 		uloc_model != -1;
 }
-bool Component::Program::idestroy()
+bool Component::Program::iDestroy()
 {
 	uloc_texture0 = -1;
 	uloc_projection = -1;
 	uloc_view = -1;
 	uloc_model = -1;
-	return axl::gl::gfx::Program::idestroy();
+	return axl::gl::gfx::Program::iDestroy();
 }
 
 } // axl.gl.gfx.ui

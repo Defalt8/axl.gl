@@ -35,7 +35,7 @@ Texture3D::~Texture3D()
 {
 	this->destroy();
 }
-bool Texture3D::icreate()
+bool Texture3D::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_1_0 || this->txr_id != -1 || !this->ctx_context || !this->ctx_context->makeCurrent())
@@ -68,7 +68,7 @@ bool Texture3D::icreate()
 	this->txr_id = tmp_id;
 	return true;
 }
-bool Texture3D::idestroy()
+bool Texture3D::iDestroy()
 {
 	using namespace GL;
 	if(this->unbind())

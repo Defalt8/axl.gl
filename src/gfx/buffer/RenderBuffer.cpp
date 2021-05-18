@@ -25,7 +25,7 @@ RenderBuffer::~RenderBuffer()
 {
 	this->destroy();
 }
-bool RenderBuffer::icreate()
+bool RenderBuffer::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_3_0 || this->isValid() || !(this->ctx_context && this->ctx_context->makeCurrent())) return false;
@@ -41,7 +41,7 @@ bool RenderBuffer::icreate()
 	this->rb_id = tmp_id;
 	return true;
 }
-bool RenderBuffer::idestroy()
+bool RenderBuffer::iDestroy()
 {
 	using namespace GL;
 	if(this->unbind() || (this->ctx_context && this->ctx_context->makeCurrent()))

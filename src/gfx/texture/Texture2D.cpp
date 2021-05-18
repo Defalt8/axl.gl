@@ -35,7 +35,7 @@ Texture2D::~Texture2D()
 {
 	this->destroy();
 }
-bool Texture2D::icreate()
+bool Texture2D::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_1_0 || this->txr_id != -1 || !this->ctx_context || !this->ctx_context->makeCurrent())
@@ -66,7 +66,7 @@ bool Texture2D::icreate()
 	this->txr_id = tmp_id;
 	return true;
 }
-bool Texture2D::idestroy()
+bool Texture2D::iDestroy()
 {
 	using namespace GL;
 	if(this->unbind())

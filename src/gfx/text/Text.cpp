@@ -46,7 +46,7 @@ Text::~Text()
 {
 	this->destroy();
 }
-bool Text::icreate()
+bool Text::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->text_font || !this->text_program || 
@@ -72,7 +72,7 @@ bool Text::icreate()
 	this->setProgram(this->text_program);
 	return glGetError() == GL_NO_ERROR;
 }
-bool Text::idestroy()
+bool Text::iDestroy()
 {
 	using namespace GL;
 	if(this->ctx_context && this->ctx_context->isValid() && this->ctx_context->makeCurrent())

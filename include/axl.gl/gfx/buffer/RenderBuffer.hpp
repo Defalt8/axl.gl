@@ -19,8 +19,8 @@ class AXLGLCXXAPI RenderBuffer : public ContextObject
 		RenderBuffer(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~RenderBuffer();
 	protected:
-		bool icreate();
-		bool idestroy();
+		bool iCreate();
+		bool iDestroy();
 	public:
 		bool isValid() const;
 		axl::glfl::GLuint getId() const;
