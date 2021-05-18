@@ -28,7 +28,7 @@ Program::~Program()
 bool Program::iCreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_2_0 || this->isValid() || !(this->ctx_context && this->ctx_context->config.major_version >= 2 && this->ctx_context->makeCurrent())) return false;
+	if(!GL_VERSION_2_0 || axl::gl::gfx::Program::isValid() || !(this->ctx_context && this->ctx_context->config.major_version >= 2 && this->ctx_context->makeCurrent())) return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	tmp_id = glCreateProgram();
@@ -45,7 +45,7 @@ bool Program::iCreate()
 bool Program::iDestroy()
 {
 	using namespace GL;
-	if(this->isValid() && this->ctx_context->makeCurrent())
+	if(axl::gl::gfx::Program::isValid() && this->ctx_context->makeCurrent())
 	{
 		GLCLEARERROR();
 		glDeleteProgram(Program::program_id);
@@ -69,7 +69,7 @@ axl::glfl::GLuint Program::getId() const
 bool Program::link() const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->makeCurrent()) return false;
 	GLCLEARERROR();
 	glLinkProgram(this->program_id);
 	GLint status;
@@ -80,7 +80,7 @@ bool Program::link() const
 bool Program::isLinked() const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->makeCurrent()) return false;
 	GLCLEARERROR();
 	GLint status;
 	glGetProgramiv(this->program_id, GL_LINK_STATUS, &status);
@@ -90,7 +90,7 @@ bool Program::isLinked() const
 axl::util::String Program::getInfoLog() const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return axl::util::String();
+	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->makeCurrent()) return axl::util::String();
 	GLCLEARERROR();
 	GLint info_log_len;
 	glGetProgramiv(this->program_id, GL_INFO_LOG_LENGTH, &info_log_len);
@@ -106,7 +106,7 @@ axl::util::String Program::getInfoLog() const
 bool Program::use() const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->makeCurrent()) return false;
 	GLCLEARERROR();
 	glUseProgram(this->program_id);
 	return glGetError() == GL_NO_ERROR;
@@ -115,7 +115,7 @@ bool Program::use() const
 bool Program::unuse() const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->makeCurrent()) return false;
 	GLCLEARERROR();
 	glUseProgram(0);
 	return glGetError() == GL_NO_ERROR;
