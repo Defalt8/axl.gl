@@ -56,6 +56,11 @@ axl::gl::Context* ContextObject::getContext()
 	return this->ctx_context;
 }
 
+const axl::gl::Context* ContextObject::getContext() const
+{
+	return this->ctx_context;
+}
+
 void ContextObject::setContext(axl::gl::Context* ptr_context)
 {
 	if(this->ctx_context != ptr_context)

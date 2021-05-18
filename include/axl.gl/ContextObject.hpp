@@ -22,6 +22,7 @@ class AXLGLCXXAPI ContextObject
 		virtual bool iDestroy() = 0;
 	public:
 		axl::gl::Context* getContext();
+		const axl::gl::Context* getContext() const;
 		void setContext(axl::gl::Context* ptr_context);
 	protected:
 		axl::gl::Context* ctx_context;
