@@ -15,6 +15,7 @@ add_executable( axl.gl.font "Font.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.text "Text.cpp" "common/GL.cpp" )
 add_executable( axl.gl.uielement "UIElement.cpp" "common/GL.cpp" "common/MainView.cpp" )
 add_executable( axl.gl.uicontainer "UIContainer.cpp" "common/GL.cpp" "common/MainView.cpp" )
+add_executable( axl.gl.uibutton "UIButton.cpp" "common/GL.cpp" "common/MainView.cpp" )
 
 set_target_properties( axl.gl.lib
 	axl.gl.display
@@ -30,5 +31,6 @@ set_target_properties( axl.gl.lib
 	axl.gl.text
 	axl.gl.uielement
 	axl.gl.uicontainer
+	axl.gl.uibutton
 	PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${AXLGL_RUNTIME_DIR}"
 )
