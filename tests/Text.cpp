@@ -25,7 +25,7 @@ class GameView : public axl::gl::View
 	public:
 		axl::gl::Context main_context;
 		axl::gl::camera::Camera3Df camera;
-		axl::gl::gfx::Program text_program;
+		axl::gl::gfx::Text::Program text_program;
 		axl::gl::gfx::Font font, font1, font2;
 		axl::gl::gfx::Text text, status_text;
 	private:
@@ -76,10 +76,10 @@ class GameView : public axl::gl::View
 			font2.setContext(&this->main_context);
 			text.setContext(&this->main_context);
 			text.setFont(&this->font);
-			text.setProgram(&this->text_program);
+			text.setTextProgram(&this->text_program);
 			status_text.setContext(&this->main_context);
 			status_text.setFont(&this->font2);
-			status_text.setProgram(&this->text_program);
+			status_text.setTextProgram(&this->text_program);
 			is_animating = false;
 			size_delta = 0;
 			time.set();
@@ -147,7 +147,7 @@ class GameView : public axl::gl::View
 			if(!this->main_context.create(recreating, this, context_configs, sizeof(context_configs)/sizeof(axl::gl::ContextConfig))) return false;
 			this->init();
 			// Create stuff here
-			GL::loadVFShaders(this->text_program, "tests/shaders/330/text_vuPVMs.vert", "tests/shaders/330/text_vuPVMs.frag");
+			Assert(this->text_program.create());
 			if(this->font.create())
 			{
 				Assert(this->font.loadFromFile("/Windows/Fonts/consola.ttf", axl::math::Vec2i(16,16)));

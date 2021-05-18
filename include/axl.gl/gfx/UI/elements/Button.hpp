@@ -35,7 +35,7 @@ class AXLGLCXXAPI Button : public axl::gl::gfx::ui::Element
 		const axl::util::WString& getLabel() const;
 		bool setLabel(const axl::util::WString& label);
 		void setFont(const axl::gl::gfx::Font* font);
-		void setProgram(const axl::gl::gfx::Program* program);
+		bool setTextProgram(const axl::gl::gfx::Text::Program* text_program);
 		virtual bool setSize(const axl::math::Vec2i& size);
 		virtual void setForegroundColor(const axl::math::Vec4f& foreground_color);
 		virtual void setReleaseColor(const axl::math::Vec4f& released_color);

@@ -25,20 +25,13 @@ Text::Text(axl::gl::Context* ptr_context) :
 	text_offset(0.0f, 0.0f),
 	text_spacing(0.0f, 0.0f),
 	text_wstring(),
-	text_font(),
 	text_alignment(Text::Alignment::TAL_CENTER),
-	text_program(),
+	text_font(0),
+	text_program_ptr(0),
 	actual_text_length(0),
 	vertex_array_id(-1),
 	vertex_buffer_id(-1),
-	element_array_id(-1),
-	attribute_location_position(-1),
-	attribute_location_UV(-1),
-	uniform_location_projection_matrix(-1),
-	uniform_location_view_matrix(-1),
-	uniform_location_model_matrix(-1),
-	uniform_location_text_offset(-1),
-	uniform_location_text_color(-1)
+	element_array_id(-1)
 {
 	this->updateAlignment();
 }
@@ -49,8 +42,8 @@ Text::~Text()
 bool Text::iCreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->text_font || !this->text_program || 
-	  !this->text_font->isValid() || !this->text_program->isValid() || !this->ctx_context->isValid() || !this->ctx_context->makeCurrent()
+	if(!GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->text_font || !text_program_ptr || 
+	  !this->text_font->isValid() || !text_program_ptr->isValid() || !this->ctx_context->isValid() || !this->ctx_context->makeCurrent()
 	)
 		return false;
 	GLCLEARERROR();
@@ -69,7 +62,6 @@ bool Text::iCreate()
 		glDeleteVertexArrays(1, &this->vertex_array_id);
 		return false;
 	}
-	this->setProgram(this->text_program);
 	return glGetError() == GL_NO_ERROR;
 }
 bool Text::iDestroy()
@@ -102,10 +94,9 @@ bool Text::iDestroy()
 }
 bool Text::isValid() const
 {
-	return this->ctx_context && this->text_font && this->text_program && 
-		   this->ctx_context->isValid() && this->text_font->isValid() && this->text_program->isValid() && 
-		   this->vertex_array_id != -1 && this->vertex_buffer_id != -1 && this->element_array_id != -1 &&
-		   this->attribute_location_position != -1 && this->attribute_location_UV != -1;
+	return this->ctx_context && this->text_font && text_program_ptr && 
+		   this->ctx_context->isValid() && this->text_font->isValid() && text_program_ptr->isValid() && 
+		   this->vertex_array_id != -1 && this->vertex_buffer_id != -1 && this->element_array_id != -1;
 }
 bool Text::render(const axl::gl::camera::Camera3Df* camera)
 {
@@ -118,13 +109,13 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera)
 		if(camera)
 		{
 			if(camera->projection)
-				this->text_program->setUniformMat4fv(uniform_location_projection_matrix, camera->projection->matrix.values);
-			this->text_program->setUniformMat4fv(uniform_location_view_matrix, camera->view_transform.values);
+				text_program_ptr->setUniformMat4fv(text_program_ptr->uloc_projection, camera->projection->matrix.values);
+			text_program_ptr->setUniformMat4fv(text_program_ptr->uloc_view, camera->view_transform.values);
 		}
-		this->text_program->setUniformMat4fv(uniform_location_model_matrix, this->text_transform.getMatrix().values);
-		this->text_program->setUniform2fv(uniform_location_text_offset, &this->text_offset.x);
-		this->text_program->setUniform4fv(uniform_location_text_color, &this->text_color.x);
-		if(!this->text_font->texture.bind() || !this->text_program->use())
+		text_program_ptr->setUniformMat4fv(text_program_ptr->uloc_model, this->text_transform.getMatrix().values);
+		text_program_ptr->setUniform2fv(text_program_ptr->uloc_text_offset, &this->text_offset.x);
+		text_program_ptr->setUniform4fv(text_program_ptr->uloc_text_color, &this->text_color.x);
+		if(!this->text_font->texture.bind() || !text_program_ptr->use())
 			return false;
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
@@ -143,11 +134,11 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera)
 		if(glGetError() != GL_NO_ERROR)
 		{
 			this->text_font->texture.unbind();
-			this->text_program->unuse();
+			text_program_ptr->unuse();
 			return false;
 		}
 		this->text_font->texture.unbind();
-		this->text_program->unuse();
+		text_program_ptr->unuse();
 		return true;
 	}
 	return true;
@@ -223,29 +214,12 @@ void Text::setFont(const Font* p_font)
 		this->rec_font_size = p_font->size;
 	this->updateBuffers(this->text_wstring, false, true);
 }
-void Text::setProgram(const axl::gl::gfx::Program* text_shader_program)
+bool Text::setTextProgram(const axl::gl::gfx::Text::Program* ptr_text_program)
 {
-	this->text_program = text_shader_program;
-	if(text_shader_program)
-	{
-		this->attribute_location_position = this->text_program->getAttributeLocation("in_Position");
-		this->attribute_location_UV = this->text_program->getAttributeLocation("in_UV");
-		this->uniform_location_projection_matrix = this->text_program->getUniformLocation("u_MatProjection");
-		this->uniform_location_view_matrix = this->text_program->getUniformLocation("u_MatView");
-		this->uniform_location_model_matrix = this->text_program->getUniformLocation("u_MatModel");
-		this->uniform_location_text_offset = this->text_program->getUniformLocation("u_TextOffset");
-		this->uniform_location_text_color = this->text_program->getUniformLocation("u_TextColor");
-	}
-	else
-	{
-		this->attribute_location_position = -1;
-		this->attribute_location_UV = -1;
-		this->uniform_location_projection_matrix = -1;
-		this->uniform_location_view_matrix = -1;
-		this->uniform_location_model_matrix = -1;
-		this->uniform_location_text_offset = -1;
-		this->uniform_location_text_color = -1;
-	}
+	if(ptr_text_program && ptr_text_program->getContext() != this->ctx_context)
+		return false;
+	text_program_ptr = ptr_text_program;
+	return true;
 }
 void Text::setAlignment(AlignmentFlag p_alignment_flags)
 {
@@ -287,9 +261,9 @@ const axl::gl::gfx::Font* Text::getFont() const
 {
 	return this->text_font;
 }
-const axl::gl::gfx::Program* Text::getProgram() const
+const axl::gl::gfx::Text::Program* Text::getTextProgram() const
 {
-	return this->text_program;
+	return text_program_ptr;
 }
 Text::AlignmentFlag Text::getAlignment() const
 {
@@ -376,10 +350,10 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 			return false;
 		}
 		const GLsizei stride = (GLsizei)(sizeof(GLfloat) * 4);
-		glEnableVertexAttribArray(this->attribute_location_position);
-		glEnableVertexAttribArray(this->attribute_location_UV);
-		glVertexAttribPointer(this->attribute_location_position, 2, GL_FLOAT, GL_FALSE, stride, 0);
-		glVertexAttribPointer(this->attribute_location_UV, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(sizeof(GLfloat) * 2));
+		glEnableVertexAttribArray(text_program_ptr->aloc_vertex);
+		glEnableVertexAttribArray(text_program_ptr->aloc_uv);
+		glVertexAttribPointer(text_program_ptr->aloc_vertex, 2, GL_FLOAT, GL_FALSE, stride, 0);
+		glVertexAttribPointer(text_program_ptr->aloc_uv, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(sizeof(GLfloat) * 2));
 	}
 	if((text_changed && text_length > 0) || font_attribute_altered)
 	{
@@ -487,6 +461,116 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	return glGetError() == GL_NO_ERROR;
+}
+
+
+//
+// Text::Program
+//
+
+Text::Program::Program(axl::gl::Context* ptr_context) :
+	axl::gl::gfx::Program(ptr_context),
+	uloc_atlas_texture(-1),
+	uloc_projection(-1),
+	uloc_view(-1),
+	uloc_model(-1),
+	uloc_text_offset(-1),
+	uloc_text_color(-1),
+	aloc_vertex(-1),
+	aloc_uv(-1)
+{}
+Text::Program::~Program()
+{
+	this->destroy();
+}
+bool Text::Program::isValid() const
+{
+	return uloc_atlas_texture != -1 &&
+		uloc_projection != -1 &&
+		uloc_view != -1 &&
+		uloc_model != -1 &&
+		uloc_text_offset != -1 &&
+		uloc_text_color != -1 &&
+		aloc_vertex != -1 &&
+		aloc_uv != -1 &&
+		axl::gl::gfx::Program::isValid();
+}
+bool Text::Program::iCreate()
+{
+	using namespace GL;
+	if(!axl::gl::gfx::Program::iCreate()) return false;
+	Shader vertex_shader(this->ctx_context, GL_VERTEX_SHADER), fragment_shader(this->ctx_context, GL_FRAGMENT_SHADER);
+	if(!vertex_shader.create() || !fragment_shader.create()) return false;
+	vertex_shader.setSource(
+		"# version 330 core\n"
+		"layout(location = 0) in vec2 in_Position;\n"
+		"layout(location = 1) in vec2 in_UV;\n"
+		"uniform mat4 u_MatProjection = mat4(1.0);\n"
+		"uniform mat4 u_MatView = mat4(1.0);\n"
+		"uniform mat4 u_MatModel = mat4(1.0);\n"
+		"uniform vec2 u_TextOffset = vec2(0,0);\n"
+		"out vec2 v_AtlasTexCoord;\n"
+		"void main() {\n"
+		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.x + u_TextOffset.x, in_Position.y + u_TextOffset.y, ((in_Position.x * in_Position.y) / 999999.0), 1.0);\n"
+		"	v_AtlasTexCoord = in_UV;\n"
+		"}\n"
+		);
+	fragment_shader.setSource(
+		"# version 330 core\n"
+		"in vec2 v_AtlasTexCoord;\n"
+		"uniform sampler2D u_AtlasTexture;\n"
+		"uniform vec4 u_TextColor = vec4(0.5,0.5,0.5,1.0);\n"
+		"void main() {\n"
+		"	vec4 atlas_sample = texture2D(u_AtlasTexture, v_AtlasTexCoord);\n"
+		"	gl_FragColor = vec4(u_TextColor.rgb, u_TextColor.a * atlas_sample.r);\n"
+		"}\n"
+		);
+	if(!vertex_shader.compile() || !fragment_shader.compile())
+	{
+		axl::util::String info_log;
+		info_log = vertex_shader.getInfoLog();
+		info_log = fragment_shader.getInfoLog();
+		return false;
+	}
+	vertex_shader.attach(*this);
+	fragment_shader.attach(*this);
+	if(!this->link())
+	{
+		axl::util::String info_log;
+		info_log = this->getInfoLog();
+		return false;
+	}
+	vertex_shader.detach(*this);
+	fragment_shader.detach(*this);
+	uloc_atlas_texture = this->getUniformLocation("u_AtlasTexture");
+	uloc_projection = this->getUniformLocation("u_MatProjection");
+	uloc_view = this->getUniformLocation("u_MatView");
+	uloc_model = this->getUniformLocation("u_MatModel");
+	uloc_text_offset = this->getUniformLocation("u_TextOffset");
+	uloc_text_color = this->getUniformLocation("u_TextColor");
+	aloc_vertex = this->getAttributeLocation("in_Position");
+	aloc_uv = this->getAttributeLocation("in_UV");
+	return uloc_atlas_texture != -1 &&
+		this->setUniform1i(uloc_atlas_texture, 0) &&
+		uloc_projection != -1 &&
+		uloc_view != -1 &&
+		uloc_model != -1 &&
+		uloc_text_offset != -1 &&
+		uloc_text_color != -1 &&
+		aloc_vertex != -1 &&
+		aloc_uv != -1;
+}
+bool Text::Program::iDestroy()
+{
+	uloc_atlas_texture = -1;
+	uloc_projection = -1;
+	uloc_view = -1;
+	uloc_model = -1;
+	uloc_text_offset = -1;
+	uloc_text_color = -1;
+	aloc_vertex = -1;
+	aloc_uv = -1;
+	return axl::gl::gfx::Program::iDestroy();
 }
 
 } // namespace axl.gl.gfx

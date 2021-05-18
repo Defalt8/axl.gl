@@ -129,7 +129,8 @@ class MainView : public Test::MainView
 	private:
 		axl::util::uc::Clock status_clock;
 		axl::gl::gfx::Font m_default_font;
-		axl::gl::gfx::Program text_program;
+		axl::gl::gfx::Text::Program text_program;
+		axl::gl::gfx::ui::Component::Program component_program;
 		MainContainer container;
 		axl::gl::gfx::ui::Container container1, container2;
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
@@ -148,7 +149,9 @@ class MainView : public Test::MainView
 			// text_program
 			text_program.setContext(&context);
 			Assert(text_program.create());
-			Assert(GL::loadVFShaders(text_program, "tests/shaders/330/text_vuPVMs.vert", "tests/shaders/330/text_vuPVMs.frag"));
+			// component_program
+			component_program.setContext(&context);
+			Assert(component_program.create());
 			// linear_layout
 			linear_layout.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_HORIZONTAL);
 			linear_layout.setSpacing(axl::math::Vec2f(10.f,0.f));
@@ -160,6 +163,7 @@ class MainView : public Test::MainView
 			linear_layout2.setSpacing(axl::math::Vec2f(5.f,0.f));
 			// container
 			container.setContext(&context);
+			container.setComponentProgram(&component_program);
 			container.setBackgroundColor(axl::math::Vec4f(.8f,.8f,.78f,1.f));
 			container.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
 			container.setSize(axl::math::Vec2i(300, 260));
@@ -167,6 +171,7 @@ class MainView : public Test::MainView
 			Assert(container.create());
 			// container1
 			container1.setContext(&context);
+			container1.setComponentProgram(&component_program);
 			container1.setContainer(&container);
 			container1.setBackgroundColor(axl::math::Vec4f(0.6f,.8f,.1f,1.f));
 			container1.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
@@ -174,6 +179,7 @@ class MainView : public Test::MainView
 			Assert(container1.create());
 			// container2
 			container2.setContext(&context);
+			container2.setComponentProgram(&component_program);
 			container2.setContainer(&container);
 			container2.setBackgroundColor(axl::math::Vec4f(.9f,0.9f,.9f,1.f));
 			container2.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
@@ -184,9 +190,10 @@ class MainView : public Test::MainView
 				for(axl::util::size_t i=0; i<element_count; ++i)
 				{
 					buttons[i].setContext(&context);
+					buttons[i].setComponentProgram(&component_program);
 					buttons[i].setContainer(&container1);
 					buttons[i].setFont(&m_default_font);
-					buttons[i].setProgram(&text_program);
+					buttons[i].setTextProgram(&text_program);
 					buttons[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, -((float)i / element_count)));
 					buttons[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
 					buttons[i].setLayoutHeight(axl::gl::gfx::ui::Layout::MATCH_PARENT);
@@ -203,6 +210,7 @@ class MainView : public Test::MainView
 				for(axl::util::size_t i=0; i<element_count; ++i)
 				{
 					elements2[i].setContext(&context);
+					elements2[i].setComponentProgram(&component_program);
 					elements2[i].setContainer(&container2);
 					elements2[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, -((float)i / element_count)));
 					elements2[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);

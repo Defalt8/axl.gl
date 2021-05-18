@@ -26,13 +26,13 @@ Component::Component(Type type,
 		const axl::math::Vec2i& size,
 		const axl::math::Vec4f& padding) :
 	axl::gl::ContextObject(ptr_context),
+	component_type(type),
 	component_is_visible(true),
 	component_is_modified(true),
-	m_framebuffer(ptr_context),
-	m_program(ptr_context),
 	m_vertex_array(-1),
 	m_vertex_buffer(-1),
-	component_type(type),
+	component_framebuffer(ptr_context),
+	component_program_ptr(0),
 	component_container(0),
 	component_size(size),
 	component_padding(padding),
@@ -52,10 +52,10 @@ bool Component::iCreate()
 	if(!GL_VERSION_3_0 ||
 	   !this->ctx_context ||
 	   !this->ctx_context->isValid() ||
+	   !component_program_ptr || !component_program_ptr->isValid() ||
 	   this->ctx_context->config.major_version < 3 ||
 	   !this->ctx_context->makeCurrent() ||
-	   !m_framebuffer.create() ||
-	   !this->m_program.create()
+	   !component_framebuffer.create()
 	)
 		return false;
 	GLCLEARERROR();
@@ -84,8 +84,8 @@ bool Component::iCreate()
 		glBindVertexArray(0);
 		return false;
 	}
-	GLsizei width = (GLsizei)this->component_size.x;
-	GLsizei height = (GLsizei)this->component_size.y;
+	GLsizei width = (GLsizei)component_size.x;
+	GLsizei height = (GLsizei)component_size.y;
 	buffer[0] = 0.0f; buffer[1] = 0.0f;
 	buffer[2] = 0.0f; buffer[3] = 0.0f;
 	buffer[4] = (GLfloat)width; buffer[5] = 0.0f;
@@ -106,7 +106,7 @@ bool Component::iCreate()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	if(GL::glGetError() != GL_NO_ERROR ||
-		!m_framebuffer.setSize(axl::math::Vec2i(width, height))
+		!component_framebuffer.setSize(axl::math::Vec2i(width, height))
 	)
 	{
 		this->destroy();
@@ -134,20 +134,28 @@ bool Component::iDestroy()
 	}
 	ctx_context->removeComponent((Component*)this);
 	return glGetError() == GL_NO_ERROR &&
-		m_program.destroy() &&
-		m_framebuffer.destroy();
+		component_framebuffer.destroy();
 }
 
 bool Component::isValid() const
 {
-	return m_framebuffer.isValid();
+	return component_program_ptr && component_program_ptr->isValid() && component_framebuffer.isValid();
 }
 void Component::setContext(axl::gl::Context* ptr_context)
 {
 	axl::gl::ContextObject::setContext(ptr_context);
-	m_framebuffer.setContext(ptr_context);
-	m_program.setContext(ptr_context);
+	component_framebuffer.setContext(ptr_context);
+	if(component_program_ptr && component_program_ptr->getContext() != ptr_context)
+		component_program_ptr = 0;
 }
+bool Component::setComponentProgram(const axl::gl::gfx::ui::Component::Program* ptr_program)
+{
+	if(ptr_program && ptr_program->getContext() != this->ctx_context)
+		return false;
+	component_program_ptr = ptr_program;
+	return true;
+}
+
 bool Component::setContainer(axl::gl::gfx::ui::Container* container)
 {
 	if(!container) return false;
@@ -159,7 +167,7 @@ void Component::setVisiblity(bool is_visible)
 }
 bool Component::setSize(const axl::math::Vec2i& size)
 {
-	if(size.x < 0 || size.y < 0 || !m_framebuffer.setSize(size))
+	if(size.x < 0 || size.y < 0 || !component_framebuffer.setSize(size))
 		return false;
 	component_size = size;
 	if(ctx_context && ctx_context->makeCurrent())
@@ -169,8 +177,8 @@ bool Component::setSize(const axl::math::Vec2i& size)
 		GLfloat* buffer = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 		if(buffer)
 		{
-			GLsizei width = (GLsizei)this->component_size.x;
-			GLsizei height = (GLsizei)this->component_size.y;
+			GLsizei width = (GLsizei)component_size.x;
+			GLsizei height = (GLsizei)component_size.y;
 			buffer[4] = (GLfloat)width; buffer[5] = 0.0f;
 			buffer[8] = (GLfloat)width; buffer[9] = (GLfloat)height;
 			buffer[12] = (GLfloat)width; buffer[13] = (GLfloat)height;
@@ -202,6 +210,10 @@ void Component::setForegroundColor(const axl::math::Vec4f& foreground_color)
 	component_foreground_color = foreground_color;
 	component_is_modified = true;
 }
+const axl::gl::gfx::ui::Component::Program* Component::getComponentProgram() const
+{
+	return component_program_ptr;
+}
 axl::gl::gfx::ui::Container* Component::getContainer() const
 {
 	return component_container;
@@ -228,7 +240,7 @@ const axl::math::Vec4f& Component::getForegroundColor() const
 }
 const axl::gl::gfx::Texture2D& Component::getTexture() const
 {
-	return m_framebuffer.fb_render_texture;
+	return component_framebuffer.fb_render_texture;
 }
 axl::math::Vec2i Component::getClientSize() const
 {
@@ -245,14 +257,14 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 	}
 	bool fully_rendered = false;
 	// render component offscreen if the component has been modified
-	if(this->component_type == CONTAINER || component_is_modified)
+	if(component_type == CONTAINER || component_is_modified)
 	{
-		if(!m_framebuffer.bind(FrameBuffer::FBT_BOTH))
+		if(!component_framebuffer.bind(FrameBuffer::FBT_BOTH))
 			return false;
 		glClearColor(component_background_color.x, component_background_color.y, component_background_color.z, component_background_color.w);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		fully_rendered = this->iRender(camera);
-		m_framebuffer.unbind(FrameBuffer::FBT_BOTH);
+		component_framebuffer.unbind(FrameBuffer::FBT_BOTH);
 		component_is_modified = false;
 	}
 	// render the rendered texture onto a quad
@@ -263,11 +275,11 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 	}
 	if(camera->projection)
 	{
-		this->m_program.setUniformMat4fv(m_program.uloc_projection, camera->projection->matrix.values);
+		component_program_ptr->setUniformMat4fv(component_program_ptr->uloc_projection, camera->projection->matrix.values);
 	}
-	this->m_program.setUniformMat4fv(m_program.uloc_view, camera->view_transform.values);
-	this->m_program.setUniformMat4fv(m_program.uloc_model, this->transform.getMatrix().values);
-	if(m_framebuffer.fb_render_texture.bind(0))
+	component_program_ptr->setUniformMat4fv(component_program_ptr->uloc_view, camera->view_transform.values);
+	component_program_ptr->setUniformMat4fv(component_program_ptr->uloc_model, this->transform.getMatrix().values);
+	if(component_framebuffer.fb_render_texture.bind(0))
 	{
 		GLCLEARERROR();
 		glEnable(GL_BLEND);
@@ -276,7 +288,7 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 		glDepthFunc(GL_LESS);
 		glBindVertexArray(this->m_vertex_array);
 		glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer);
-		m_program.use();
+		component_program_ptr->use();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
@@ -284,8 +296,8 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 		glDisable(GL_BLEND);
 		if(glGetError() != GL_NO_ERROR)
 			fully_rendered = false;
-		m_program.unuse();
-		m_framebuffer.fb_render_texture.unbind(0);
+		component_program_ptr->unuse();
+		component_framebuffer.fb_render_texture.unbind(0);
 	}
 	else
 		fully_rendered = false;
@@ -408,8 +420,6 @@ bool Component::Program::iCreate()
 		);
 	if(!vertex_shader.compile() || !fragment_shader.compile())
 	{
-		// printf("===== Component::VIL:\n %s\n", vertex_shader.getInfoLog().cstr());
-		// printf("===== Component::FIL:\n %s\n", fragment_shader.getInfoLog().cstr());
 		return false;
 	}
 	vertex_shader.attach(*this);
@@ -421,8 +431,8 @@ bool Component::Program::iCreate()
 	uloc_projection = this->getUniformLocation("u_MatProjection");
 	uloc_view = this->getUniformLocation("u_MatView");
 	uloc_model = this->getUniformLocation("u_MatModel");
-	return this->setUniform1i(uloc_texture0, 0) &&
-		uloc_texture0 != -1 &&
+	return uloc_texture0 != -1 &&
+		this->setUniform1i(uloc_texture0, 0) &&
 		uloc_projection != -1 &&
 		uloc_view != -1 &&
 		uloc_model != -1;

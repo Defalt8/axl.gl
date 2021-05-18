@@ -74,12 +74,14 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 	public:
 		virtual bool isValid() const;
 		virtual void setContext(axl::gl::Context* ptr_context);
+		bool setComponentProgram(const axl::gl::gfx::ui::Component::Program* ptr_program);
 		virtual bool setContainer(axl::gl::gfx::ui::Container* container);
 		virtual void setVisiblity(bool is_visible);
 		virtual bool setSize(const axl::math::Vec2i& size);
 		virtual bool setPadding(const axl::math::Vec4f& padding);
 		virtual void setBackgroundColor(const axl::math::Vec4f& background_color);
 		virtual void setForegroundColor(const axl::math::Vec4f& foreground_color);
+		const axl::gl::gfx::ui::Component::Program* getComponentProgram() const;
 		axl::gl::gfx::ui::Container* getContainer() const;
 		bool isVisible() const;
 		const axl::math::Vec2i& getSize() const;
@@ -95,11 +97,11 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		const Type component_type;
 		axl::math::Transform4f transform;
 	private:
-		Component::FrameBuffer m_framebuffer;
-		Component::Program m_program;
 		axl::glfl::GLuint m_vertex_array;
 		axl::glfl::GLuint m_vertex_buffer;
 	protected:
+		Component::FrameBuffer component_framebuffer;
+		const Component::Program* component_program_ptr;
 		axl::gl::gfx::ui::Container* component_container;
 		bool component_is_visible;
 		bool component_is_modified;

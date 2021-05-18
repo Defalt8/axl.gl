@@ -45,6 +45,26 @@ class AXLGLCXXAPI Text : public ContextObject
 			TAL_RIGHT_CENTER = 14,
 			TAL_CENTER = 15
 			};
+		class AXLGLCXXAPI Program : public axl::gl::gfx::Program
+		{
+			public:
+				Program(axl::gl::Context* ptr_context = 0);
+				~Program();
+			protected:
+				virtual bool isValid() const;
+				bool iCreate();
+				bool iDestroy();
+			private:
+				axl::glfl::GLint uloc_atlas_texture;
+				axl::glfl::GLint uloc_projection;
+				axl::glfl::GLint uloc_view;
+				axl::glfl::GLint uloc_model;
+				axl::glfl::GLint uloc_text_offset;
+				axl::glfl::GLint uloc_text_color;
+				axl::glfl::GLint aloc_vertex;
+				axl::glfl::GLint aloc_uv;
+				friend class AXLGLCXXAPI axl::gl::gfx::Text;
+		};
 	public:
 		Text(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Text();
@@ -52,7 +72,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		bool iCreate();
 		bool iDestroy();
 	public:
-		bool isValid() const;
+		virtual bool isValid() const;
 		bool render(const axl::gl::camera::Camera3Df* camera = 0);
 		void updateBuffers(void);
 	protected:
@@ -64,7 +84,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		bool setStorageSize(axl::util::size_t size);
 		bool setText(const axl::util::WString& wstring);
 		void setFont(const Font* font);
-		void setProgram(const axl::gl::gfx::Program* text_shader_program);
+		bool setTextProgram(const axl::gl::gfx::Text::Program* text_program_ptr);
 		void setAlignment(AlignmentFlag alignment_flags);
 		void setHorizontalAlignment(HorizontalAlignment horizontal_alignment);
 		void setVerticalAlignment(VerticalAlignment vertical_alignment);
@@ -75,7 +95,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		const axl::math::Vec2f& getSpacing() const;
 		const axl::util::WString& getText() const;
 		const axl::gl::gfx::Font* getFont() const;
-		const axl::gl::gfx::Program* getProgram() const;
+		const axl::gl::gfx::Text::Program* getTextProgram() const;
 		AlignmentFlag getAlignment() const;
 		HorizontalAlignment getHorizontalAlignment() const;
 		VerticalAlignment getVerticalAlignment() const;
@@ -90,20 +110,13 @@ class AXLGLCXXAPI Text : public ContextObject
 		axl::math::Vec2f text_spacing;
 		axl::util::WString text_wstring;
 		const axl::gl::gfx::Font* text_font;
-		const axl::gl::gfx::Program* text_program;
+		const axl::gl::gfx::Text::Program* text_program_ptr;
 		AlignmentFlag text_alignment;
 	private:
 		unsigned int actual_text_length;
 		axl::glfl::GLuint vertex_array_id;
 		axl::glfl::GLuint vertex_buffer_id;
 		axl::glfl::GLuint element_array_id;
-		axl::glfl::GLint attribute_location_position;
-		axl::glfl::GLint attribute_location_UV;
-		axl::glfl::GLint uniform_location_projection_matrix;
-		axl::glfl::GLint uniform_location_view_matrix;
-		axl::glfl::GLint uniform_location_model_matrix;
-		axl::glfl::GLint uniform_location_text_offset;
-		axl::glfl::GLint uniform_location_text_color;
 		axl::math::Vec2i rec_font_size;
 };
 

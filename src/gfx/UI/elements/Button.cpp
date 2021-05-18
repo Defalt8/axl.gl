@@ -60,9 +60,9 @@ void Button::setFont(const axl::gl::gfx::Font* font)
 {
 	button_text.setFont(font);
 }
-void Button::setProgram(const axl::gl::gfx::Program* program)
+bool Button::setTextProgram(const axl::gl::gfx::Text::Program* text_program)
 {
-	button_text.setProgram(program);
+	return button_text.setTextProgram(text_program);
 }
 bool Button::setSize(const axl::math::Vec2i& size)
 {
