@@ -113,7 +113,7 @@ bool Component::iCreate()
 		return false;
 	}
 	ctx_context->addComponent((Component*)this);
-	component_is_modified = true;
+	this->onModify();
 	return true;
 }
 bool Component::iDestroy()
@@ -187,7 +187,7 @@ bool Component::setSize(const axl::math::Vec2i& size)
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-	component_is_modified = true;
+	this->onModify();
 	return true;
 }
 bool Component::setPadding(const axl::math::Vec4f& padding)
@@ -197,18 +197,18 @@ bool Component::setPadding(const axl::math::Vec4f& padding)
 	)
 		return false;
 	component_padding = padding;
-	component_is_modified = true;
+	this->onModify();
 	return true;
 }
 void Component::setBackgroundColor(const axl::math::Vec4f& background_color)
 {
 	component_background_color = background_color;
-	component_is_modified = true;
+	this->onModify();
 }
 void Component::setForegroundColor(const axl::math::Vec4f& foreground_color)
 {
 	component_foreground_color = foreground_color;
-	component_is_modified = true;
+	this->onModify();
 }
 const axl::gl::gfx::ui::Component::Program* Component::getComponentProgram() const
 {
@@ -264,7 +264,7 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 		{
 			if((*it)->component_is_modified)
 			{
-				this->component_is_modified = true;
+				component_is_modified = true;
 				break;
 			}
 		}
@@ -316,6 +316,13 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 	if(ptr_frame_buffer)
 		ptr_frame_buffer->unbind(axl::gl::gfx::FrameBuffer::FBT_BOTH);
 	return fully_rendered;
+}
+
+void Component::onModify()
+{
+	component_is_modified = true;
+	if(component_container)
+		component_container->onModify();
 }
 
 //

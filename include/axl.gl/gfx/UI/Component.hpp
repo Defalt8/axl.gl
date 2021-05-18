@@ -93,6 +93,7 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		bool render(axl::gl::camera::Camera3Df* camera = 0, const axl::gl::gfx::FrameBuffer* ptr_frame_buffer = 0);
 	protected:
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera) = 0;
+		virtual void onModify();
 	public:
 		const Type component_type;
 		axl::math::Transform4f transform;
