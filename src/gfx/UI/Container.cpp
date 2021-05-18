@@ -87,7 +87,8 @@ bool Container::iRender(axl::gl::camera::Camera3Df* camera)
 {
 	for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = m_components.first(); it.isNotNull(); ++it)
 	{
-		(*it)->render(camera, &component_framebuffer);
+		axl::gl::gfx::ui::Component* component = *it;
+		component->render(camera, &component_framebuffer);
 	}
 	return true;
 }
