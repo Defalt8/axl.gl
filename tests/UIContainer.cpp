@@ -54,7 +54,6 @@ class MainView : public Test::MainView
 		}
 	private:
 		axl::util::uc::Clock status_clock;
-		axl::gl::gfx::Font m_default_font;
 		axl::gl::gfx::ui::Component::Program component_program;
 		axl::gl::gfx::ui::Container container, container1, container2;
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
@@ -64,11 +63,6 @@ class MainView : public Test::MainView
 		{
 			using namespace GL;
 			if(!Test::MainView::onCreate()) return false;
-			// m_default_font
-			m_default_font.setContext(&context);
-			Assert(m_default_font.create());
-			Assert(m_default_font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(22,22)) ||
-				m_default_font.loadFromFile("/windows/fonts/consola.ttf", axl::math::Vec2i(22,22)));
 			// component_program
 			component_program.setContext(&context);
 			Assert(component_program.create());
