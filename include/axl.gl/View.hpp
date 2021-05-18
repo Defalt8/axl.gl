@@ -61,11 +61,11 @@ class AXLGLCXXAPI View
 {
 	public:
 		const static int MAX_TOUCHES = 10;
-		const static int MAX_POINTERS = MAX_TOUCHES + 3; // don't change
+		const static int MAX_POINTERS = MAX_TOUCHES + 5; // don't change
 		// View creation flags
 		enum Flags { VF_FIXED, VF_RESIZABLE, VF_POPUP };
 		// A mouse or other pointer's buttons.
-		enum PointerIndex { PI_RIGHT_BUTTON = 0, PI_MIDDLE_BUTTON = 1, PI_LEFT_BUTTON = 2, PI_TOUCH = 3 };
+		enum PointerIndex { PI_LEFT_BUTTON = 0, PI_MIDDLE_BUTTON = 1, PI_RIGHT_BUTTON = 2, PI_TOUCH = 3 };
 		// View visiblity states.
 		enum VisiblityState { VS_SHOWN, VS_HIDDEN, VS_FULLSCREEN };
 		// View show modes.
