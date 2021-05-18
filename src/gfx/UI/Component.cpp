@@ -255,7 +255,7 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 		if(!camera->makeCurrent(this->ctx_context, true))
 			return false;
 	}
-	bool fully_rendered = false;
+	bool fully_rendered = true;
 	// render component offscreen if the component has been modified
 	if(component_type == CONTAINER || component_is_modified)
 	{
@@ -343,6 +343,10 @@ bool Component::FrameBuffer::iCreate()
 		this->destroy();
 		return false;
 	}
+	fb_render_texture.setParami(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	fb_render_texture.setParami(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	fb_render_texture.setParami(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	fb_render_texture.setParami(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	return this->fb_render_texture.allocate(0, this->fb_size.x, this->fb_size.y, GL_RGBA8) &&
 		this->fb_render_buffer_depth.allocate(this->fb_size.x, this->fb_size.y, GL_DEPTH_COMPONENT24, 0) &&
 		this->attachTexture2D(GL_COLOR_ATTACHMENT0, &this->fb_render_texture) &&

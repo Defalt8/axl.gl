@@ -20,7 +20,8 @@ Container::Container(axl::gl::Context* ptr_context,
 			const axl::math::Vec2i& size,
 			const axl::math::Vec4f& padding):
 	Component(Component::CONTAINER, ptr_context, container, position, size, padding),
-	m_components()
+	m_components(),
+	m_layout(0)
 {}
 Container::~Container()
 {

@@ -97,17 +97,13 @@ class TestButton : public axl::gl::gfx::ui::elements::Button
 		}
 		void onPress(int pointer_index)
 		{
-			if(pointer_index != axl::gl::View::PI_LEFT_BUTTON)
-				return;
 			axl::gl::gfx::ui::elements::Button::onPress(pointer_index);
-			wprintf(L"%s::onPressed()\n", this->button_text.getText().cwstr());
+			wprintf(L"%s::onPress(%d)\n", this->button_text.getText().cwstr(), pointer_index);
 		}
 		void onRelease(int pointer_index)
 		{
-			if(pointer_index != axl::gl::View::PI_LEFT_BUTTON)
-				return;
 			axl::gl::gfx::ui::elements::Button::onRelease(pointer_index);
-			wprintf(L"%s::onReleased()\n", this->button_text.getText().cwstr());
+			wprintf(L"%s::onRelease(%d)\n", this->button_text.getText().cwstr(), pointer_index);
 		}
 };
 
@@ -134,7 +130,7 @@ class MainView : public Test::MainView
 		MainContainer container;
 		axl::gl::gfx::ui::Container container1, container2;
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
-		TestButton buttons[5];
+		TestButton buttons[3];
 		TestElement elements2[3];
 	public:
 		bool onCreate(bool recreating)
@@ -157,7 +153,7 @@ class MainView : public Test::MainView
 			linear_layout.setSpacing(axl::math::Vec2f(10.f,0.f));
 			// linear_layout1
 			linear_layout1.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_VERTICAL);
-			linear_layout1.setSpacing(axl::math::Vec2f(0.f,5.f));
+			linear_layout1.setSpacing(axl::math::Vec2f(0.f,50.f));
 			// linear_layout2
 			linear_layout2.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_HORIZONTAL);
 			linear_layout2.setSpacing(axl::math::Vec2f(5.f,0.f));
@@ -174,16 +170,17 @@ class MainView : public Test::MainView
 			container1.setComponentProgram(&component_program);
 			container1.setContainer(&container);
 			container1.setBackgroundColor(axl::math::Vec4f(0.6f,.8f,.1f,1.f));
-			container1.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
-			container1.setLayout(&linear_layout1);
+			container1.setPadding(axl::math::Vec4f(50.f,10.f,10.f,10.f));
+			// container1.setLayout(&linear_layout1);
 			Assert(container1.create());
 			// container2
 			container2.setContext(&context);
 			container2.setComponentProgram(&component_program);
-			container2.setContainer(&container);
+			// container2.setContainer(&container);
 			container2.setBackgroundColor(axl::math::Vec4f(.9f,0.9f,.9f,1.f));
 			container2.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
 			container2.setLayout(&linear_layout2);
+			container2.setVisiblity(false);
 			Assert(container2.create());
 			{ // test buttons
 				axl::util::size_t element_count = sizeof(buttons)/sizeof(axl::gl::gfx::ui::elements::Button);
@@ -194,16 +191,23 @@ class MainView : public Test::MainView
 					buttons[i].setContainer(&container1);
 					buttons[i].setFont(&m_default_font);
 					buttons[i].setTextProgram(&text_program);
-					buttons[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, -((float)i / element_count)));
+					buttons[i].transform.setTransformOrder(axl::math::Orders::Transform::SRT, false);
+					buttons[i].transform.setRotationOrder(axl::math::Orders::Rotation::Z, false);
+					buttons[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, ((float)i / element_count)));
 					buttons[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
 					buttons[i].setLayoutHeight(axl::gl::gfx::ui::Layout::MATCH_PARENT);
-					buttons[i].setSize(axl::math::Vec2i(100,40));
+					buttons[i].setSize(axl::math::Vec2i(260,60));
 					buttons[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
 					Assert(buttons[i].create());
 					axl::util::WString label(64);
 					label.format(L"Button %d", (i+1));
 					buttons[i].setLabel(label);
 				}
+				buttons[0].transform.setPosition(axl::math::Vec3f(50.f, 50.f, buttons[0].transform.getPosition().z));
+				buttons[1].transform.setPosition(axl::math::Vec3f(90.f, 160.f, buttons[1].transform.getPosition().z));
+				buttons[2].transform.setPosition(axl::math::Vec3f(100.f, 160.f, buttons[2].transform.getPosition().z));
+				buttons[1].transform.setRotation(axl::math::Vec3f(0.f,0.f,axl::math::Angle::degToRad(57.f)));
+				buttons[2].transform.setRotation(axl::math::Vec3f(0.f,0.f,axl::math::Angle::degToRad(90.f)));
 			}
 			{ // test elements2
 				axl::util::size_t element_count = sizeof(elements2)/sizeof(TestElement);
