@@ -16,6 +16,8 @@ Button::Button(axl::gl::Context* ptr_context,
 	axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::BUTTON, ptr_context, container, position, size, padding, layout_width, layout_height),
 	button_state(Button::RELEASED),
 	button_hovered(false),
+	button_horizontal_text_alignment(HAL_CENTER),
+	button_vertical_text_alignment(VAL_CENTER),
 	button_text(ptr_context),
 	button_released_color(.95f,.95f,.95f,1.f),
 	button_released_text_color(.1f,.1f,.1f,1.f),
@@ -68,15 +70,26 @@ bool Button::setSize(const axl::math::Vec2i& size)
 {
 	if(!axl::gl::gfx::ui::Element::setSize(size))
 		return false;
-	button_text.text_transform.setPosition(axl::math::Vec3f((float)this->component_size.x / 2.f, (float)this->component_size.y / 2.f));
+		this->onAlignmentChange();
 	return true;
+}
+
+void Button::setHorizontalAlignment(HorizontalTextAlignment horizontal_text_alignment)
+{
+	button_horizontal_text_alignment = horizontal_text_alignment;
+	this->onAlignmentChange();
+}
+void Button::setVerticalAlignment(VerticalTextAlignment vertical_text_alignment)
+{
+	button_vertical_text_alignment = vertical_text_alignment;
+	this->onAlignmentChange();
 }
 void Button::setForegroundColor(const axl::math::Vec4f& foreground_color)
 {
 	axl::gl::gfx::ui::Element::setForegroundColor(foreground_color);
 	button_text.setColor(this->component_foreground_color);
 }
-void Button::setReleaseColor(const axl::math::Vec4f& released_color)
+void Button::setReleasedColor(const axl::math::Vec4f& released_color)
 {
 	button_released_color = released_color;
 	component_is_modified = true;
@@ -91,7 +104,7 @@ void Button::setHoveredColor(const axl::math::Vec4f& hovered_color)
 	button_hovered_color = hovered_color;
 	component_is_modified = true;
 }
-void Button::setReleaseTextColor(const axl::math::Vec4f& released_text_color)
+void Button::setReleasedTextColor(const axl::math::Vec4f& released_text_color)
 {
 	button_released_text_color = released_text_color;
 	component_is_modified = true;
@@ -105,6 +118,39 @@ void Button::setHoveredTextColor(const axl::math::Vec4f& hovered_text_color)
 {
 	button_hovered_text_color = hovered_text_color;
 	component_is_modified = true;
+}
+
+Button::HorizontalTextAlignment Button::getHorizontalAlignment() const
+{
+	return button_horizontal_text_alignment;
+}
+Button::VerticalTextAlignment Button::getVerticalAlignment() const
+{
+	return button_vertical_text_alignment;
+}
+const axl::math::Vec4f& Button::getReleasedColor() const
+{
+	return button_released_color;
+}
+const axl::math::Vec4f& Button::getPressedColor() const
+{
+	return button_pressed_color;
+}
+const axl::math::Vec4f& Button::getHoveredColor() const
+{
+	return button_hovered_color;
+}
+const axl::math::Vec4f& Button::getReleasedTextColor() const
+{
+	return button_released_text_color;
+}
+const axl::math::Vec4f& Button::getPressedTextColor() const
+{
+	return button_pressed_text_color;
+}
+const axl::math::Vec4f& Button::getHoveredTextColor() const
+{
+	return button_hovered_text_color;
 }
 
 void Button::onHover()
@@ -147,6 +193,50 @@ bool Button::iDestroy()
 bool Button::iRender(axl::gl::camera::Camera3Df* camera)
 {
 	return button_text.render(camera);
+}
+axl::math::Vec2i Button::getContentSize() const
+{
+	const axl::math::Vec2f& text_box = button_text.getBox();
+	return axl::math::Vec2i((int)text_box.x, (int)text_box.y);
+}
+
+void Button::onAlignmentChange()
+{
+	// if(!axl::gl::gfx::ui::elements::Button::isValid())
+	// 	return;
+	axl::math::Vec2f text_size = button_text.getBox();
+	axl::math::Vec3f position(0.f,0.f,0.f);
+	switch(button_horizontal_text_alignment)
+	{
+		case HAL_CENTER:
+			button_text.setHorizontalAlignment(axl::gl::gfx::Text::TAL_HORIZONTAL_CENTER);
+			position.x = (float)this->component_size.x / 2.f;
+			break;
+		case HAL_LEFT:
+			button_text.setHorizontalAlignment(axl::gl::gfx::Text::TAL_LEFT);
+			position.x = component_padding.x;
+			break;
+		case HAL_RIGHT:
+			button_text.setHorizontalAlignment(axl::gl::gfx::Text::TAL_RIGHT);
+			position.x = (float)this->component_size.x - component_padding.z;
+			break;
+	}
+	switch(button_vertical_text_alignment)
+	{
+		case VAL_CENTER:
+			button_text.setVerticalAlignment(axl::gl::gfx::Text::TAL_VERTICAL_CENTER);
+			position.y = (float)this->component_size.y / 2.f;
+			break;
+		case VAL_BOTTOM:
+			button_text.setVerticalAlignment(axl::gl::gfx::Text::TAL_BOTTOM);
+			position.y = component_padding.y;
+			break;
+		case VAL_TOP:
+			button_text.setVerticalAlignment(axl::gl::gfx::Text::TAL_TOP);
+			position.y = (float)this->component_size.y - component_padding.w;
+			break;
+	}
+	button_text.text_transform.setPosition(position);
 }
 
 } // axl.gl.gfx.ui.elements

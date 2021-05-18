@@ -101,7 +101,7 @@ class MainView : public Test::MainView
 		MainContainer container;
 		axl::gl::gfx::ui::Container container1, container2;
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
-		TestButton buttons[5], buttons2[5];
+		TestButton buttons[9], buttons2[6];
 	public:
 		bool onCreate(bool recreating)
 		{
@@ -110,8 +110,8 @@ class MainView : public Test::MainView
 			// m_default_font
 			m_default_font.setContext(&context);
 			Assert(m_default_font.create());
-			Assert(m_default_font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(22,22)) ||
-				m_default_font.loadFromFile("/windows/fonts/consola.ttf", axl::math::Vec2i(22,22)));
+			Assert(m_default_font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(18,18)) ||
+				m_default_font.loadFromFile("/windows/fonts/consola.ttf", axl::math::Vec2i(18,18)));
 			// text_program
 			text_program.setContext(&context);
 			Assert(text_program.create());
@@ -164,11 +164,56 @@ class MainView : public Test::MainView
 					buttons[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, ((float)i / element_count)));
 					buttons[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
 					buttons[i].setLayoutHeight(axl::gl::gfx::ui::Layout::MATCH_PARENT);
-					buttons[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
+					// buttons[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
 					Assert(buttons[i].create());
-					axl::util::WString label(64);
-					label.format(L"Button %d", (i+1));
-					buttons[i].setLabel(label);
+					switch(i)
+					{
+						case 0:
+							buttons[i].setHorizontalAlignment(TestButton::HAL_LEFT);
+							buttons[i].setVerticalAlignment(TestButton::VAL_BOTTOM);
+							buttons[i].setLabel(L"bottom left");
+							break;
+						case 1:
+							buttons[i].setHorizontalAlignment(TestButton::HAL_CENTER);
+							buttons[i].setVerticalAlignment(TestButton::VAL_BOTTOM);
+							buttons[i].setLabel(L"bottom center");
+							break;
+						case 2:
+							buttons[i].setHorizontalAlignment(TestButton::HAL_RIGHT);
+							buttons[i].setVerticalAlignment(TestButton::VAL_BOTTOM);
+							buttons[i].setLabel(L"bottom right");
+							break;
+						case 3:
+							buttons[i].setHorizontalAlignment(TestButton::HAL_LEFT);
+							buttons[i].setVerticalAlignment(TestButton::VAL_CENTER);
+							buttons[i].setLabel(L"center left");
+							break;
+						case 4:
+							buttons[i].setHorizontalAlignment(TestButton::HAL_CENTER);
+							buttons[i].setVerticalAlignment(TestButton::VAL_CENTER);
+							buttons[i].setLabel(L"center");
+							break;
+						case 5:
+							buttons[i].setHorizontalAlignment(TestButton::HAL_RIGHT);
+							buttons[i].setVerticalAlignment(TestButton::VAL_CENTER);
+							buttons[i].setLabel(L"center right");
+							break;
+						case 6:
+							buttons[i].setHorizontalAlignment(TestButton::HAL_LEFT);
+							buttons[i].setVerticalAlignment(TestButton::VAL_TOP);
+							buttons[i].setLabel(L"top left");
+							break;
+						case 7:
+							buttons[i].setHorizontalAlignment(TestButton::HAL_CENTER);
+							buttons[i].setVerticalAlignment(TestButton::VAL_TOP);
+							buttons[i].setLabel(L"top center");
+							break;
+						case 8:
+							buttons[i].setHorizontalAlignment(TestButton::HAL_RIGHT);
+							buttons[i].setVerticalAlignment(TestButton::VAL_TOP);
+							buttons[i].setLabel(L"top right");
+							break;
+					}
 				}
 			}
 			{ // test elements2
@@ -243,7 +288,7 @@ int main(int argc, char* argv[])
 	{
 		// Create View
 		Assertve(g_display.isOpen(), verbose);
-		axl::math::Vec2i view_position(40, 60), view_size(640, 320);
+		axl::math::Vec2i view_position(40, 60), view_size(640, 480);
 		MainView main_view(L"UIButton test", view_position, view_size, axl::gl::Cursor::CUR_CROSS);
 		Assertve(main_view.create(g_display, false, MainView::VF_RESIZABLE), verbose);
 		Assertve(main_view.show(MainView::SM_SHOW), verbose);
