@@ -140,7 +140,7 @@ class MainView : public Test::MainView
 			container1.setComponentProgram(&component_program);
 			container1.setContainer(&container);
 			container1.setBackgroundColor(axl::math::Vec4f(0.6f,.8f,.1f,1.f));
-			container1.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
+			container1.setPadding(axl::math::Vec4f(200.f,10.f,10.f,10.f));
 			container1.setLayout(&linear_layout1);
 			Assert(container1.create());
 			// container2
@@ -160,10 +160,13 @@ class MainView : public Test::MainView
 					buttons[i].setContainer(&container1);
 					buttons[i].setFont(&m_default_font);
 					buttons[i].setTextProgram(&text_program);
-					buttons[i].transform.setRotationOrder(axl::math::Orders::Rotation::NONE, false);
+					buttons[i].setHoveredColor(axl::math::Vec4f(.5f,.5f,.98f,1.f));
+					buttons[i].transform.setTransformOrder(axl::math::Orders::Transform::SRT, false);
+					buttons[i].transform.setRotationOrder(axl::math::Orders::Rotation::Z, false);
 					buttons[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, ((float)i / element_count)));
 					buttons[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
 					buttons[i].setLayoutHeight(axl::gl::gfx::ui::Layout::MATCH_PARENT);
+					buttons[i].transform.setRotation(axl::math::Vec3f(0.f,0.f,axl::math::Angle::degToRad(-(float)i/(element_count-1)*360.f)));
 					// buttons[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
 					Assert(buttons[i].create());
 					switch(i)

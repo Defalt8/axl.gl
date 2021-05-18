@@ -668,6 +668,78 @@ bool View::removeContext(Context* context)
 	return this->m_contexts.remove(context);
 }
 
+//
+// local functions
+//
+
+bool isInArea(float tx, float ty, axl::math::Vec2i size, axl::math::Mat4f transform, axl::gl::gfx::ui::Container* parent)
+{
+	using namespace axl::math;
+	if(size.x == 0 || size.y == 0)
+		return false;
+	Mat4f final_transform = transform;
+	// calculate the final transform matrix
+	while(parent)
+	{
+		final_transform = parent->transform.getMatrix() * final_transform;
+		parent = parent->getContainer();
+	}
+	Vec4f verteces[4];
+	verteces[0] = final_transform * Vec4f(0.f,0.f,0.f,1.f);
+	verteces[1] = final_transform * Vec4f((float)size.x,0.f,0.f,1.f);
+	verteces[2] = final_transform * Vec4f((float)size.x,(float)size.y,0.f,1.f);
+	verteces[3] = final_transform * Vec4f(0.f,(float)size.y,0.f,1.f);
+	// line0(v1-v0), line1(v2-v1), line2(v3-v2), line3(v0-v3)
+	float slopes[4], constants[4], ynots[4];
+	// calculate slope for each line.
+	slopes[0] = (verteces[1].y - verteces[0].y) / (verteces[1].x - verteces[0].x);
+	slopes[1] = (verteces[2].y - verteces[1].y) / (verteces[2].x - verteces[1].x);
+	slopes[2] = (verteces[3].y - verteces[2].y) / (verteces[3].x - verteces[2].x);
+	slopes[3] = (verteces[0].y - verteces[3].y) / (verteces[0].x - verteces[3].x);
+	// calculate the linear constant for each line.
+	constants[0] = verteces[0].y - slopes[0] * verteces[0].x;
+	constants[1] = verteces[1].y - slopes[1] * verteces[1].x;
+	constants[2] = verteces[2].y - slopes[2] * verteces[2].x;
+	constants[3] = verteces[3].y - slopes[3] * verteces[3].x;
+	// calculate the y-not values which are the point's vertical projection on each line 
+	for(int i=0; i<4; ++i)
+	{
+		ynots[i] = slopes[i] * tx + constants[i];
+	}
+	// Check based on the arrangment of the verteces.
+	// At certain orientations the slopes become infinite.
+	// Thus, we have to compare x coordinate on such occasions.
+	bool vertical = Float::equals(verteces[0].x, verteces[1].x), horizontal = Float::equals(verteces[0].y, verteces[1].y, .01f);
+	if(verteces[0].x >= verteces[1].x && verteces[0].y < verteces[1].y)
+	{ // second quadrant
+		return (vertical ? tx <= verteces[0].x : ty <= ynots[0]) &&
+			(horizontal ? tx <= verteces[0].x : ty <= ynots[1]) &&
+			(vertical ? tx >= verteces[2].x : ty >= ynots[2]) &&
+			(horizontal ? tx >= verteces[2].x : ty >= ynots[3]);
+	}
+	else if(verteces[0].x >= verteces[1].x && verteces[0].y > verteces[1].y)
+	{ // thrid quadrant
+		return (vertical ? tx >= verteces[0].x : ty <= ynots[0]) &&
+			(horizontal ? tx <= verteces[0].x : ty >= ynots[1]) &&
+			(vertical ? tx <= verteces[2].x : ty >= ynots[2]) &&
+			(horizontal ? tx >= verteces[2].x : ty <= ynots[3]);
+	}
+	else if(verteces[0].x <= verteces[1].x && verteces[0].y > verteces[1].y)
+	{ // fourth quadrant
+		return (vertical ? tx >= verteces[0].x : ty >= ynots[0]) &&
+			(horizontal ? tx >= verteces[0].x : ty >= ynots[1]) &&
+			(vertical ? tx <= verteces[2].x : ty <= ynots[2]) &&
+			(horizontal ? tx <= verteces[2].x : ty <= ynots[3]);
+	}
+	else
+	{ // first quadrant
+		return (vertical ? tx <= verteces[0].x : ty >= ynots[0]) &&
+			(horizontal ? tx >= verteces[0].x : ty <= ynots[1]) &&
+			(vertical ? tx >= verteces[2].x : ty <= ynots[2]) &&
+			(horizontal ? tx <= verteces[2].x : ty >= ynots[3]);
+	}
+}
+
 ///////////
 /// Events
 
@@ -815,38 +887,7 @@ void View::onPointer(int index, int x, int y, bool is_down)
 									axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
 									if(is_down)
 									{
-										axl::math::Mat4f final_transform = button->transform.getMatrix();
-										axl::gl::gfx::ui::Container* parent = button->getContainer();
-										while(parent)
-										{
-											final_transform = parent->transform.getMatrix() * final_transform;
-											parent = parent->getContainer();
-										}
-										axl::math::Vec2i button_size = button->getSize();
-										axl::math::Vec4f verteces[4];
-										verteces[0] = final_transform * axl::math::Vec4f(0.f,0.f,0.f,1.f);
-										verteces[1] = final_transform * axl::math::Vec4f((float)button_size.x,0.f,0.f,1.f);
-										verteces[2] = final_transform * axl::math::Vec4f((float)button_size.x,(float)button_size.y,0.f,1.f);
-										verteces[3] = final_transform * axl::math::Vec4f(0.f,(float)button_size.y,0.f,1.f);
-										float slopes[4], constants[4], ynots[4];
-										slopes[0] = (verteces[1].y - verteces[0].y) / (verteces[1].x - verteces[0].x);
-										slopes[1] = (verteces[2].y - verteces[1].y) / (verteces[2].x - verteces[1].x);
-										slopes[2] = (verteces[3].y - verteces[2].y) / (verteces[3].x - verteces[2].x);
-										slopes[3] = (verteces[0].y - verteces[3].y) / (verteces[0].x - verteces[3].x);
-										constants[0] = verteces[0].y - slopes[0] * verteces[0].x;
-										constants[1] = verteces[1].y - slopes[1] * verteces[1].x;
-										constants[2] = verteces[2].y - slopes[2] * verteces[2].x;
-										constants[3] = verteces[3].y - slopes[3] * verteces[3].x;
-										for(int i=0; i<4; ++i)
-										{
-											ynots[i] = slopes[i] * tx + constants[i];
-										}
-										if(
-											(axl::math::Float::equals(verteces[1].x, verteces[0].x, .01f) ? tx <= verteces[0].x : ty >= ynots[0]) &&
-											(axl::math::Float::equals(verteces[2].x, verteces[1].x, .01f) ? tx <= verteces[1].x : ty <= ynots[1]) &&
-											(axl::math::Float::equals(verteces[3].x, verteces[2].x, .01f) ? tx >= verteces[2].x: ty <= ynots[2]) &&
-											(axl::math::Float::equals(verteces[0].x, verteces[3].x, .01f) ? tx >= verteces[3].x : ty >= ynots[3])
-										)
+										if(isInArea(tx, ty, button->getSize(), button->transform.getMatrix(), button->getContainer()))
 											button->onPress(index);
 									}
 									else
@@ -871,7 +912,7 @@ void View::onPointerMove(int index, int x, int y)
 	{
 		SetCursor(hcursor);
 	}
-	int tx = x, ty = this->size.y - y;
+	float tx = (float)x, ty = (float)(this->size.y - y);
 	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
 	{
 		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
@@ -897,38 +938,7 @@ void View::onPointerMove(int index, int x, int y)
 							case axl::gl::gfx::ui::Element::BUTTON:
 								{
 									axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
-									axl::math::Mat4f final_transform = button->transform.getMatrix();
-									axl::gl::gfx::ui::Container* parent = button->getContainer();
-									while(parent)
-									{
-										final_transform = parent->transform.getMatrix() * final_transform;
-										parent = parent->getContainer();
-									}
-									axl::math::Vec2i button_size = button->getSize();
-									axl::math::Vec4f verteces[4];
-									verteces[0] = final_transform * axl::math::Vec4f(0.f,0.f,0.f,1.f);
-									verteces[1] = final_transform * axl::math::Vec4f((float)button_size.x,0.f,0.f,1.f);
-									verteces[2] = final_transform * axl::math::Vec4f((float)button_size.x,(float)button_size.y,0.f,1.f);
-									verteces[3] = final_transform * axl::math::Vec4f(0.f,(float)button_size.y,0.f,1.f);
-									float slopes[4], constants[4], ynots[4];
-									slopes[0] = (verteces[1].y - verteces[0].y) / (verteces[1].x - verteces[0].x);
-									slopes[1] = (verteces[2].y - verteces[1].y) / (verteces[2].x - verteces[1].x);
-									slopes[2] = (verteces[3].y - verteces[2].y) / (verteces[3].x - verteces[2].x);
-									slopes[3] = (verteces[0].y - verteces[3].y) / (verteces[0].x - verteces[3].x);
-									constants[0] = verteces[0].y - slopes[0] * verteces[0].x;
-									constants[1] = verteces[1].y - slopes[1] * verteces[1].x;
-									constants[2] = verteces[2].y - slopes[2] * verteces[2].x;
-									constants[3] = verteces[3].y - slopes[3] * verteces[3].x;
-									for(int i=0; i<4; ++i)
-									{
-										ynots[i] = slopes[i] * tx + constants[i];
-									}
-									if(
-										(axl::math::Float::equals(verteces[1].x, verteces[0].x, .01f) ? tx <= verteces[0].x : ty >= ynots[0]) &&
-										(axl::math::Float::equals(verteces[2].x, verteces[1].x, .01f) ? tx <= verteces[1].x : ty <= ynots[1]) &&
-										(axl::math::Float::equals(verteces[3].x, verteces[2].x, .01f) ? tx >= verteces[2].x: ty <= ynots[2]) &&
-										(axl::math::Float::equals(verteces[0].x, verteces[3].x, .01f) ? tx >= verteces[3].x : ty >= ynots[3])
-									)
+									if(isInArea(tx, ty, button->getSize(), button->transform.getMatrix(), button->getContainer()))
 									{
 										if(!button->isHovered())
 											button->onHover();
