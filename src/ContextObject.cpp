@@ -18,6 +18,10 @@ ContextObject::~ContextObject()
 		this->ctx_context->m_context_objects.remove(this);
 }
 
+ bool ContextObject::isValid() const
+ {
+	 return ctx_context && ctx_context->isValid() && m_created;
+ }
 bool ContextObject::create()
 {
 	if(!ContextObject::m_created && this->iCreate())

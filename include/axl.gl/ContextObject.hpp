@@ -11,6 +11,8 @@ class AXLGLCXXAPI ContextObject
 	public:
 		ContextObject(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~ContextObject();
+	public:
+		virtual bool isValid() const;
 		bool create();
 		bool destroy();
 		bool isCreated() const;
