@@ -40,8 +40,6 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::ui::Element
 	public:
 		virtual void setContext(axl::gl::Context* ptr_context);
 		virtual bool isValid() const;
-		State getState() const;
-		bool isHovered() const;
 		const axl::util::WString& getLabel() const;
 		bool setLabel(const axl::util::WString& label);
 		void setFont(const axl::gl::gfx::Font* font);
@@ -59,9 +57,9 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::ui::Element
 		virtual axl::math::Vec2i getContentSize() const;
 		virtual void onAlignmentChange();
 	protected:
-		HorizontalTextAlignment text_horizontal_text_alignment;
-		VerticalTextAlignment text_vertical_text_alignment;
-		axl::gl::gfx::Text text_text;
+		HorizontalTextAlignment text_view_horizontal_text_alignment;
+		VerticalTextAlignment text_view_vertical_text_alignment;
+		axl::gl::gfx::Text text_view_text;
 };
 
 } // axl.gl.gfx.ui.elements
