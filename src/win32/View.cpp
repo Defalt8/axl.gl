@@ -819,7 +819,7 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 		Application::quit(0);
 		return;
 	}
-	else
+	else if(kLeft || kRight)
 	{
 		for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
 		{
@@ -850,9 +850,17 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 												{
 													axl::util::size_t index = text_input->getCursorIndex();
 													if(kLeft)
-														--index;
+													{
+														if(index != -1)
+															--index;
+													}
 													else if(kRight)
-														++index;
+													{
+														if(index == -1)
+															index = 0;
+														else
+															++index;
+													}
 													text_input->setCursorIndex(index);
 												}
 											}
