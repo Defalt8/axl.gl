@@ -881,6 +881,11 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 
 void View::onChar(wchar_t char_code)
 {
+	switch(char_code)
+	{
+		case (axl::util::WString::char_t)127:
+			return;
+	}
 	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
 	{
 		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();

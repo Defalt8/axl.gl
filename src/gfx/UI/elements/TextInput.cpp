@@ -226,19 +226,28 @@ void TextInput::onChar(axl::util::WString::char_t char_code)
 			m_cursor_index = 0;
 			this->onCursorPositionChange();
 		}
-		else if(m_cursor_index > len)
+		else if(m_cursor_index != -1 && m_cursor_index > len)
 			return;
 		else
 		{
 			axl::util::WString wstr_buffer(len+1);
-			wstr_buffer.scwCopy(wstring.cwstr(), wstr_buffer.wstr(), m_cursor_index+1);
-			wstr_buffer[m_cursor_index+1] = char_code;
-			if(m_cursor_index < len-1)
-				wstr_buffer.scwCopy(wstring.cwstr(), wstr_buffer.wstr(), (len-m_cursor_index-1), m_cursor_index, m_cursor_index+1);
-			wstr_buffer[len+1] = L'\0';
-			wstr_buffer.length(true);
-			this->setText(wstr_buffer);
-			++m_cursor_index;
+			if(m_cursor_index == -1)
+			{
+				wstr_buffer[0] = char_code;
+				wstr_buffer.scwCopy(wstring.cwstr(), wstr_buffer.wstr(), (len-m_cursor_index-1), 0, 1);
+				m_cursor_index = 0;
+			}
+			else
+			{
+				wstr_buffer.scwCopy(wstring.cwstr(), wstr_buffer.wstr(), m_cursor_index+1);
+				wstr_buffer[m_cursor_index+1] = char_code;
+				if(m_cursor_index < len-1)
+					wstr_buffer.scwCopy(wstring.cwstr(), wstr_buffer.wstr(), (len-m_cursor_index), m_cursor_index+1, m_cursor_index+2);
+				wstr_buffer[len+1] = L'\0';
+				wstr_buffer.length(true);
+				this->setText(wstr_buffer);
+				++m_cursor_index;
+			}
 			this->onCursorPositionChange();
 		}
 	}

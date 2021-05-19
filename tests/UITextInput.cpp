@@ -57,7 +57,7 @@ class MainView : public Test::MainView
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
 		MainContainer container;
 		axl::gl::gfx::ui::Container container1, container2;
-		axl::gl::gfx::ui::elements::TextInput text_inputs[5], text_inputs2[5];
+		axl::gl::gfx::ui::elements::TextInput text_inputs[12], text_inputs2[8];
 	public:
 		bool onCreate(bool recreating)
 		{
@@ -66,7 +66,7 @@ class MainView : public Test::MainView
 			// m_default_font
 			m_default_font.setContext(&context);
 			Assert(m_default_font.create());
-			Assert(m_default_font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(24,24)) ||
+			Assert(m_default_font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(16,16)) ||
 				m_default_font.loadFromFile("/windows/fonts/consola.ttf", axl::math::Vec2i(22,22)));
 			// text_program
 			text_program.setContext(&context);
@@ -79,10 +79,10 @@ class MainView : public Test::MainView
 			linear_layout.setSpacing(axl::math::Vec2f(10.f,0.f));
 			// linear_layout1
 			linear_layout1.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_VERTICAL);
-			linear_layout1.setSpacing(axl::math::Vec2f(0.f,10.f));
+			linear_layout1.setSpacing(axl::math::Vec2f(0.f,4.f));
 			// linear_layout2
 			linear_layout2.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_VERTICAL);
-			linear_layout2.setSpacing(axl::math::Vec2f(0.f,10.f));
+			linear_layout2.setSpacing(axl::math::Vec2f(0.f,4.f));
 			// container
 			container.setContext(&context);
 			container.setComponentProgram(&component_program);
