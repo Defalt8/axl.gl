@@ -156,8 +156,8 @@ void TextInput::onAlignmentChange()
 			break;
 	}
 	text_input_text.text_transform.setPosition(position);
-	axl::math::Vec3f cursor_position(position.x, position.y, 0.f);
-	text_input_cursor.text_transform.setPosition(cursor_position);
+	const axl::math::Vec2i& font_size = text_input_text.getFont()->size;
+	text_input_cursor.text_transform.setPosition(axl::math::Vec3f(position.x - 0.3f * font_size.x, position.y - 0.3f * font_size.y,.0f));
 }
 bool TextInput::onInputFocusRequest() const
 {
@@ -201,17 +201,17 @@ void TextInput::onChar(axl::util::WString::char_t char_code)
 		else
 		{
 			axl::util::WString wstr_buffer(len-1);
-			if(m_cursor_index > 0)
+			if(m_cursor_index != -1 && m_cursor_index >= 0)
 			{
 				wstr_buffer.scwCopy(wstring.cwstr(), wstr_buffer.wstr(), m_cursor_index);
 				if(m_cursor_index < len - 1)
-					wstr_buffer.scwCopy(wstring.cwstr(), wstr_buffer.wstr(), (len-m_cursor_index-2), m_cursor_index+1, m_cursor_index-1);
+					wstr_buffer.scwCopy(wstring.cwstr(), wstr_buffer.wstr(), (len-m_cursor_index-1), m_cursor_index+1, m_cursor_index);
+				wstr_buffer[len-1] = L'\0';
+				wstr_buffer.length(true);
+				this->setText(wstr_buffer);
+				--m_cursor_index;
+				this->onCursorPositionChange();
 			}
-			wstr_buffer[len-1] = L'\0';
-			wstr_buffer.length(true);
-			this->setText(wstr_buffer);
-			--m_cursor_index;
-			this->onCursorPositionChange();
 		}
 	}
 	else
@@ -248,7 +248,7 @@ bool TextInput::setCursorIndex(axl::util::size_t index)
 	if(!this->isValid())
 		return false;
 	axl::util::size_t len = text_input_text.getText().length();
-	if(index >= len)
+	if(index != -1 && index >= len)
 		return false;
 	m_cursor_index = index;
 	this->onCursorPositionChange();
@@ -262,7 +262,15 @@ axl::util::size_t TextInput::getCursorIndex() const
 
 void TextInput::onCursorPositionChange()
 {
-	if(m_cursor_index != -1)
+	if(!this->isValid())
+		return;
+	if(m_cursor_index == -1)
+	{
+		axl::math::Vec3f text_position = text_input_text.text_transform.getPosition();
+		const axl::math::Vec2i& font_size = text_input_text.getFont()->size;
+		text_input_cursor.text_transform.setPosition(axl::math::Vec3f(text_position.x - 0.3f * font_size.x, text_position.y - 0.3f * font_size.y,.0f));
+	}
+	else
 	{
 		axl::math::Vec3f position = text_input_text.text_transform.getPosition();
 		axl::math::Vec4f char_box = text_input_text.getCharBox(m_cursor_index);
