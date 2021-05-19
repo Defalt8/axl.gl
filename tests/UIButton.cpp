@@ -174,47 +174,47 @@ class MainView : public Test::MainView
 						case 0:
 							buttons[i].setHorizontalAlignment(TestButton::HAL_LEFT);
 							buttons[i].setVerticalAlignment(TestButton::VAL_BOTTOM);
-							buttons[i].setLabel(L"bottom left");
+							buttons[i].setText(L"bottom left");
 							break;
 						case 1:
 							buttons[i].setHorizontalAlignment(TestButton::HAL_CENTER);
 							buttons[i].setVerticalAlignment(TestButton::VAL_BOTTOM);
-							buttons[i].setLabel(L"bottom center");
+							buttons[i].setText(L"bottom center");
 							break;
 						case 2:
 							buttons[i].setHorizontalAlignment(TestButton::HAL_RIGHT);
 							buttons[i].setVerticalAlignment(TestButton::VAL_BOTTOM);
-							buttons[i].setLabel(L"bottom right");
+							buttons[i].setText(L"bottom right");
 							break;
 						case 3:
 							buttons[i].setHorizontalAlignment(TestButton::HAL_LEFT);
 							buttons[i].setVerticalAlignment(TestButton::VAL_CENTER);
-							buttons[i].setLabel(L"center left");
+							buttons[i].setText(L"center left");
 							break;
 						case 4:
 							buttons[i].setHorizontalAlignment(TestButton::HAL_CENTER);
 							buttons[i].setVerticalAlignment(TestButton::VAL_CENTER);
-							buttons[i].setLabel(L"center");
+							buttons[i].setText(L"center");
 							break;
 						case 5:
 							buttons[i].setHorizontalAlignment(TestButton::HAL_RIGHT);
 							buttons[i].setVerticalAlignment(TestButton::VAL_CENTER);
-							buttons[i].setLabel(L"center right");
+							buttons[i].setText(L"center right");
 							break;
 						case 6:
 							buttons[i].setHorizontalAlignment(TestButton::HAL_LEFT);
 							buttons[i].setVerticalAlignment(TestButton::VAL_TOP);
-							buttons[i].setLabel(L"top left");
+							buttons[i].setText(L"top left");
 							break;
 						case 7:
 							buttons[i].setHorizontalAlignment(TestButton::HAL_CENTER);
 							buttons[i].setVerticalAlignment(TestButton::VAL_TOP);
-							buttons[i].setLabel(L"top center");
+							buttons[i].setText(L"top center");
 							break;
 						case 8:
 							buttons[i].setHorizontalAlignment(TestButton::HAL_RIGHT);
 							buttons[i].setVerticalAlignment(TestButton::VAL_TOP);
-							buttons[i].setLabel(L"top right");
+							buttons[i].setText(L"top right");
 							break;
 					}
 				}
@@ -237,7 +237,7 @@ class MainView : public Test::MainView
 					Assert(buttons2[i].create());
 					axl::util::WString label(64);
 					label.format(L"B%d", (i+1));
-					buttons2[i].setLabel(label);
+					buttons2[i].setText(label);
 				}
 			}
 			container.organize();

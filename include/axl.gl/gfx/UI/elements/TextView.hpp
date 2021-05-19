@@ -40,8 +40,8 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::ui::Element
 	public:
 		virtual void setContext(axl::gl::Context* ptr_context);
 		virtual bool isValid() const;
-		const axl::util::WString& getLabel() const;
-		bool setLabel(const axl::util::WString& label);
+		const axl::util::WString& getText() const;
+		bool setText(const axl::util::WString& label);
 		void setFont(const axl::gl::gfx::Font* font);
 		bool setTextProgram(const axl::gl::gfx::Text::Program* text_program);
 		virtual bool setSize(const axl::math::Vec2i& size);

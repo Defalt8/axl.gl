@@ -42,8 +42,8 @@ class AXLGLCXXAPI Button : public axl::gl::gfx::ui::Element
 		virtual bool isValid() const;
 		State getState() const;
 		bool isHovered() const;
-		const axl::util::WString& getLabel() const;
-		bool setLabel(const axl::util::WString& label);
+		const axl::util::WString& getText() const;
+		bool setText(const axl::util::WString& label);
 		void setFont(const axl::gl::gfx::Font* font);
 		bool setTextProgram(const axl::gl::gfx::Text::Program* text_program);
 		virtual bool setSize(const axl::math::Vec2i& size);

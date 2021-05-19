@@ -48,11 +48,11 @@ bool Button::isHovered() const
 {
 	return button_hovered;
 }
-const axl::util::WString& Button::getLabel() const
+const axl::util::WString& Button::getText() const
 {
 	return button_text.getText();
 }
-bool Button::setLabel(const axl::util::WString& label)
+bool Button::setText(const axl::util::WString& label)
 {
 	if(!button_text.setText(label)) return false;
 	this->component_is_modified = true;

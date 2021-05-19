@@ -32,11 +32,11 @@ bool TextView::isValid() const
 {
 	return axl::gl::gfx::ui::Element::isValid() && text_view_text.isValid();
 }
-const axl::util::WString& TextView::getLabel() const
+const axl::util::WString& TextView::getText() const
 {
 	return text_view_text.getText();
 }
-bool TextView::setLabel(const axl::util::WString& label)
+bool TextView::setText(const axl::util::WString& label)
 {
 	if(!text_view_text.setText(label)) return false;
 	this->component_is_modified = true;

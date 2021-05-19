@@ -129,7 +129,7 @@ class MainView : public Test::MainView
 					Assert(text_views[i].create());
 					axl::util::WString label(32);
 					label.format(L"Text %d", (i+1));
-					text_views[i].setLabel(label);
+					text_views[i].setText(label);
 				}
 			}
 			{ // test text_views
@@ -151,7 +151,7 @@ class MainView : public Test::MainView
 					Assert(text_views2[i].create());
 					axl::util::WString label(32);
 					label.format(L"Text %d", (i+1));
-					text_views2[i].setLabel(label);
+					text_views2[i].setText(label);
 				}
 			}
 			container.organize();
