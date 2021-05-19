@@ -36,10 +36,10 @@ const axl::util::WString& TextView::getText() const
 {
 	return text_view_text.getText();
 }
-bool TextView::setText(const axl::util::WString& label)
+bool TextView::setText(const axl::util::WString& text)
 {
-	if(!text_view_text.setText(label)) return false;
-	this->component_is_modified = true;
+	if(!text_view_text.setText(text)) return false;
+	this->onModify();
 	return true;
 }
 void TextView::setFont(const axl::gl::gfx::Font* font)

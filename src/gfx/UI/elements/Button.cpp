@@ -55,7 +55,7 @@ const axl::util::WString& Button::getText() const
 bool Button::setText(const axl::util::WString& label)
 {
 	if(!button_text.setText(label)) return false;
-	this->component_is_modified = true;
+	this->onModify();
 	return true;
 }
 void Button::setFont(const axl::gl::gfx::Font* font)
@@ -92,32 +92,32 @@ void Button::setForegroundColor(const axl::math::Vec4f& foreground_color)
 void Button::setReleasedColor(const axl::math::Vec4f& released_color)
 {
 	button_released_color = released_color;
-	component_is_modified = true;
+	this->onModify();
 }
 void Button::setPressedColor(const axl::math::Vec4f& pressed_color)
 {
 	button_pressed_color = pressed_color;
-	component_is_modified = true;
+	this->onModify();
 }
 void Button::setHoveredColor(const axl::math::Vec4f& hovered_color)
 {
 	button_hovered_color = hovered_color;
-	component_is_modified = true;
+	this->onModify();
 }
 void Button::setReleasedTextColor(const axl::math::Vec4f& released_text_color)
 {
 	button_released_text_color = released_text_color;
-	component_is_modified = true;
+	this->onModify();
 }
 void Button::setPressedTextColor(const axl::math::Vec4f& pressed_text_color)
 {
 	button_pressed_text_color = pressed_text_color;
-	component_is_modified = true;
+	this->onModify();
 }
 void Button::setHoveredTextColor(const axl::math::Vec4f& hovered_text_color)
 {
 	button_hovered_text_color = hovered_text_color;
-	component_is_modified = true;
+	this->onModify();
 }
 
 Button::HorizontalTextAlignment Button::getHorizontalAlignment() const
@@ -158,7 +158,6 @@ void Button::onHover()
 	button_hovered = true;
 	this->setBackgroundColor(button_hovered_color);
 	this->setForegroundColor(button_hovered_text_color);
-	this->component_is_modified = true;
 }
 void Button::onDrift()
 {
