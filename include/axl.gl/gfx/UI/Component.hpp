@@ -84,6 +84,9 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		const axl::gl::gfx::ui::Component::Program* getComponentProgram() const;
 		axl::gl::gfx::ui::Container* getContainer() const;
 		bool isVisible() const;
+		bool hasInputFocus() const;
+		bool requestInputFocus() const;
+		bool loseInputFocus() const;
 		const axl::math::Vec2i& getSize() const;
 		const axl::math::Vec4f& getPadding() const;
 		const axl::math::Vec4f& getBackgroundColor() const;
@@ -92,8 +95,18 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		axl::math::Vec2i getClientSize() const;
 		bool render(axl::gl::camera::Camera3Df* camera = 0, const axl::gl::gfx::FrameBuffer* ptr_frame_buffer = 0);
 	protected:
+		// Sub-component's render implementation method. Implement in child class.
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera) = 0;
+		// Called when component has undergone change
 		virtual void onModify();
+		// Called when component requests input focus.
+		// Implement and return true if child accepts inputs that require focus, false otherwise.
+		// By default it returns false.
+		virtual bool onInputFocusRequest() const;
+		// Called when input focus has changed to another component.
+		virtual void onInputFocusLost();
+		// Called when input focus has changed to this component.
+		virtual void onInputFocusGain();
 	public:
 		const Type component_type;
 		axl::math::Transform4f transform;

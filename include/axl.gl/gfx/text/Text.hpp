@@ -99,6 +99,7 @@ class AXLGLCXXAPI Text : public ContextObject
 		AlignmentFlag getAlignment() const;
 		HorizontalAlignment getHorizontalAlignment() const;
 		VerticalAlignment getVerticalAlignment() const;
+		axl::math::Vec4f getCharBox(axl::util::size_t char_index) const;
 	protected:
 		bool updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed = false, bool font_attribute_altered = false);
 	public:

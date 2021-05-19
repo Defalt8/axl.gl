@@ -290,6 +290,65 @@ Text::VerticalAlignment Text::getVerticalAlignment() const
 		case VerticalAlignment::TAL_BOTTOM: return VerticalAlignment::TAL_BOTTOM;
 	}
 }
+axl::math::Vec4f Text::getCharBox(axl::util::size_t char_index) const
+{
+	using namespace GL;
+	axl::math::Vec4f char_box(0.f, 0.f, 0.f, 0.f);
+	axl::util::size_t text_length = text_wstring.length();
+	if(!this->isValid() || char_index >= text_length || !this->ctx_context->makeCurrent())
+		return char_box;
+	axl::util::size_t buffer_index = 0, space_count = 0;
+	if(char_index != -1)
+	{
+		axl::util::size_t loc_char_index = (text_wstring[char_index] == L' ') ? (char_index - 1) : char_index;
+		for(axl::util::size_t i = 0; i < loc_char_index; ++i)
+		{
+			switch(this->text_wstring[i])
+			{
+				case L'\n':
+				case L'\0':
+				case L'\r':
+				case L'\t':
+					continue;
+				case L' ':
+					++space_count;
+					break;
+			}
+			++buffer_index;
+		}
+		// if(char_index > 0 && this->text_wstring[(char_index-1)] == L' ')
+		// 	++space_count;
+	}
+	if(buffer_index >= actual_text_length)
+		return char_box;
+	axl::util::size_t base_vertex_index = buffer_index * 16;
+	GLCLEARERROR();
+	glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer_id);
+	GLfloat* buffer = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+	if(!buffer)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		return char_box;
+	}
+	char_box.set(
+		buffer[base_vertex_index],
+		buffer[base_vertex_index + 1],
+		buffer[base_vertex_index + 4],
+		buffer[base_vertex_index + 9]
+	);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	unsigned int glyph_index = this->text_font->getCharIndex(L' ');
+	float space_width = (float)(glyph_index ? this->text_font->glyphs[glyph_index].horiAdvance : (text_font->size.x * .5f));
+	if(text_wstring[char_index] == L' ')
+	{
+		char_box.x = char_box.z;
+		char_box.z = char_box.x + space_width * (1 + space_count);
+	}
+	return char_box;
+}
+
+
 bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_changed, bool font_attribute_altered)
 {
 	using namespace GL;

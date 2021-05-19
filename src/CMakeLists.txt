@@ -45,6 +45,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"gfx/UI/layouts/Linear.cpp"
 	"gfx/UI/elements/Button.cpp"
 	"gfx/UI/elements/TextView.cpp"
+	"gfx/UI/elements/TextInput.cpp"
 
 	"${AXLGL_INCLUDE_DIR}/axl.gl/everything.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/lib.hpp"
@@ -87,6 +88,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/layouts/Linear.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/Button.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextView.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextInput.hpp"
 )
 set( LIBFREETYPE "${THIRD_PARTY_LIB_DIR}/freetype.lib" )
 target_include_directories( axl.gl
@@ -100,6 +102,7 @@ set_target_properties( axl.gl PROPERTIES
 	RUNTIME_OUTPUT_NAME "axl.gl${TYPE_SUFFIX}${DEBUG_SUFFIX}"
 	ARCHIVE_OUTPUT_NAME "axl.gl${TYPE_SUFFIX}${DEBUG_SUFFIX}"
 )
+
 target_compile_definitions( axl.gl
 	PRIVATE AXLGL_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
 	PRIVATE AXLGL_VERSION_MINOR=${PROJECT_VERSION_MINOR}
@@ -175,6 +178,7 @@ if( AXLGL_INSTALL_HEADERS )
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/layouts/Linear.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/Button.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextView.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextInput.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx.hpp"
 		DESTINATION "include/axl.gl"
 	)

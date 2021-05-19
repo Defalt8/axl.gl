@@ -133,6 +133,8 @@ bool Component::iDestroy()
 		}
 	}
 	ctx_context->removeComponent((Component*)this);
+	if(ctx_context->m_input_focus_component == (Component*)this)
+		ctx_context->m_input_focus_component = 0;
 	return glGetError() == GL_NO_ERROR &&
 		component_framebuffer.destroy();
 }
@@ -221,6 +223,38 @@ axl::gl::gfx::ui::Container* Component::getContainer() const
 bool Component::isVisible() const
 {
 	return component_is_visible;
+}
+bool Component::hasInputFocus() const
+{
+	if(!this->isValid())
+		return false;
+	return ctx_context->m_input_focus_component == (Component*)this;
+}
+bool Component::requestInputFocus() const
+{
+	if(!this->isValid())
+		return false;
+	if(ctx_context->m_input_focus_component == (Component*)this)
+		return true;
+	if(onInputFocusRequest())
+	{
+		if(ctx_context->m_input_focus_component)
+			ctx_context->m_input_focus_component->onInputFocusLost();
+		ctx_context->m_input_focus_component = (Component*)this;
+		ctx_context->m_input_focus_component->onInputFocusGain();
+		return true;
+	}
+	return false;
+}
+bool Component::loseInputFocus() const
+{
+	if(!this->isValid())
+		return false;
+	if(ctx_context->m_input_focus_component != (Component*)this)
+		return false;
+	ctx_context->m_input_focus_component->onInputFocusLost();
+	ctx_context->m_input_focus_component = 0;
+	return true;
 }
 const axl::math::Vec2i& Component::getSize() const
 {
@@ -324,6 +358,14 @@ void Component::onModify()
 	if(component_container)
 		component_container->onModify();
 }
+bool Component::onInputFocusRequest() const
+{
+	return false;
+}
+void Component::onInputFocusLost()
+{}
+void Component::onInputFocusGain()
+{}
 
 //
 // Component::FrameBuffer

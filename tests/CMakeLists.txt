@@ -1,4 +1,5 @@
 
+# set( CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib" )
 link_libraries( axl.gl gdi32.lib user32.lib )
 
 add_executable( axl.gl.lib "lib.cpp")
@@ -17,6 +18,7 @@ add_executable( axl.gl.uielement "UIElement.cpp" "common/GL.cpp" "common/MainVie
 add_executable( axl.gl.uicontainer "UIContainer.cpp" "common/GL.cpp" "common/MainView.cpp" )
 add_executable( axl.gl.uibutton "UIButton.cpp" "common/GL.cpp" "common/MainView.cpp" )
 add_executable( axl.gl.uitextview "UITextView.cpp" "common/GL.cpp" "common/MainView.cpp" )
+add_executable( axl.gl.uitextinput "UITextInput.cpp" "common/GL.cpp" "common/MainView.cpp" )
 
 set_target_properties( axl.gl.lib
 	axl.gl.display
@@ -34,5 +36,6 @@ set_target_properties( axl.gl.lib
 	axl.gl.uicontainer
 	axl.gl.uibutton
 	axl.gl.uitextview
+	axl.gl.uitextinput
 	PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${AXLGL_RUNTIME_DIR}"
 )

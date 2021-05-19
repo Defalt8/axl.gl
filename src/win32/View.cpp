@@ -12,10 +12,7 @@
 #include <axl.gl/input/Mouse.hpp>
 #include <axl.gl/input/Keyboard.hpp>
 #include <axl.gl/input/Touch.hpp>
-#include <axl.gl/gfx/ui/Component.hpp>
-#include <axl.gl/gfx/ui/Container.hpp>
-#include <axl.gl/gfx/ui/Element.hpp>
-#include <axl.gl/gfx/ui/elements/Button.hpp>
+#include <axl.gl/gfx/UI.hpp>
 #include "ViewData.hpp"
 
 namespace axl {
@@ -809,13 +806,69 @@ void View::onResume()
 
 void View::onKey(input::KeyCode key_code, bool is_down)
 {
-	static bool kAlt = false, kF4 = false;
+	static bool kAlt = false, kF4 = false, kLeft = false, kRight = false;
 	switch(key_code)
 	{
 		case input::KeyCode::KEY_ALT: kAlt = is_down; break;
 		case input::KeyCode::KEY_F4: kF4 = is_down; break;
+		case input::KeyCode::KEY_LEFT: kLeft = is_down; break;
+		case input::KeyCode::KEY_RIGHT: kRight = is_down; break;
 	}
-	if(kAlt && kF4) Application::quit(0);
+	if(kAlt && kF4)
+	{
+		Application::quit(0);
+		return;
+	}
+	else
+	{
+		for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
+		{
+			const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
+			for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
+			{
+				axl::gl::gfx::ui::Component* component = *it;
+				if(!component->isVisible()) continue;
+				switch(component->component_type)
+				{
+					case axl::gl::gfx::ui::Component::CONTAINER:
+						break;
+					case axl::gl::gfx::ui::Component::ELEMENT:
+						{
+							axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
+							switch(element->element_type)
+							{
+								case axl::gl::gfx::ui::Element::OTHER:
+								case axl::gl::gfx::ui::Element::IMAGE_VIEW:
+								case axl::gl::gfx::ui::Element::TEXT_VIEW:
+								case axl::gl::gfx::ui::Element::TEXT_INPUT:
+									{
+										if(element->hasInputFocus())
+										{
+											axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
+											{
+												if(kLeft ^ kRight)
+												{
+													axl::util::size_t index = text_input->getCursorIndex();
+													if(kLeft)
+														--index;
+													else if(kRight)
+														++index;
+													text_input->setCursorIndex(index);
+												}
+											}
+										}
+									}
+									break;
+								case axl::gl::gfx::ui::Element::LIST:
+								case axl::gl::gfx::ui::Element::BUTTON:
+									break;
+							}
+						}
+						break;
+				}
+			}
+		}
+	}
 }
 
 void View::onChar(wchar_t char_code)
@@ -841,7 +894,11 @@ void View::onChar(wchar_t char_code)
 							case axl::gl::gfx::ui::Element::TEXT_VIEW:
 							case axl::gl::gfx::ui::Element::TEXT_INPUT:
 								{
-									// axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
+									if(element->hasInputFocus())
+									{
+										axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
+										text_input->onChar(char_code);
+									}
 								}
 								break;
 							case axl::gl::gfx::ui::Element::LIST:
@@ -879,8 +936,17 @@ void View::onPointer(int index, int x, int y, bool is_down)
 							case axl::gl::gfx::ui::Element::OTHER:
 							case axl::gl::gfx::ui::Element::IMAGE_VIEW:
 							case axl::gl::gfx::ui::Element::TEXT_VIEW:
-							case axl::gl::gfx::ui::Element::TEXT_INPUT:
 							case axl::gl::gfx::ui::Element::LIST:
+								break;
+							case axl::gl::gfx::ui::Element::TEXT_INPUT:
+								{
+									axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
+									if(is_down)
+									{
+										if(isInArea(tx, ty, text_input->getSize(), text_input->transform.getMatrix(), text_input->getContainer()))
+											text_input->requestInputFocus();
+									}
+								}
 								break;
 							case axl::gl::gfx::ui::Element::BUTTON:
 								{

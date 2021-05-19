@@ -79,6 +79,9 @@ Context::Context() :
 	config(m_config),
 	reserved(m_reserved),
 	m_config(DefaultContextConfig),
+	m_context_objects(),
+	m_components(),
+	m_input_focus_component(0),
 	m_reserved(new ContextData())
 {}
 

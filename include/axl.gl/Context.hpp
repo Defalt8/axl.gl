@@ -75,6 +75,7 @@ class AXLGLCXXAPI Context
 		Context::ContextConfig m_config;
 		axl::util::ds::UniList<ContextObject*> m_context_objects;
 		axl::util::ds::UniList<axl::gl::gfx::ui::Component*> m_components;
+		axl::gl::gfx::ui::Component* m_input_focus_component;
 		void *m_reserved;
 	private:
 		Context(const Context& context);

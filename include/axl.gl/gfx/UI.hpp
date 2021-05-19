@@ -3,6 +3,11 @@
 #include "UI/Container.hpp"
 #include "UI/Element.hpp"
 #include "UI/Layout.hpp"
+
+// Layouts
 #include "UI/layouts/Linear.hpp"
+
+// UI elements
 #include "UI/elements/Button.hpp"
 #include "UI/elements/TextView.hpp"
+#include "UI/elements/TextInput.hpp"
