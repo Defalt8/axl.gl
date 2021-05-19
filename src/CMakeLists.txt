@@ -44,6 +44,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"gfx/UI/Layout.cpp"
 	"gfx/UI/layouts/Linear.cpp"
 	"gfx/UI/elements/Button.cpp"
+	"gfx/UI/elements/TextView.cpp"
 
 	"${AXLGL_INCLUDE_DIR}/axl.gl/everything.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/lib.hpp"
@@ -85,6 +86,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Layout.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/layouts/Linear.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/Button.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextView.hpp"
 )
 set( LIBFREETYPE "${THIRD_PARTY_LIB_DIR}/freetype.lib" )
 target_include_directories( axl.gl
@@ -172,6 +174,7 @@ if( AXLGL_INSTALL_HEADERS )
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/Layout.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/layouts/Linear.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/Button.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextView.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx.hpp"
 		DESTINATION "include/axl.gl"
 	)
