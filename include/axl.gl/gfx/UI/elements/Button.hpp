@@ -65,18 +65,20 @@ class AXLGLCXXAPI Button : public axl::gl::gfx::ui::Element
 		const axl::math::Vec4f& getPressedTextColor() const;
 		const axl::math::Vec4f& getHoveredTextColor() const;
 	public:
-		// When a pointer is on the button.
+		// When a pointer moves in the area of the button.
 		virtual void onHover();
+		// When a pointer moves out of the area of the button.
 		virtual void onDrift();
+		// When a pointer is pressed in the area of the button.
 		virtual void onPress(int pointer_index);
+		// When a pointer is released after the button was previously pressed.
 		virtual void onRelease(int pointer_index);
 	protected:
 		virtual bool iCreate();
 		virtual bool iDestroy();
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera);
 		virtual axl::math::Vec2i getContentSize() const;
-	private:
-		void onAlignmentChange();
+		virtual void onAlignmentChange();
 	protected:
 		State button_state;
 		bool button_hovered;
