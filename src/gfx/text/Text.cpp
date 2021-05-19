@@ -120,7 +120,8 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera)
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 		glEnable(GL_BLEND);
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
+		glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		GLCLEARERROR();
 		glBindVertexArray(this->vertex_array_id);
 		glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer_id);
