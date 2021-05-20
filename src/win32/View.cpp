@@ -2,6 +2,7 @@
 #include <axl.gl/lib.hpp>
 #include <axl.math/vec/Vec2i.hpp>
 #include <axl.math/float.hpp>
+#include <axl.math/constants.hpp>
 #include <axl.util/WString.hpp>
 #include <axl.glfl/glCoreARB.hpp>
 #include <axl.glfl/win/wglext.hpp>
@@ -669,73 +670,39 @@ bool View::removeContext(Context* context)
 // local functions
 //
 
-bool isInArea(float tx, float ty, axl::math::Vec2i size, axl::math::Mat4f transform, axl::gl::gfx::ui::Container* parent)
-{
-	using namespace axl::math;
-	if(size.x == 0 || size.y == 0)
-		return false;
-	Mat4f final_transform = transform;
-	// calculate the final transform matrix
-	while(parent)
-	{
-		final_transform = parent->transform.getMatrix() * final_transform;
-		parent = parent->getContainer();
-	}
-	Vec4f verteces[4];
-	verteces[0] = final_transform * Vec4f(0.f,0.f,0.f,1.f);
-	verteces[1] = final_transform * Vec4f((float)size.x,0.f,0.f,1.f);
-	verteces[2] = final_transform * Vec4f((float)size.x,(float)size.y,0.f,1.f);
-	verteces[3] = final_transform * Vec4f(0.f,(float)size.y,0.f,1.f);
-	// line0(v1-v0), line1(v2-v1), line2(v3-v2), line3(v0-v3)
-	float slopes[4], constants[4], ynots[4];
-	// calculate slope for each line.
-	slopes[0] = (verteces[1].y - verteces[0].y) / (verteces[1].x - verteces[0].x);
-	slopes[1] = (verteces[2].y - verteces[1].y) / (verteces[2].x - verteces[1].x);
-	slopes[2] = (verteces[3].y - verteces[2].y) / (verteces[3].x - verteces[2].x);
-	slopes[3] = (verteces[0].y - verteces[3].y) / (verteces[0].x - verteces[3].x);
-	// calculate the linear constant for each line.
-	constants[0] = verteces[0].y - slopes[0] * verteces[0].x;
-	constants[1] = verteces[1].y - slopes[1] * verteces[1].x;
-	constants[2] = verteces[2].y - slopes[2] * verteces[2].x;
-	constants[3] = verteces[3].y - slopes[3] * verteces[3].x;
-	// calculate the y-not values which are the point's vertical projection on each line 
-	for(int i=0; i<4; ++i)
-	{
-		ynots[i] = slopes[i] * tx + constants[i];
-	}
-	// Check based on the arrangment of the verteces.
-	// At certain orientations the slopes become infinite.
-	// Thus, we have to compare x coordinate on such occasions.
-	bool vertical = Float::equals(verteces[0].x, verteces[1].x), horizontal = Float::equals(verteces[0].y, verteces[1].y, .01f);
-	if(verteces[0].x >= verteces[1].x && verteces[0].y < verteces[1].y)
-	{ // second quadrant
-		return (vertical ? tx <= verteces[0].x : ty <= ynots[0]) &&
-			(horizontal ? tx <= verteces[0].x : ty <= ynots[1]) &&
-			(vertical ? tx >= verteces[2].x : ty >= ynots[2]) &&
-			(horizontal ? tx >= verteces[2].x : ty >= ynots[3]);
-	}
-	else if(verteces[0].x >= verteces[1].x && verteces[0].y > verteces[1].y)
-	{ // thrid quadrant
-		return (vertical ? tx >= verteces[0].x : ty <= ynots[0]) &&
-			(horizontal ? tx <= verteces[0].x : ty >= ynots[1]) &&
-			(vertical ? tx <= verteces[2].x : ty >= ynots[2]) &&
-			(horizontal ? tx >= verteces[2].x : ty <= ynots[3]);
-	}
-	else if(verteces[0].x <= verteces[1].x && verteces[0].y > verteces[1].y)
-	{ // fourth quadrant
-		return (vertical ? tx >= verteces[0].x : ty >= ynots[0]) &&
-			(horizontal ? tx >= verteces[0].x : ty >= ynots[1]) &&
-			(vertical ? tx <= verteces[2].x : ty <= ynots[2]) &&
-			(horizontal ? tx <= verteces[2].x : ty <= ynots[3]);
-	}
-	else
-	{ // first quadrant
-		return (vertical ? tx <= verteces[0].x : ty >= ynots[0]) &&
-			(horizontal ? tx >= verteces[0].x : ty <= ynots[1]) &&
-			(vertical ? tx >= verteces[2].x : ty <= ynots[2]) &&
-			(horizontal ? tx <= verteces[2].x : ty >= ynots[3]);
-	}
-}
+    bool isInArea(axl::math::Vec2f point, axl::math::Vec2i size, axl::math::Mat4f transform, axl::gl::gfx::ui::Container* parent)
+    {
+        using namespace axl::math;
+        if(size.x == 0 || size.y == 0)
+            return false;
+        Mat4f final_transform = transform;
+        // calculate the final transform matrix
+        while(parent)
+        {
+            final_transform = parent->transform.getMatrix() * final_transform;
+            parent = parent->getContainer();
+        }
+        Vec4f verteces[4];
+        verteces[0] = final_transform * Vec4f(0.f,0.f,0.f,1.f);
+        verteces[1] = final_transform * Vec4f((float)size.x,0.f,0.f,1.f);
+        verteces[2] = final_transform * Vec4f((float)size.x,(float)size.y,0.f,1.f);
+        verteces[3] = final_transform * Vec4f(0.f,(float)size.y,0.f,1.f);
+        // Calculate the internal angles check if any of them are greater than 180 degrees.
+        // If so, then the point is outside, or else it is inside.
+        axl::math::Vec2f vector_a, vector_b;
+        for(int i=0; i<4; ++i)
+        {
+            int next_i = (i+1)%4;
+            vector_a.set(point.x - verteces[i].x, point.y - verteces[i].y);
+            vector_b.set(point.x - verteces[next_i].x, point.y - verteces[next_i].y);
+            float angle = vector_b.fullAngle(vector_a);
+            if(angle < 0.f) // absolute value
+                angle = -angle;
+            if(angle > axl::math::Constants::F_PI)
+                return false;
+        }
+        return true;
+    }
 
 ///////////
 /// Events
@@ -929,7 +896,7 @@ void View::onPointer(int index, int x, int y, bool is_down)
 {
 	if(index >= 0 && index < MAX_POINTERS)
 		m_pointers[index] = is_down;
-	float tx = (float)(x), ty = (float)(this->size.y - y);
+	axl::math::Vec2f point((float)x, (float)(this->size.y - y));
 	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
 	{
 		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
@@ -956,7 +923,7 @@ void View::onPointer(int index, int x, int y, bool is_down)
 									axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
 									if(is_down)
 									{
-										if(isInArea(tx, ty, text_input->getSize(), text_input->transform.getMatrix(), text_input->getContainer()))
+										if(isInArea(point, text_input->getSize(), text_input->transform.getMatrix(), text_input->getContainer()))
 											text_input->requestInputFocus();
 									}
 								}
@@ -966,7 +933,7 @@ void View::onPointer(int index, int x, int y, bool is_down)
 									axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
 									if(is_down)
 									{
-										if(isInArea(tx, ty, button->getSize(), button->transform.getMatrix(), button->getContainer()))
+										if(isInArea(point, button->getSize(), button->transform.getMatrix(), button->getContainer()))
 											button->onPress(index);
 									}
 									else
@@ -991,7 +958,7 @@ void View::onPointerMove(int index, int x, int y)
 	{
 		SetCursor(hcursor);
 	}
-	float tx = (float)x, ty = (float)(this->size.y - y);
+	axl::math::Vec2f point((float)x, (float)(this->size.y - y));
 	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
 	{
 		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
@@ -1017,7 +984,7 @@ void View::onPointerMove(int index, int x, int y)
 							case axl::gl::gfx::ui::Element::BUTTON:
 								{
 									axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
-									if(isInArea(tx, ty, button->getSize(), button->transform.getMatrix(), button->getContainer()))
+									if(isInArea(point, button->getSize(), button->transform.getMatrix(), button->getContainer()))
 									{
 										if(!button->isHovered())
 											button->onHover();
