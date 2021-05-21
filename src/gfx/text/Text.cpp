@@ -297,27 +297,23 @@ axl::math::Vec4f Text::getCharBox(axl::util::size_t char_index) const
 	axl::util::size_t text_length = text_wstring.length();
 	if(!this->isValid() || char_index >= text_length || !this->ctx_context->makeCurrent())
 		return char_box;
-	axl::util::size_t buffer_index = 0, space_count = 0;
+	axl::util::size_t buffer_index = 0, space_count = 0, trailing_space_count = 0;
 	if(char_index != -1)
 	{
-		axl::util::size_t loc_char_index = (text_wstring[char_index] == L' ') ? (char_index - 1) : char_index;
-		for(axl::util::size_t i = 0; i < loc_char_index; ++i)
+		for(axl::util::size_t i = 0; i < char_index; ++i)
 		{
 			switch(this->text_wstring[i])
 			{
+				default:
+					break;
 				case L'\n':
 				case L'\0':
 				case L'\r':
 				case L'\t':
 					continue;
-				case L' ':
-					++space_count;
-					break;
 			}
 			++buffer_index;
 		}
-		// if(char_index > 0 && this->text_wstring[(char_index-1)] == L' ')
-		// 	++space_count;
 	}
 	if(buffer_index >= actual_text_length)
 		return char_box;
@@ -338,13 +334,10 @@ axl::math::Vec4f Text::getCharBox(axl::util::size_t char_index) const
 	);
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	unsigned int glyph_index = this->text_font->getCharIndex(L' ');
-	float space_width = (float)(glyph_index ? this->text_font->glyphs[glyph_index].horiAdvance : (text_font->size.x * .5f));
-	if(text_wstring[char_index] == L' ')
-	{
-		char_box.x = char_box.z;
-		char_box.z = char_box.x + space_width * (1 + space_count);
-	}
+	unsigned int glyph_index = this->text_font->getCharIndex(text_wstring[char_index]);
+	float bearing_y = (float)(glyph_index != -1 ? this->text_font->glyphs[glyph_index].horiBearingY : 0.f) + (text_wstring[char_index] == L' ' ? text_font->size.y * .15f : 0.f);
+	char_box.y -= bearing_y;
+	char_box.w -= bearing_y;
 	return char_box;
 }
 
@@ -571,7 +564,7 @@ bool Text::Program::iCreate()
 		"uniform vec2 u_TextOffset = vec2(0,0);\n"
 		"out vec2 v_AtlasTexCoord;\n"
 		"void main() {\n"
-		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.x + u_TextOffset.x, in_Position.y + u_TextOffset.y, ((in_Position.x * in_Position.y) / 999999.0), 1.0);\n"
+		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.x + u_TextOffset.x, in_Position.y + u_TextOffset.y, ((in_Position.x * in_Position.y) / 99999.0), 1.0);\n"
 		"	v_AtlasTexCoord = in_UV;\n"
 		"}\n"
 		);

@@ -143,8 +143,8 @@ void MainView::onSize(int w,int h)
 	axl::gl::View::onSize(w, h);
 	if(this->context.makeCurrent())
 	{
-		this->projection.set(0, (float)w, 0, (float)h, .001f, 1000.f);
-		this->main_camera.set(axl::math::Vec3f(0.f,0.f,10.f),
+		this->projection.set(0, (float)w, 0, (float)h, -100.f, 100.f);
+		this->main_camera.set(axl::math::Vec3f(0.f,0.f,90.f),
 			axl::math::Vec3f::filled(0.f),
 			0.f,
 			axl::math::Vec3f::filled(1.f),

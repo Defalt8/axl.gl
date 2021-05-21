@@ -277,13 +277,13 @@ void TextInput::onCursorPositionChange()
 	{
 		axl::math::Vec3f text_position = text_input_text.text_transform.getPosition();
 		const axl::math::Vec2i& font_size = text_input_text.getFont()->size;
-		text_input_cursor.text_transform.setPosition(axl::math::Vec3f(text_position.x - 0.3f * font_size.x, text_position.y - 0.3f * font_size.y,.0f));
+		text_input_cursor.text_transform.setPosition(axl::math::Vec3f(text_position.x - 0.1f * font_size.x, text_position.y - 0.3f * font_size.y,.0f));
 	}
 	else
 	{
 		axl::math::Vec3f position = text_input_text.text_transform.getPosition();
 		axl::math::Vec4f char_box = text_input_text.getCharBox(m_cursor_index);
-		axl::math::Vec3f cursor_position(position.x + char_box.z - (char_box.z - char_box.x)*0.5f, position.y + char_box.y - (char_box.w - char_box.y)*0.2f, 0.f);
+		axl::math::Vec3f cursor_position(position.x + char_box.z, position.y + char_box.y - (char_box.w - char_box.y)*0.2f, 0.f);
 		text_input_cursor.text_transform.setPosition(cursor_position);
 	}
 }

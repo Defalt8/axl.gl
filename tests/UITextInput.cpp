@@ -57,7 +57,7 @@ class MainView : public Test::MainView
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
 		MainContainer container;
 		axl::gl::gfx::ui::Container container1, container2;
-		axl::gl::gfx::ui::elements::TextInput text_inputs[12], text_inputs2[8];
+		axl::gl::gfx::ui::elements::TextInput text_inputs[4], text_inputs2[8];
 	public:
 		bool onCreate(bool recreating)
 		{
@@ -66,7 +66,7 @@ class MainView : public Test::MainView
 			// m_default_font
 			m_default_font.setContext(&context);
 			Assert(m_default_font.create());
-			Assert(m_default_font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(16,16)) ||
+			Assert(m_default_font.loadFromFile("../../common/fonts/arialbi.ttf", axl::math::Vec2i(28,28)) ||
 				m_default_font.loadFromFile("/windows/fonts/consola.ttf", axl::math::Vec2i(22,22)));
 			// text_program
 			text_program.setContext(&context);
@@ -96,7 +96,7 @@ class MainView : public Test::MainView
 			container1.setContainer(&container);
 			container1.setComponentProgram(&component_program);
 			container1.setBackgroundColor(axl::math::Vec4f(.5f,.5f,.5f,0.04f));
-			container1.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
+			container1.setPadding(axl::math::Vec4f(100.f,100.f,100.f,100.f));
 			container1.setSize(axl::math::Vec2i(300, 260));
 			container1.setLayout(&linear_layout1);
 			Assert(container1.create());
@@ -118,20 +118,19 @@ class MainView : public Test::MainView
 					text_inputs[i].setContainer(&container1);
 					text_inputs[i].setFont(&m_default_font);
 					text_inputs[i].setTextProgram(&text_program);
-					text_inputs[i].setBackgroundColor(axl::math::Vec4f(.99f,.99f,.99f,1.f));
+					text_inputs[i].setBackgroundColor(axl::math::Vec4f(.99f,.99f,((float)i / (element_count-1)),1.f));
 					text_inputs[i].setForegroundColor(axl::math::Vec4f(.1f,.1f,.1f,1.f));
 					text_inputs[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
 					text_inputs[i].setLayoutHeight(axl::gl::gfx::ui::Layout::MATCH_PARENT);
-					text_inputs[i].transform.setRotationOrder(axl::math::Orders::Rotation::NONE, false);
-					text_inputs[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, ((float)i / element_count)));
+					text_inputs[i].transform.setTransformOrder(axl::math::Orders::Transform::SRT, false);
+					text_inputs[i].transform.setRotationOrder(axl::math::Orders::Rotation::ZY, false);
+					text_inputs[i].transform.setRotation(axl::math::Vec3f(0.f, axl::math::Constants::F_PI * 0.25f, axl::math::Constants::F_PI * 0.2f), false);
+					text_inputs[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, ((float)i / (element_count-1))));
 					text_inputs[i].setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
 					Assert(text_inputs[i].create());
-					if(i != 0)
-					{
-						axl::util::WString label(32);
-						label.format(L"Text Input%d", (i+1));
-						text_inputs[i].setText(label);
-					}
+					axl::util::WString label(32);
+					label.format(L"Text Input%d", (i+1));
+					text_inputs[i].setText(label);
 				}
 			}
 			{ // test text_inputs
@@ -154,7 +153,7 @@ class MainView : public Test::MainView
 					text_inputs2[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
 					Assert(text_inputs2[i].create());
 					axl::util::WString label(32);
-					label.format(L"Text %d", (i+1));
+					label.format(L"Text Input %d", (i+1));
 					text_inputs2[i].setText(label);
 				}
 			}
@@ -174,6 +173,16 @@ class MainView : public Test::MainView
 			{
 				new_title.format(L"UITextInput test | FPS: %.2f", FPS);
 				this->setTitle(new_title);
+			}
+			{
+				static axl::util::uc::Time ctime;
+				float elapsed_time = ctime.deltaTimef();
+				axl::util::size_t element_count = sizeof(text_inputs)/sizeof(axl::gl::gfx::ui::elements::TextInput);
+				for(axl::util::size_t i=0; i<element_count; ++i)
+				{
+					text_inputs[i].transform.setRotation(axl::math::Vec3f(0.f, axl::math::Constants::F_PI * 0.f * elapsed_time, axl::math::Constants::F_PI * 0.25f * elapsed_time));
+					text_inputs[i].update();
+				}
 			}
 			return true;
 		}

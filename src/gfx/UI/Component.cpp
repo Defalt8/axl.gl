@@ -351,6 +351,10 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 		ptr_frame_buffer->unbind(axl::gl::gfx::FrameBuffer::FBT_BOTH);
 	return fully_rendered;
 }
+void Component::update()
+{
+	this->onModify();
+}
 
 void Component::onModify()
 {

@@ -94,6 +94,7 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		const axl::gl::gfx::Texture2D& getTexture() const;
 		axl::math::Vec2i getClientSize() const;
 		bool render(axl::gl::camera::Camera3Df* camera = 0, const axl::gl::gfx::FrameBuffer* ptr_frame_buffer = 0);
+		void update();
 	protected:
 		// Sub-component's render implementation method. Implement in child class.
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera) = 0;
