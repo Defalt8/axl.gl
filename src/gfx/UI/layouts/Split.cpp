@@ -70,12 +70,16 @@ void Split::organize(axl::gl::gfx::ui::Container& container)
 	axl::math::Vec2i current_position((int)(container_padding.x), (int)(container_padding.y));
 	int index = 0;
 	axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = container_children.first();
+	float depth = 0.f;
 	while(!it.isNull())
 	{
 		if(index >= 2)
 			break;
-		(*it)->transform.setPosition(new_positions[index]);
-		(*it)->setSize(new_sizes[index]);
+		axl::gl::gfx::ui::Component* component = (axl::gl::gfx::ui::Component*)(*it);
+		new_positions[index].z = depth;
+		component->transform.setPosition(new_positions[index]);
+		component->setSize(new_sizes[index]);
+		depth -= .0001f;
 		++it;
 		++index;
 	}

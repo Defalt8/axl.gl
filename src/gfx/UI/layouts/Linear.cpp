@@ -41,7 +41,8 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 	axl::math::Vec2i element_size(
 		(int)((float)(child_count == 0 ? 0.f : ((client_size.x - ((child_count-1) * lin_spacing.x)) / child_count))),
 		(int)((float)(child_count == 0 ? 0.f : ((client_size.y - ((child_count-1) * lin_spacing.y)) / child_count)))
-		);
+	);
+	float depth = 0.f;
 	axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = container_children.first();
 	while(!it.isNull())
 	{
@@ -59,8 +60,11 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 				current_position.y += new_size.y + (int)(lin_spacing.y);
 				break;
 		}
-		(*it)->transform.setPosition(new_position);
-		(*it)->setSize(new_size);
+		axl::gl::gfx::ui::Component* component = (axl::gl::gfx::ui::Component*)(*it);
+		new_position.z = depth;
+		component->transform.setPosition(new_position);
+		component->setSize(new_size);
+		depth -= 0.0001f;
 		++it;
 	}
 }
