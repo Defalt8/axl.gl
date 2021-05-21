@@ -7,6 +7,7 @@
 // Layouts
 #include "UI/layouts/Linear.hpp"
 #include "UI/layouts/Split.hpp"
+#include "UI/layouts/Grid.hpp"
 
 // UI elements
 #include "UI/elements/Button.hpp"
