@@ -159,7 +159,7 @@ View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, 
 	m_visiblity(View::VS_HIDDEN),
 	m_is_paused(false),
 	m_contexts(),
-	m_reserved((void*)calloc(1, sizeof(ViewData)))
+	m_reserved((void*)new ViewData())
 {
 	for(int i=0; i<MAX_POINTERS; ++i) m_pointers[i] = false;
 	setCursor(m_cursor);
@@ -175,7 +175,7 @@ View::~View()
 	if(this->m_display) this->m_display->removeView(this);
 	if(m_reserved)
 	{
-		free(m_reserved);
+		delete ((ViewData*)m_reserved);
 		m_reserved = (void*)0;
 	}
 }
@@ -200,7 +200,7 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 	}
 	if(!_hbrush_black)
 		_hbrush_black = CreateSolidBrush(RGB(0,0,0));
-	if(!m_reserved) m_reserved = (void*)calloc(1, sizeof(ViewData));
+	if(!m_reserved) m_reserved = (void*)new ViewData();
 	if(m_reserved)
 	{
 		m_display = &display;
@@ -561,6 +561,7 @@ bool View::capturePointer(bool capture) const
 
 bool View::show(ShowMode show_mode)
 {
+	ViewData* view_data = ((ViewData*)m_reserved);
 	if(!m_reserved || !((ViewData*)m_reserved)->hwnd) return false;
 	switch (show_mode)
 	{
