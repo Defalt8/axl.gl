@@ -203,6 +203,7 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 	if(!m_reserved) m_reserved = (void*)new ViewData();
 	if(m_reserved)
 	{
+		ViewData* view_data = (ViewData*)m_reserved;
 		m_display = &display;
 		m_display->addView(this);
 		((ViewData*)m_reserved)->is_recreating = recreate;
@@ -271,24 +272,24 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 			}
 		}
 		else return false;
-		((ViewData*)m_reserved)->hinst = hinst;
-		((ViewData*)m_reserved)->hwnd = hwnd;
-		((ViewData*)m_reserved)->hdc = hdc;
-		((ViewData*)m_reserved)->style = style;
-		((ViewData*)m_reserved)->destroying = false;
-		((ViewData*)m_reserved)->destroy_from_message = false;
-		if(!((ViewData*)m_reserved)->hcursor) setCursor(m_cursor);
-		if(((ViewData*)m_reserved)->hwnd)
+		view_data->hinst = hinst;
+		view_data->hwnd = hwnd;
+		view_data->hdc = hdc;
+		view_data->style = style;
+		view_data->destroying = false;
+		view_data->destroy_from_message = false;
+		if(!view_data->hcursor) setCursor(m_cursor);
+		if(view_data->hwnd)
 		{
-			if(((ViewData*)m_reserved)->hicon_small)
+			if(view_data->hicon_small)
 			{
-				SendMessageW(((ViewData*)m_reserved)->hwnd, WM_SETICON, (WPARAM)ICON_SMALL, (LPARAM)((ViewData*)m_reserved)->hicon_small);
+				SendMessageW(view_data->hwnd, WM_SETICON, (WPARAM)ICON_SMALL, (LPARAM)view_data->hicon_small);
 			}
-			if(((ViewData*)m_reserved)->hicon_big)
+			if(view_data->hicon_big)
 			{
-				SendMessageW(((ViewData*)m_reserved)->hwnd, WM_SETICON, (WPARAM)ICON_BIG, (LPARAM)((ViewData*)m_reserved)->hicon_big);
+				SendMessageW(view_data->hwnd, WM_SETICON, (WPARAM)ICON_BIG, (LPARAM)view_data->hicon_big);
 			}
-			((ViewData*)m_reserved)->is_recreating = false;
+			view_data->is_recreating = false;
 		}
 		if(axl::gl::View::isValid())
 		{
@@ -388,23 +389,24 @@ void View::destroy()
 {
 	if(m_reserved && !((ViewData*)m_reserved)->destroying)
 	{
-		((ViewData*)m_reserved)->destroying = true;
-		if(((ViewData*)m_reserved)->hdc) this->onDestroy(false);
+		ViewData* view_data = (ViewData*)m_reserved;
+		view_data->destroying = true;
+		if(view_data->hdc) this->onDestroy(false);
 		while(!this->m_contexts.isEmpty())
 		{
 			Context* contexts = this->m_contexts.removeFirst();
 			if(contexts) contexts->destroy();
 		}
-		((ViewData*)m_reserved)->is_recreating = false;
-		if(((ViewData*)m_reserved)->hwnd)
+		view_data->is_recreating = false;
+		if(view_data->hwnd)
 		{
-			ReleaseDC(((ViewData*)m_reserved)->hwnd, ((ViewData*)m_reserved)->hdc);
-			((ViewData*)m_reserved)->hdc = NULL;
-			if(!((ViewData*)m_reserved)->destroy_from_message)
-				DestroyWindow(((ViewData*)m_reserved)->hwnd);
-			((ViewData*)m_reserved)->hwnd = NULL;
+			ReleaseDC(view_data->hwnd, view_data->hdc);
+			view_data->hdc = NULL;
+			if(!view_data->destroy_from_message)
+				DestroyWindow(view_data->hwnd);
+			view_data->hwnd = NULL;
 		}
-		((ViewData*)m_reserved)->destroying = false;
+		view_data->destroying = false;
 	}
 }
 
