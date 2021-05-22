@@ -557,7 +557,7 @@ bool Text::Program::iCreate()
 		"uniform vec2 u_TextOffset = vec2(0,0);\n"
 		"out vec2 v_AtlasTexCoord;\n"
 		"void main() {\n"
-		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.x + u_TextOffset.x, in_Position.y + u_TextOffset.y, ((in_Position.x * in_Position.y) / 99999.0), 1.0);\n"
+		"	gl_Position = u_MatProjection * u_MatView * u_MatModel * vec4(in_Position.x + u_TextOffset.x, in_Position.y + u_TextOffset.y, ((gl_VertexID / 6) * 0.001), 1.0);\n"
 		"	v_AtlasTexCoord = in_UV;\n"
 		"}\n"
 		);
