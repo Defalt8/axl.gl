@@ -27,26 +27,6 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 			CONTAINER,
 			ELEMENT
 		};
-		class AXLGLCXXAPI FrameBuffer : public axl::gl::gfx::FrameBuffer
-		{
-			public:
-				FrameBuffer(axl::gl::Context* ptr_context = 0);
-				~FrameBuffer();
-			public:
-				virtual bool isValid() const;
-				void setContext(axl::gl::Context* ptr_context);
-			protected:
-				bool iCreate();
-				bool iDestroy();
-			public:
-				bool setSize(const axl::math::Vec2i& size);
-				const axl::math::Vec2i& getSize() const;
-			protected:
-				axl::gl::gfx::Texture2D fb_render_texture;
-				axl::gl::gfx::RenderBuffer fb_render_buffer_depth;
-				axl::math::Vec2i fb_size;
-				friend class AXLGLCXXAPI axl::gl::gfx::ui::Component;
-		};
 		class AXLGLCXXAPI Program : public axl::gl::gfx::Program
 		{
 			public:
@@ -74,6 +54,7 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 	public:
 		virtual bool isValid() const;
 		virtual void setContext(axl::gl::Context* ptr_context);
+		bool setComponentFrameBuffer(axl::gl::gfx::FrameBuffer* ptr_framebuffer);
 		bool setComponentProgram(const axl::gl::gfx::ui::Component::Program* ptr_program);
 		virtual bool setContainer(axl::gl::gfx::ui::Container* container);
 		virtual void setVisiblity(bool is_visible);
@@ -93,7 +74,7 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		const axl::math::Vec4f& getForegroundColor() const;
 		const axl::gl::gfx::Texture2D& getTexture() const;
 		axl::math::Vec2i getClientSize() const;
-		bool render(axl::gl::camera::Camera3Df* camera = 0, const axl::gl::gfx::FrameBuffer* ptr_frame_buffer = 0);
+		bool render(axl::gl::camera::Camera3Df* camera = 0, axl::gl::gfx::Texture2D* ptr_render_texture = 0, axl::gl::gfx::Texture2D* ptr_depth_texture = 0);
 		void update();
 	protected:
 		// Sub-component's render implementation method. Implement in child class.
@@ -115,7 +96,9 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		axl::glfl::GLuint m_vertex_array;
 		axl::glfl::GLuint m_vertex_buffer;
 	protected:
-		Component::FrameBuffer component_framebuffer;
+		axl::gl::gfx::Texture2D component_render_texture;
+		axl::gl::gfx::Texture2D component_depth_texture;
+		axl::gl::gfx::FrameBuffer* component_framebuffer_ptr;
 		const Component::Program* component_program_ptr;
 		axl::gl::gfx::ui::Container* component_container;
 		bool component_is_visible;

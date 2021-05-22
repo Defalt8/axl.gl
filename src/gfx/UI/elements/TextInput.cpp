@@ -233,7 +233,10 @@ void TextInput::onChar(axl::util::WString::char_t char_code)
 			{
 				wstr_buffer[0] = char_code;
 				wstr_buffer.scwCopy(wstring.cwstr(), wstr_buffer.wstr(), (len-m_cursor_index-1), 0, 1);
+				wstr_buffer[len+1] = L'\0';
+				wstr_buffer.length(true);
 				m_cursor_index = 0;
+				this->setText(wstr_buffer);
 			}
 			else
 			{

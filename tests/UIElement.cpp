@@ -36,13 +36,16 @@ class TestElement : public axl::gl::gfx::ui::Element
 class MainView : public Test::MainView
 {
 	private:
+		axl::util::uc::Clock status_clock, update_clock;
 		axl::gl::gfx::Font m_default_font;
-		axl::util::uc::Clock status_clock;
+		axl::gl::gfx::FrameBuffer component_framebuffer;
+		axl::gl::gfx::ui::Component::Program component_program;
 		TestElement test_element;
 	public:
 		MainView(const axl::util::WString& _title, const axl::math::Vec2i& _position, const axl::math::Vec2i& _size, const axl::gl::Cursor& _cursor) :
 			Test::MainView(_title, _position, _size, _cursor),
-			status_clock(300)
+			status_clock(300),
+			update_clock(15)
 		{}
 		~MainView()
 		{
@@ -58,8 +61,16 @@ class MainView : public Test::MainView
 			Assert(m_default_font.create());
 			Assert(m_default_font.loadFromFile("../../common/fonts/consola.ttf", axl::math::Vec2i(22,22)) ||
 				m_default_font.loadFromFile("/windows/fonts/consola.ttf", axl::math::Vec2i(22,22)));
+			// component_framebuffer
+			component_framebuffer.setContext(&context);
+			Assert(component_framebuffer.create());
+			// component_program
+			component_program.setContext(&context);
+			Assert(component_program.create());
 			// test element
 			test_element.setContext(&context);
+			test_element.setComponentFrameBuffer(&component_framebuffer);
+			test_element.setComponentProgram(&component_program);
 			test_element.transform.setPosition(axl::math::Vec3f(100.f,80.f, 0.f));
 			test_element.setSize(axl::math::Vec2i(200,160));
 			Assert(test_element.create());
@@ -79,9 +90,10 @@ class MainView : public Test::MainView
 				new_title.format(L"UIElement test | FPS: %.2f", FPS);
 				this->setTitle(new_title);
 			}
+			if(update_clock.checkAndSet(true))
 			{
-				static axl::util::uc::Time time;
-				float elapsed_time = time.deltaTimef();
+				static axl::util::uc::Time ctime;
+				float elapsed_time = ctime.deltaTimef();
 				test_element.setBackgroundColor(
 					axl::math::Vec4f(
 						axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI), -1.f, 1.f, 0.f, 1.f),
@@ -90,13 +102,13 @@ class MainView : public Test::MainView
 						1.f
 					)
 				);
-				test_element.transform.setPosition(
-					axl::math::Vec3f(
-						200.f+axl::math::map(axl::math::cos(elapsed_time * axl::math::Constants::F_PI*4.f), -1.f, 1.f, -150.f, 150.f),
-						200.f+axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI), -1.f, 1.f, -150.f, 100.f),
-						0.f
-					)
-				);
+				// test_element.transform.setPosition(
+				// 	axl::math::Vec3f(
+				// 		200.f+axl::math::map(axl::math::cos(elapsed_time * axl::math::Constants::F_PI*4.f), -1.f, 1.f, -150.f, 150.f),
+				// 		200.f+axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI), -1.f, 1.f, -150.f, 100.f),
+				// 		0.f
+				// 	)
+				// );
 			}
 			return true;
 		}
@@ -104,7 +116,7 @@ class MainView : public Test::MainView
 		{
 			using namespace GL;
 			if(!Test::MainView::render()) return false;
-			glClearColor(.07f, .07f, .13f, .0f);
+			glClearColor(.07f, .4f, .8f, .0f);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);

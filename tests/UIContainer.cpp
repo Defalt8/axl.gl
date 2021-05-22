@@ -54,6 +54,7 @@ class MainView : public Test::MainView
 		}
 	private:
 		axl::util::uc::Clock status_clock;
+		axl::gl::gfx::FrameBuffer component_framebuffer;
 		axl::gl::gfx::ui::Component::Program component_program;
 		axl::gl::gfx::ui::Container container, container1, container2;
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
@@ -63,6 +64,9 @@ class MainView : public Test::MainView
 		{
 			using namespace GL;
 			if(!Test::MainView::onCreate()) return false;
+			// component_framebuffer
+			component_framebuffer.setContext(&context);
+			Assert(component_framebuffer.create());
 			// component_program
 			component_program.setContext(&context);
 			Assert(component_program.create());
@@ -77,6 +81,7 @@ class MainView : public Test::MainView
 			linear_layout2.setSpacing(axl::math::Vec2f(5.f,0.f));
 			// container
 			container.setContext(&context);
+			container.setComponentFrameBuffer(&component_framebuffer);
 			container.setComponentProgram(&component_program);
 			container.setBackgroundColor(axl::math::Vec4f(.8f,.8f,.78f,1.f));
 			container.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
@@ -85,6 +90,7 @@ class MainView : public Test::MainView
 			Assert(container.create());
 			// container1
 			container1.setContext(&context);
+			container1.setComponentFrameBuffer(&component_framebuffer);
 			container1.setComponentProgram(&component_program);
 			container1.setContainer(&container);
 			container1.setBackgroundColor(axl::math::Vec4f(0.9f,.9f,.85f,1.f));
@@ -93,6 +99,7 @@ class MainView : public Test::MainView
 			Assert(container1.create());
 			// container2
 			container2.setContext(&context);
+			container2.setComponentFrameBuffer(&component_framebuffer);
 			container2.setComponentProgram(&component_program);
 			container2.setContainer(&container);
 			container2.setBackgroundColor(axl::math::Vec4f(.85f,0.9f,.9f,1.f));
@@ -104,6 +111,7 @@ class MainView : public Test::MainView
 				for(axl::util::size_t i=0; i<element_count; ++i)
 				{
 					elements1[i].setContext(&context);
+					elements1[i].setComponentFrameBuffer(&component_framebuffer);
 					elements1[i].setComponentProgram(&component_program);
 					elements1[i].setContainer(&container1);
 					elements1[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, -((float)i / element_count)));
@@ -119,6 +127,7 @@ class MainView : public Test::MainView
 				for(axl::util::size_t i=0; i<element_count; ++i)
 				{
 					elements2[i].setContext(&context);
+					elements2[i].setComponentFrameBuffer(&component_framebuffer);
 					elements2[i].setComponentProgram(&component_program);
 					elements2[i].setContainer(&container2);
 					elements2[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, -((float)i / element_count)));
@@ -129,7 +138,6 @@ class MainView : public Test::MainView
 					Assert(elements2[i].create());
 				}
 			}
-			container.organize();
 			return true;
 		}
 		bool initialize()
@@ -170,7 +178,7 @@ class MainView : public Test::MainView
 		void onSize(int w, int h)
 		{
 			Test::MainView::onSize(w, h);
-			container.setSize(axl::math::Vec2i(w, h));
+			container.setSize(this->size);
 			container.organize();
 		}
 		void onKey(axl::gl::input::KeyCode key_code, bool down)

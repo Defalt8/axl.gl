@@ -154,18 +154,21 @@ bool FrameBuffer::attachRenderBuffer(axl::glfl::GLenum attachment_target, Render
 bool FrameBuffer::attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D* texture, Target p_target)
 {
 	using namespace GL;
-	if(!this->bind(Target::FBT_BOTH)) return false;
+	if(!this->isValid()) return false;
 	axl::glfl::GLuint texture_id = texture && texture->isValid() ? texture->getId() : 0;
 	axl::glfl::GLenum fb_target = p_target == Target::FBT_READ ? GL_READ_FRAMEBUFFER : (p_target == Target::FBT_DRAW ? GL_DRAW_FRAMEBUFFER : GL_FRAMEBUFFER);
 	GLCLEARERROR();
+	glBindFramebuffer(fb_target, this->fb_id);
 	if(p_target == Target::FBT_BOTH)
 	{
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, attachment_target, GL_TEXTURE_2D, texture_id, 0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment_target, GL_TEXTURE_2D, texture_id, 0);
 	}
 	else
+	{
 		glFramebufferTexture2D(fb_target, attachment_target, GL_TEXTURE_2D, texture_id, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+	glBindFramebuffer(fb_target, 0);
 	if(glGetError() != GL_NO_ERROR) return false;
 	this->fb_bindings.insertLast(FrameBufferBinding(FrameBufferBinding::Type::BT_TEXTURE, attachment_target, texture));
 	return true;

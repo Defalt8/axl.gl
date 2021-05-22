@@ -30,6 +30,7 @@ class MainView : public Test::MainView
 		axl::util::uc::Clock status_clock;
 		axl::gl::gfx::Font m_default_font;
 		axl::gl::gfx::Text::Program text_program;
+		axl::gl::gfx::FrameBuffer component_framebuffer;
 		axl::gl::gfx::ui::Component::Program component_program;
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
 		axl::gl::gfx::ui::Container container, container1, container2;
@@ -47,6 +48,9 @@ class MainView : public Test::MainView
 			// text_program
 			text_program.setContext(&context);
 			Assert(text_program.create());
+			// component_framebuffer
+			component_framebuffer.setContext(&context);
+			Assert(component_framebuffer.create());
 			// component_program
 			component_program.setContext(&context);
 			Assert(component_program.create());
@@ -61,6 +65,7 @@ class MainView : public Test::MainView
 			linear_layout2.setSpacing(axl::math::Vec2f(0.f,10.f));
 			// container
 			container.setContext(&context);
+			container.setComponentFrameBuffer(&component_framebuffer);
 			container.setComponentProgram(&component_program);
 			container.setBackgroundColor(axl::math::Vec4f(.8f,.8f,.78f,1.f));
 			container.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
@@ -69,6 +74,7 @@ class MainView : public Test::MainView
 			Assert(container.create());
 			// container1
 			container1.setContext(&context);
+			container1.setComponentFrameBuffer(&component_framebuffer);
 			container1.setContainer(&container);
 			container1.setComponentProgram(&component_program);
 			container1.setBackgroundColor(axl::math::Vec4f(.5f,.5f,.5f,0.04f));
@@ -78,6 +84,7 @@ class MainView : public Test::MainView
 			Assert(container1.create());
 			// container2
 			container2.setContext(&context);
+			container2.setComponentFrameBuffer(&component_framebuffer);
 			container2.setContainer(&container);
 			container2.setComponentProgram(&component_program);
 			container2.setBackgroundColor(axl::math::Vec4f(.5f,.5f,.5f,.04f));
@@ -90,6 +97,7 @@ class MainView : public Test::MainView
 				for(axl::util::size_t i=0; i<element_count; ++i)
 				{
 					text_views[i].setContext(&context);
+					text_views[i].setComponentFrameBuffer(&component_framebuffer);
 					text_views[i].setComponentProgram(&component_program);
 					text_views[i].setContainer(&container1);
 					text_views[i].setFont(&m_default_font);
@@ -113,6 +121,7 @@ class MainView : public Test::MainView
 				for(axl::util::size_t i=0; i<element_count; ++i)
 				{
 					text_views2[i].setContext(&context);
+					text_views2[i].setComponentFrameBuffer(&component_framebuffer);
 					text_views2[i].setComponentProgram(&component_program);
 					text_views2[i].setContainer(&container2);
 					text_views2[i].setFont(&m_default_font);
