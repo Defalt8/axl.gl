@@ -286,23 +286,11 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 	if(!camera || !component_is_visible || !this->isValid()) return false;
 	if(camera)
 	{
-		if(!camera->makeCurrent(this->ctx_context, true))
+		if(!camera->makeCurrent(this->ctx_context, false))
 			return false;
 	}
 	bool fully_rendered = true;
 	// render component offscreen if the component has been modified
-	if(!component_is_modified && component_type == CONTAINER)
-	{
-		axl::gl::gfx::ui::Container* container = (axl::gl::gfx::ui::Container*)this;
-		for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = container->getComponents().first(); it.isNotNull(); ++it)
-		{
-			if((*it)->component_is_modified)
-			{
-				component_is_modified = true;
-				break;
-			}
-		}
-	}
 	if(component_is_modified)
 	{
 		if(!component_framebuffer.bind(FrameBuffer::FBT_BOTH))
