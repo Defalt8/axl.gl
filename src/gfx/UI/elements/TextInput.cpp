@@ -121,8 +121,6 @@ axl::math::Vec2i TextInput::getContentSize() const
 
 void TextInput::onAlignmentChange()
 {
-	// if(!axl::gl::gfx::ui::elements::TextInput::isValid())
-	// 	return;
 	axl::math::Vec2f text_input_size = text_input_text.getBox();
 	axl::math::Vec3f position(0.f,0.f,0.1f);
 	switch(text_input_horizontal_text_alignment)

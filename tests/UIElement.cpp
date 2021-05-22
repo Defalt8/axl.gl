@@ -106,7 +106,14 @@ class MainView : public Test::MainView
 			if(!Test::MainView::render()) return false;
 			glClearColor(.07f, .07f, .13f, .0f);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LESS);
+			glEnable(GL_BLEND);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 			test_element.render(&main_camera);
+			glDisable(GL_BLEND);
+			glDisable(GL_DEPTH_TEST);
 			return true;
 		}
 		void onSize(int w, int h)

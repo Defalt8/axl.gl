@@ -126,7 +126,7 @@ void Grid::organize(axl::gl::gfx::ui::Container& container)
 					}
 					break;
 			}
-			depth -= 0.0001f;
+			depth += 0.0001f;
 			++column_index;
 			++index;
 		}

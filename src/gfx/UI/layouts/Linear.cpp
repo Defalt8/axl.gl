@@ -64,7 +64,7 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 		new_position.z = depth;
 		component->transform.setPosition(new_position);
 		component->setSize(new_size);
-		depth -= 0.0001f;
+		depth += 0.0001f;
 		++it;
 	}
 }

@@ -79,7 +79,7 @@ void Split::organize(axl::gl::gfx::ui::Container& container)
 		new_positions[index].z = depth;
 		component->transform.setPosition(new_positions[index]);
 		component->setSize(new_sizes[index]);
-		depth -= .0001f;
+		depth += .0001f;
 		++it;
 		++index;
 	}

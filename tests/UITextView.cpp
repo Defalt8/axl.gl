@@ -12,29 +12,6 @@ namespace GL {
 axl::gl::Display g_display;
 
 //
-// MainContainer
-//
-
-class MainContainer : public axl::gl::gfx::ui::Container
-{
-	public:
-		MainContainer(axl::gl::Context* ptr_context = 0,
-			axl::gl::gfx::ui::Container* container = 0,
-			axl::gl::gfx::ui::Layout* layout = 0,
-			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
-			const axl::math::Vec2i& size = axl::math::Vec2i(0,0),
-			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f)
-		) :
-			axl::gl::gfx::ui::Container(ptr_context, container, layout, position, size, padding)
-		{}
-		void onViewSize(int w, int h)
-		{
-			this->setSize(axl::math::Vec2i(w, h));
-			this->organize();
-		}
-};
-
-//
 // MainView
 //
 
@@ -55,8 +32,7 @@ class MainView : public Test::MainView
 		axl::gl::gfx::Text::Program text_program;
 		axl::gl::gfx::ui::Component::Program component_program;
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
-		MainContainer container;
-		axl::gl::gfx::ui::Container container1, container2;
+		axl::gl::gfx::ui::Container container, container1, container2;
 		axl::gl::gfx::ui::elements::TextView text_views[5], text_views2[5];
 	public:
 		bool onCreate(bool recreating)
@@ -181,13 +157,22 @@ class MainView : public Test::MainView
 			{
 				glClearColor(.07f, .07f, .13f, .0f);
 				glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+				glEnable(GL_DEPTH_TEST);
+				glDepthFunc(GL_LESS);
+				glEnable(GL_BLEND);
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+				glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 				container.render(&main_camera);
+				glDisable(GL_BLEND);
+				glDisable(GL_DEPTH_TEST);
 			}
 			return true;
 		}
 		void onSize(int w, int h)
 		{
 			Test::MainView::onSize(w, h);
+			container.setSize(this->size);
+			container.organize();
 		}
 		void onKey(axl::gl::input::KeyCode key_code, bool down)
 		{}

@@ -118,7 +118,7 @@ class MainView : public Test::MainView
 					text_inputs[i].setContainer(&container1);
 					text_inputs[i].setFont(&m_default_font);
 					text_inputs[i].setTextProgram(&text_program);
-					text_inputs[i].setBackgroundColor(axl::math::Vec4f(.99f,.99f,((float)i / (element_count-1)),1.f));
+					text_inputs[i].setBackgroundColor(axl::math::Vec4f(.99f,.99f,((float)i / (element_count-1)),0.5f));
 					text_inputs[i].setForegroundColor(axl::math::Vec4f(.1f,.1f,.1f,1.f));
 					text_inputs[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
 					text_inputs[i].setLayoutHeight(axl::gl::gfx::ui::Layout::MATCH_PARENT);
@@ -171,7 +171,7 @@ class MainView : public Test::MainView
 			if(!Test::MainView::update()) return false;
 			if(status_clock.checkAndSet(true))
 			{
-				new_title.format(L"UITextInput test | FPS: %.2f", FPS);
+				new_title.format(L"UITextInput test | Samples: %hhu | FPS: %.2f", this->config.samples, FPS);
 				this->setTitle(new_title);
 			}
 			{
@@ -194,7 +194,14 @@ class MainView : public Test::MainView
 			{
 				glClearColor(.07f, .07f, .13f, .0f);
 				glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+				glEnable(GL_DEPTH_TEST);
+				glDepthFunc(GL_LESS);
+				glEnable(GL_BLEND);
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+				glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 				container.render(&main_camera);
+				glDisable(GL_BLEND);
+				glDisable(GL_DEPTH_TEST);
 			}
 			return true;
 		}

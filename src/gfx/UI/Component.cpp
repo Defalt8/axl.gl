@@ -316,18 +316,12 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, const axl::gl::gfx::F
 	if(component_framebuffer.fb_render_texture.bind(0))
 	{
 		GLCLEARERROR();
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
 		glBindVertexArray(this->m_vertex_array);
 		glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer);
 		component_program_ptr->use();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_BLEND);
 		if(glGetError() != GL_NO_ERROR)
 			fully_rendered = false;
 		component_program_ptr->unuse();
