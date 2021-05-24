@@ -74,6 +74,7 @@ class MainView : public Test::MainView
 		axl::util::uc::Clock status_clock;
 		axl::gl::gfx::Font m_default_font;
 		axl::gl::gfx::Text::Program text_program;
+		axl::gl::gfx::FrameBuffer component_framebuffer;
 		axl::gl::gfx::ui::Component::Program component_program;
 		axl::gl::gfx::ui::Container container, container1, container2;
 		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
@@ -94,6 +95,9 @@ class MainView : public Test::MainView
 			// component_program
 			component_program.setContext(&context);
 			Assert(component_program.create());
+			// component_framebuffer
+			component_framebuffer.setContext(&context);
+			Assert(component_framebuffer.create());
 			// linear_layout
 			linear_layout.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_HORIZONTAL);
 			linear_layout.setSpacing(axl::math::Vec2f(10.f,0.f));
@@ -106,22 +110,25 @@ class MainView : public Test::MainView
 			// container
 			container.setContext(&context);
 			container.setComponentProgram(&component_program);
+			container.setComponentFrameBuffer(&component_framebuffer);
 			container.setBackgroundColor(axl::math::Vec4f(.8f,.8f,.78f,1.f));
-			container.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
+			container.setPadding(axl::math::Vec4f(0.f,0.f,0.f,0.f));
 			container.setSize(axl::math::Vec2i(300, 260));
 			container.setLayout(&linear_layout);
 			Assert(container.create());
 			// container1
 			container1.setContext(&context);
 			container1.setComponentProgram(&component_program);
+			container1.setComponentFrameBuffer(&component_framebuffer);
 			container1.setContainer(&container);
 			container1.setBackgroundColor(axl::math::Vec4f(0.6f,.8f,.1f,1.f));
-			container1.setPadding(axl::math::Vec4f(200.f,10.f,10.f,10.f));
+			container1.setPadding(axl::math::Vec4f(160.f,90.f,10.f,90.f));
 			container1.setLayout(&linear_layout1);
 			Assert(container1.create());
 			// container2
 			container2.setContext(&context);
 			container2.setComponentProgram(&component_program);
+			container2.setComponentFrameBuffer(&component_framebuffer);
 			container2.setContainer(&container);
 			container2.setBackgroundColor(axl::math::Vec4f(.8f,0.6f,.1f,1.f));
 			container2.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
@@ -132,11 +139,12 @@ class MainView : public Test::MainView
 				for(axl::util::size_t i=0; i<element_count; ++i)
 				{
 					buttons[i].setContext(&context);
+					buttons[i].setComponentFrameBuffer(&component_framebuffer);
 					buttons[i].setComponentProgram(&component_program);
 					buttons[i].setContainer(&container1);
 					buttons[i].setFont(&m_default_font);
 					buttons[i].setTextProgram(&text_program);
-					buttons[i].setHoveredColor(axl::math::Vec4f(.5f,.5f,.98f,0.8f));
+					buttons[i].setHoveredColor(axl::math::Vec4f(1.f,1.f,.1f,0.8f));
 					buttons[i].transform.setTransformOrder(axl::math::Orders::Transform::SRT, false);
 					buttons[i].transform.setRotationOrder(axl::math::Orders::Rotation::Z, false);
 					buttons[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, ((float)i / element_count)));
@@ -145,54 +153,9 @@ class MainView : public Test::MainView
 					buttons[i].transform.setRotation(axl::math::Vec3f(0.f,0.f,axl::math::Angle::degToRad(-(float)i/(element_count-1)*360.f)));
 					// buttons[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
 					Assert(buttons[i].create());
-					switch(i)
-					{
-						case 0:
-							buttons[i].setHorizontalAlignment(TestButton::HAL_LEFT);
-							buttons[i].setVerticalAlignment(TestButton::VAL_BOTTOM);
-							buttons[i].setText(L"bottom left");
-							break;
-						case 1:
-							buttons[i].setHorizontalAlignment(TestButton::HAL_CENTER);
-							buttons[i].setVerticalAlignment(TestButton::VAL_BOTTOM);
-							buttons[i].setText(L"bottom center");
-							break;
-						case 2:
-							buttons[i].setHorizontalAlignment(TestButton::HAL_RIGHT);
-							buttons[i].setVerticalAlignment(TestButton::VAL_BOTTOM);
-							buttons[i].setText(L"bottom right");
-							break;
-						case 3:
-							buttons[i].setHorizontalAlignment(TestButton::HAL_LEFT);
-							buttons[i].setVerticalAlignment(TestButton::VAL_CENTER);
-							buttons[i].setText(L"center left");
-							break;
-						case 4:
-							buttons[i].setHorizontalAlignment(TestButton::HAL_CENTER);
-							buttons[i].setVerticalAlignment(TestButton::VAL_CENTER);
-							buttons[i].setText(L"center");
-							break;
-						case 5:
-							buttons[i].setHorizontalAlignment(TestButton::HAL_RIGHT);
-							buttons[i].setVerticalAlignment(TestButton::VAL_CENTER);
-							buttons[i].setText(L"center right");
-							break;
-						case 6:
-							buttons[i].setHorizontalAlignment(TestButton::HAL_LEFT);
-							buttons[i].setVerticalAlignment(TestButton::VAL_TOP);
-							buttons[i].setText(L"top left");
-							break;
-						case 7:
-							buttons[i].setHorizontalAlignment(TestButton::HAL_CENTER);
-							buttons[i].setVerticalAlignment(TestButton::VAL_TOP);
-							buttons[i].setText(L"top center");
-							break;
-						case 8:
-							buttons[i].setHorizontalAlignment(TestButton::HAL_RIGHT);
-							buttons[i].setVerticalAlignment(TestButton::VAL_TOP);
-							buttons[i].setText(L"top right");
-							break;
-					}
+					axl::util::WString label(64);
+					label.format(L"Button %d", (i+1));
+					buttons[i].setText(label);
 				}
 			}
 			{ // test elements2
@@ -200,6 +163,7 @@ class MainView : public Test::MainView
 				for(axl::util::size_t i=0; i<element_count; ++i)
 				{
 					buttons2[i].setContext(&context);
+					buttons2[i].setComponentFrameBuffer(&component_framebuffer);
 					buttons2[i].setComponentProgram(&component_program);
 					buttons2[i].setContainer(&container2);
 					buttons2[i].setFont(&m_default_font);
