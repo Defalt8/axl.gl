@@ -1,6 +1,7 @@
 #pragma once
 #include "../../../lib.hpp"
 #include "../Layout.hpp"
+#include <axl.math/vec/Vec2i.hpp>
 #include <axl.math/vec/Vec2f.hpp>
 #include <axl.math/vec/Vec4f.hpp>
 
@@ -33,14 +34,17 @@ class AXLGLCXXAPI Grid : public axl::gl::gfx::ui::Layout
 		void setOrientation(Orientation orientation);
 		void setFillMode(FillMode fill_mode);
 		void setSpacing(const axl::math::Vec2f& spacing);
+		bool setSize(const axl::math::Vec2i& size);
 		// get methods
 		Orientation getOrientation() const;
 		FillMode getFillMode() const;
 		const axl::math::Vec2f& getSpacing() const;
+		const axl::math::Vec2i& getSize() const;
 	private:
 		Orientation grid_orientation;
 		FillMode grid_fill_mode;
 		axl::math::Vec2f grid_spacing;
+		axl::math::Vec2i grid_size;
 };
 
 } // axl.gl.gfx.ui.layouts

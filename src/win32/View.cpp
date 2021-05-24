@@ -673,7 +673,7 @@ bool View::removeContext(Context* context)
 // local functions
 //
 
-    bool isInArea(axl::math::Vec2f point, axl::math::Vec2i size, axl::math::Mat4f transform, axl::gl::gfx::ui::Container* parent)
+    bool isInArea(axl::math::Vec2f point, axl::math::Vec2f size, axl::math::Mat4f transform, axl::gl::gfx::ui::Container* parent)
     {
         using namespace axl::math;
         if(size.x == 0 || size.y == 0)
@@ -686,10 +686,10 @@ bool View::removeContext(Context* context)
             parent = parent->getContainer();
         }
         Vec4f verteces[4];
-        verteces[0] = final_transform * Vec4f(0.f,0.f,0.f,1.f);
-        verteces[1] = final_transform * Vec4f((float)size.x,0.f,0.f,1.f);
-        verteces[2] = final_transform * Vec4f((float)size.x,(float)size.y,0.f,1.f);
-        verteces[3] = final_transform * Vec4f(0.f,(float)size.y,0.f,1.f);
+        verteces[0] = final_transform * Vec4f(0.f, 0.f, 0.f, 1.f);
+        verteces[1] = final_transform * Vec4f(size.x, 0.f, 0.f, 1.f);
+        verteces[2] = final_transform * Vec4f(size.x, size.y, 0.f, 1.f);
+        verteces[3] = final_transform * Vec4f(0.f, size.y, 0.f, 1.f);
         // Calculate the internal angles check if any of them are greater than 180 degrees.
         // If so, then the point is outside, or else it is inside.
         axl::math::Vec2f vector_a, vector_b;

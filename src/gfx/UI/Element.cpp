@@ -11,7 +11,7 @@ Element::Element(Element::Type type,
 			axl::gl::Context* ptr_context,
 			axl::gl::gfx::ui::Container* container,
 			const axl::math::Vec3f& position,
-			const axl::math::Vec2i& size,
+			const axl::math::Vec2f& size,
 			const axl::math::Vec4f& padding,
 			axl::gl::gfx::ui::Layout::Size layout_width,
 			axl::gl::gfx::ui::Layout::Size layout_height):
@@ -31,9 +31,9 @@ bool Element::isValid() const
 {
 	return axl::gl::gfx::ui::Component::isValid();
 }
-axl::math::Vec2i Element::getContentSize() const
+axl::math::Vec2f Element::getContentSize() const
 {
-	return axl::math::Vec2i(0,0);
+	return axl::math::Vec2f(0,0);
 }
 axl::gl::gfx::ui::Layout::Size Element::getLayoutWidth() const
 {

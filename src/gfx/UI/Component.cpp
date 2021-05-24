@@ -23,7 +23,7 @@ Component::Component(Type type,
 		axl::gl::Context* ptr_context,
 		axl::gl::gfx::ui::Container* container,
 		const axl::math::Vec3f& position,
-		const axl::math::Vec2i& size,
+		const axl::math::Vec2f& size,
 		const axl::math::Vec4f& padding) :
 	axl::gl::ContextObject(ptr_context),
 	component_type(type),
@@ -39,7 +39,8 @@ Component::Component(Type type,
 	component_size(size),
 	component_padding(padding),
 	component_background_color(0.f,0.f,0.f,0.f),
-	component_foreground_color(.9f,.9f,.9f,1.f)
+	component_foreground_color(.9f,.9f,.9f,1.f),
+	component_clear_background(true)
 {
 	this->setContainer(container);
 }
@@ -88,17 +89,17 @@ bool Component::iCreate()
 		glBindVertexArray(0);
 		return false;
 	}
-	GLsizei width = (GLsizei)component_size.x;
-	GLsizei height = (GLsizei)component_size.y;
+	GLfloat width = component_size.x;
+	GLfloat height = component_size.y;
 	buffer[0] = 0.0f; buffer[1] = 0.0f;
 	buffer[2] = 0.0f; buffer[3] = 0.0f;
-	buffer[4] = (GLfloat)width; buffer[5] = 0.0f;
+	buffer[4] = width; buffer[5] = 0.0f;
 	buffer[6] = 1.0f; buffer[7] = 0.0f;
-	buffer[8] = (GLfloat)width; buffer[9] = (GLfloat)height;
+	buffer[8] = width; buffer[9] = height;
 	buffer[10] = 1.0f; buffer[11] = 1.0f;
-	buffer[12] = (GLfloat)width; buffer[13] = (GLfloat)height;
+	buffer[12] = width; buffer[13] = height;
 	buffer[14] = 1.0f; buffer[15] = 1.0f;
-	buffer[16] = 0.0f; buffer[17] = (GLfloat)height;
+	buffer[16] = 0.0f; buffer[17] = height;
 	buffer[18] = 0.0f; buffer[19] = 1.0f;
 	buffer[20] = 0.0f; buffer[21] = 0.0f;
 	buffer[22] = 0.0f; buffer[23] = 0.0f;
@@ -110,8 +111,8 @@ bool Component::iCreate()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	if(GL::glGetError() != GL_NO_ERROR ||
-		!component_render_texture.allocate(0, width, height, GL::GL_RGBA8) ||
-		!component_depth_texture.allocate(0, width, height, GL::GL_DEPTH_COMPONENT24)
+		!component_render_texture.allocate(0, (GLsizei)width, (GLsizei)height, GL::GL_RGBA8) ||
+		!component_depth_texture.allocate(0, (GLsizei)width, (GLsizei)height, GL::GL_DEPTH_COMPONENT24)
 	)
 	{
 		this->destroy();
@@ -193,7 +194,7 @@ void Component::setVisiblity(bool is_visible)
 {
 	component_is_visible = is_visible;
 }
-bool Component::setSize(const axl::math::Vec2i& size)
+bool Component::setSize(const axl::math::Vec2f& size)
 {
 	if(size.x < 0 || size.y < 0)
 		return false;
@@ -209,12 +210,12 @@ bool Component::setSize(const axl::math::Vec2i& size)
 		GLfloat* buffer = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 		if(buffer)
 		{
-			GLsizei width = (GLsizei)size.x;
-			GLsizei height = (GLsizei)size.y;
-			buffer[4] = (GLfloat)width; buffer[5] = 0.0f;
-			buffer[8] = (GLfloat)width; buffer[9] = (GLfloat)height;
-			buffer[12] = (GLfloat)width; buffer[13] = (GLfloat)height;
-			buffer[16] = 0.0f; buffer[17] = (GLfloat)height;
+			GLfloat width = size.x;
+			GLfloat height = size.y;
+			buffer[4] = width; buffer[5] = 0.0f;
+			buffer[8] = width; buffer[9] = height;
+			buffer[12] = width; buffer[13] = height;
+			buffer[16] = 0.0f; buffer[17] = height;
 			glUnmapBuffer(GL_ARRAY_BUFFER);
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -287,7 +288,7 @@ bool Component::loseInputFocus() const
 	ctx_context->m_input_focus_component = 0;
 	return true;
 }
-const axl::math::Vec2i& Component::getSize() const
+const axl::math::Vec2f& Component::getSize() const
 {
 	return component_size;
 }
@@ -307,9 +308,9 @@ const axl::gl::gfx::Texture2D& Component::getTexture() const
 {
 	return component_render_texture;
 }
-axl::math::Vec2i Component::getClientSize() const
+axl::math::Vec2f Component::getClientSize() const
 {
-	return axl::math::Vec2i(component_size.x - (int)(component_padding.x + component_padding.z), component_size.y - (int)(component_padding.y + component_padding.w));
+	return axl::math::Vec2f(component_size.x - (component_padding.x + component_padding.z), component_size.y - (component_padding.y + component_padding.w));
 }
 
 bool attachTexture2D(axl::glfl::GLenum attachment_target, axl::glfl::GLuint texture_id, axl::glfl::GLenum framebuffer_target)
@@ -338,8 +339,14 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, axl::gl::gfx::Texture
 		if(!attachTexture2D(GL_COLOR_ATTACHMENT0, component_render_texture.getId(), GL_DRAW_FRAMEBUFFER) ||
 			!attachTexture2D(GL_DEPTH_ATTACHMENT, component_depth_texture.getId(), GL_DRAW_FRAMEBUFFER))
 			return false;
-		glClearColor(component_background_color.x, component_background_color.y, component_background_color.z, component_background_color.w);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		if(component_clear_background)
+		{
+			glEnable(GL_SCISSOR_TEST);
+			glScissor(0, 0, (GLsizei)this->component_size.x, (GLsizei)this->component_size.y);
+			glClearColor(component_background_color.x, component_background_color.y, component_background_color.z, component_background_color.w);
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			glDisable(GL_SCISSOR_TEST);
+		}
 		fully_rendered = this->iRender(camera);
 		attachTexture2D(GL_COLOR_ATTACHMENT0, 0, GL_DRAW_FRAMEBUFFER);
 		attachTexture2D(GL_DEPTH_ATTACHMENT, 0, GL_DRAW_FRAMEBUFFER);

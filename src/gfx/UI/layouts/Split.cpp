@@ -26,13 +26,13 @@ void Split::organize(axl::gl::gfx::ui::Container& container)
 	if(child_count == 0)
 		return;
 	axl::math::Vec4f container_padding = container.getPadding();
-	axl::math::Vec2i container_size = container.getSize();
-	axl::math::Vec2i client_size = axl::math::Vec2i(
-		container_size.x - (int)(container_padding.x + container_padding.z),
-		container_size.y - (int)(container_padding.y + container_padding.w)
+	axl::math::Vec2f container_size = container.getSize();
+	axl::math::Vec2f client_size = axl::math::Vec2f(
+		container_size.x - (container_padding.x + container_padding.z),
+		container_size.y - (container_padding.y + container_padding.w)
 	);
 	axl::math::Vec3f new_positions[2];
-	axl::math::Vec2i new_sizes[2];
+	axl::math::Vec2f new_sizes[2];
 	switch(this->split_orientation)
 	{
 		default:
@@ -40,11 +40,11 @@ void Split::organize(axl::gl::gfx::ui::Container& container)
 			{
 				float actual_x = (client_size.x - split_spacing.x);
 				new_sizes[0].set(
-					(int)(actual_x * split_proportion),
+					actual_x * split_proportion,
 					client_size.y
 				);
 				new_sizes[1].set(
-					(int)(actual_x * (1.f - split_proportion)),
+					actual_x * (1.f - split_proportion),
 					client_size.y
 				);
 				new_positions[0].set(container_padding.x, container_padding.y);
@@ -56,18 +56,18 @@ void Split::organize(axl::gl::gfx::ui::Container& container)
 				float actual_y = (client_size.y - split_spacing.y);
 				new_sizes[0].set(
 					client_size.x,
-					(int)(actual_y * split_proportion)
+					(actual_y * split_proportion)
 				);
 				new_sizes[1].set(
 					client_size.x,
-					(int)(actual_y * (1.f - split_proportion))
+					(actual_y * (1.f - split_proportion))
 				);
 				new_positions[0].set(container_padding.x, container_padding.y);
 				new_positions[1].set(container_padding.x, (container_padding.y + new_sizes[0].y + split_spacing.y));
 			}
 			break;
 	}
-	axl::math::Vec2i current_position((int)(container_padding.x), (int)(container_padding.y));
+	axl::math::Vec2f current_position(container_padding.x, container_padding.y);
 	int index = 0;
 	axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = container_children.first();
 	float depth = 0.f;

@@ -21,7 +21,7 @@ class TestButton : public axl::gl::gfx::ui::elements::Button
 		TestButton(axl::gl::Context* ptr_context = 0,
 			axl::gl::gfx::ui::Container* container = 0,
 			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
-			const axl::math::Vec2i& size = axl::math::Vec2i(60,30),
+			const axl::math::Vec2f& size = axl::math::Vec2f(60.f,30.f),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f),
 			axl::gl::gfx::ui::Layout::Size layout_width = axl::gl::gfx::ui::Layout::WRAP_CONTENT,
 			axl::gl::gfx::ui::Layout::Size layout_height = axl::gl::gfx::ui::Layout::WRAP_CONTENT
@@ -113,7 +113,6 @@ class MainView : public Test::MainView
 			container.setComponentFrameBuffer(&component_framebuffer);
 			container.setBackgroundColor(axl::math::Vec4f(.8f,.8f,.78f,1.f));
 			container.setPadding(axl::math::Vec4f(0.f,0.f,0.f,0.f));
-			container.setSize(axl::math::Vec2i(300, 260));
 			container.setLayout(&linear_layout);
 			Assert(container.create());
 			// container1
@@ -186,7 +185,7 @@ class MainView : public Test::MainView
 		void onSize(int w, int h)
 		{
 			Test::MainView::onSize(w, h);
-			container.setSize(this->size);
+			container.setSize(axl::math::Vec2f((float)w, (float)h));
 			container.organize();
 			this->update();
 			this->render();

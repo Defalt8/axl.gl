@@ -9,7 +9,7 @@ namespace elements {
 TextView::TextView(axl::gl::Context* ptr_context,
 			axl::gl::gfx::ui::Container* container,
 			const axl::math::Vec3f& position,
-			const axl::math::Vec2i& size,
+			const axl::math::Vec2f& size,
 			const axl::math::Vec4f& padding,
 			axl::gl::gfx::ui::Layout::Size layout_width,
 			axl::gl::gfx::ui::Layout::Size layout_height) :
@@ -50,7 +50,7 @@ bool TextView::setTextProgram(const axl::gl::gfx::Text::Program* text_program)
 {
 	return text_view_text.setTextProgram(text_program);
 }
-bool TextView::setSize(const axl::math::Vec2i& size)
+bool TextView::setSize(const axl::math::Vec2f& size)
 {
 	if(!axl::gl::gfx::ui::Element::setSize(size))
 		return false;
@@ -96,10 +96,10 @@ bool TextView::iRender(axl::gl::camera::Camera3Df* camera)
 {
 	return text_view_text.render(camera);
 }
-axl::math::Vec2i TextView::getContentSize() const
+axl::math::Vec2f TextView::getContentSize() const
 {
 	const axl::math::Vec2f& text_box = text_view_text.getBox();
-	return axl::math::Vec2i((int)text_box.x, (int)text_box.y);
+	return axl::math::Vec2f(text_box.x, text_box.y);
 }
 
 void TextView::onAlignmentChange()

@@ -69,7 +69,6 @@ class MainView : public Test::MainView
 			container.setComponentProgram(&component_program);
 			container.setBackgroundColor(axl::math::Vec4f(.8f,.8f,.78f,1.f));
 			container.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
-			container.setSize(axl::math::Vec2i(300, 260));
 			container.setLayout(&linear_layout);
 			Assert(container.create());
 			// container1
@@ -79,7 +78,6 @@ class MainView : public Test::MainView
 			container1.setComponentProgram(&component_program);
 			container1.setBackgroundColor(axl::math::Vec4f(.0f,.0f,.9f,0.1f));
 			container1.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
-			container1.setSize(axl::math::Vec2i(300, 260));
 			container1.setLayout(&linear_layout1);
 			Assert(container1.create());
 			// container2
@@ -89,7 +87,6 @@ class MainView : public Test::MainView
 			container2.setComponentProgram(&component_program);
 			container2.setBackgroundColor(axl::math::Vec4f(.5f,.5f,.5f,.04f));
 			container2.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
-			container2.setSize(axl::math::Vec2i(300, 260));
 			container2.setLayout(&linear_layout2);
 			Assert(container2.create());
 			{ // test text_inputs
@@ -142,7 +139,7 @@ class MainView : public Test::MainView
 		void onSize(int w, int h)
 		{
 			Test::MainView::onSize(w, h);
-			container.setSize(this->size);
+			container.setSize(axl::math::Vec2f((float)w, (float)h));
 			container.organize();
 			this->update();
 			this->render();

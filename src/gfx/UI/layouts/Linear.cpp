@@ -20,12 +20,12 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 {
 	axl::math::Vec3f new_position(0.0f,0.0f);
 	axl::math::Vec4f container_padding = container.getPadding();
-	axl::math::Vec2i new_size(0,0), container_size = container.getSize();
+	axl::math::Vec2f new_size(0,0), container_size = container.getSize();
 	const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& container_children = container.getComponents();
 	unsigned int child_count = container_children.count();
-	axl::math::Vec2i client_size = axl::math::Vec2i(
-			container_size.x - (int)(container_padding.x + container_padding.z),
-			container_size.y - (int)(container_padding.y + container_padding.w)
+	axl::math::Vec2f client_size = axl::math::Vec2f(
+			container_size.x - (container_padding.x + container_padding.z),
+			container_size.y - (container_padding.y + container_padding.w)
 			);
 	switch(this->lin_orientation)
 	{
@@ -37,10 +37,10 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 			new_size.x = client_size.x;
 			break;
 	}
-	axl::math::Vec2i current_position((int)(container_padding.x), (int)(container_padding.y));
-	axl::math::Vec2i element_size(
-		(int)((float)(child_count == 0 ? 0.f : ((client_size.x - ((child_count-1) * lin_spacing.x)) / child_count))),
-		(int)((float)(child_count == 0 ? 0.f : ((client_size.y - ((child_count-1) * lin_spacing.y)) / child_count)))
+	axl::math::Vec2f current_position(container_padding.x, container_padding.y);
+	axl::math::Vec2f element_size(
+		(child_count == 0 ? 0.f : ((float)(client_size.x - ((child_count-1) * lin_spacing.x)) / child_count)),
+		(child_count == 0 ? 0.f : ((float)(client_size.y - ((child_count-1) * lin_spacing.y)) / child_count))
 	);
 	float depth = 0.f;
 	axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = container_children.first();
@@ -52,12 +52,12 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 			case OR_HORIZONTAL:
 				new_position.set((float)current_position.x, (float)current_position.y);
 				new_size.set(element_size.x, client_size.y);
-				current_position.x += new_size.x + (int)(lin_spacing.x);
+				current_position.x += new_size.x + (lin_spacing.x);
 				break;
 			case OR_VERTICAL:
 				new_position.set((float)current_position.x, (float)current_position.y);
 				new_size.set(client_size.x, element_size.y);
-				current_position.y += new_size.y + (int)(lin_spacing.y);
+				current_position.y += new_size.y + (lin_spacing.y);
 				break;
 		}
 		axl::gl::gfx::ui::Component* component = (axl::gl::gfx::ui::Component*)(*it);

@@ -32,7 +32,7 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::ui::Element
 		TextView(axl::gl::Context* ptr_context = 0,
 			axl::gl::gfx::ui::Container* container = 0,
 			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
-			const axl::math::Vec2i& size = axl::math::Vec2i(0,0),
+			const axl::math::Vec2f& size = axl::math::Vec2f(0,0),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f),
 			axl::gl::gfx::ui::Layout::Size layout_width = axl::gl::gfx::ui::Layout::WRAP_CONTENT,
 			axl::gl::gfx::ui::Layout::Size layout_height = axl::gl::gfx::ui::Layout::WRAP_CONTENT);
@@ -44,7 +44,7 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::ui::Element
 		bool setText(const axl::util::WString& label);
 		void setFont(const axl::gl::gfx::Font* font);
 		bool setTextProgram(const axl::gl::gfx::Text::Program* text_program);
-		virtual bool setSize(const axl::math::Vec2i& size);
+		virtual bool setSize(const axl::math::Vec2f& size);
 		virtual void setHorizontalAlignment(HorizontalTextAlignment horizontal_text_alignment);
 		virtual void setVerticalAlignment(VerticalTextAlignment vertical_text_alignment);
 		virtual void setForegroundColor(const axl::math::Vec4f& foreground_color);
@@ -54,7 +54,7 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::ui::Element
 		virtual bool iCreate();
 		virtual bool iDestroy();
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera);
-		virtual axl::math::Vec2i getContentSize() const;
+		virtual axl::math::Vec2f getContentSize() const;
 		virtual void onAlignmentChange();
 	protected:
 		HorizontalTextAlignment text_view_horizontal_text_alignment;

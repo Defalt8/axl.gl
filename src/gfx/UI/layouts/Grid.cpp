@@ -15,7 +15,8 @@ Grid::Grid(Grid::Orientation orientation, Grid::FillMode fill_mode, const axl::m
 	axl::gl::gfx::ui::Layout(),
 	grid_orientation(orientation),
 	grid_fill_mode(fill_mode),
-	grid_spacing(spacing)
+	grid_spacing(spacing),
+	grid_size(0,0)
 {}
 Grid::~Grid()
 {}
@@ -28,28 +29,28 @@ void Grid::organize(axl::gl::gfx::ui::Container& container)
 	else if(child_count == 1)
 	{
 		axl::math::Vec4f container_padding = container.getPadding();
-		axl::math::Vec2i container_size = container.getSize();
+		axl::math::Vec2f container_size = container.getSize();
 		axl::gl::gfx::ui::Component* component = (axl::gl::gfx::ui::Component*)(*container_children.first());
 		component->transform.setPosition(axl::math::Vec3f(container_padding.x, container_padding.y, component->transform.getPosition().z));
-		component->setSize(axl::math::Vec2i(
-			container_size.x - (int)(container_padding.x + container_padding.z),
-			container_size.y - (int)(container_padding.y + container_padding.w)
+		component->setSize(axl::math::Vec2f(
+			container_size.x - (container_padding.x + container_padding.z),
+			container_size.y - (container_padding.y + container_padding.w)
 		));
 	}
 	else
 	{
 		axl::math::Vec4f container_padding = container.getPadding();
-		axl::math::Vec2i container_size = container.getSize();
-		axl::math::Vec2i client_size = axl::math::Vec2i(
-			container_size.x - (int)(container_padding.x + container_padding.z),
-			container_size.y - (int)(container_padding.y + container_padding.w)
+		axl::math::Vec2f container_size = container.getSize();
+		axl::math::Vec2f client_size = axl::math::Vec2f(
+			container_size.x - (container_padding.x + container_padding.z),
+			container_size.y - (container_padding.y + container_padding.w)
 		);
 		float _sqrt = axl::math::sqrt((float)child_count);
-		unsigned int column_count = (int)axl::math::ceil(_sqrt);
-		unsigned int row_count = (column_count*column_count == child_count ? column_count : (int)_sqrt);
+		unsigned int column_count = (this->grid_size.x == 0 ? ((unsigned int)axl::math::ceil(_sqrt)) : (unsigned int)this->grid_size.x);
+		unsigned int row_count = (this->grid_size.y == 0 ? (column_count*column_count == child_count ? column_count : (unsigned int)_sqrt) : (unsigned int)this->grid_size.y);
 		axl::math::Vec2f cell_size(
-			((float)((float)client_size.x - ((float)grid_spacing.x * (column_count - 1))) / column_count),
-			((float)((float)client_size.y - ((float)grid_spacing.y * (row_count - 1))) / row_count)
+			((float)(client_size.x - ((float)grid_spacing.x * (column_count - 1))) / column_count),
+			((float)(client_size.y - ((float)grid_spacing.y * (row_count - 1))) / row_count)
 		);
 		if(this->grid_orientation == OR_VERTICAL)
 		{
@@ -77,20 +78,20 @@ void Grid::organize(axl::gl::gfx::ui::Container& container)
 					));
 					if(index < last_index)
 					{
-						component->setSize(axl::math::Vec2i((int)cell_size.x, (int)cell_size.y));
+						component->setSize(axl::math::Vec2f(cell_size.x, cell_size.y));
 					}
 					else
 					{
 						switch(grid_fill_mode)
 						{
 							case KEEP_PATTERN:
-								component->setSize(axl::math::Vec2i((int)cell_size.x, (int)cell_size.y));
+								component->setSize(axl::math::Vec2f(cell_size.x, cell_size.y));
 								break;
 							case STRECH_LAST:
 								{
-									component->setSize(axl::math::Vec2i(
-										(int)((float)client_size.x - ((float)(cell_size.x + grid_spacing.x) * column_index)),
-										(int)cell_size.y
+									component->setSize(axl::math::Vec2f(
+										((float)client_size.x - ((float)(cell_size.x + grid_spacing.x) * column_index)),
+										cell_size.y
 									));
 								}
 								break;
@@ -105,20 +106,20 @@ void Grid::organize(axl::gl::gfx::ui::Container& container)
 					));
 					if(index < last_index)
 					{
-						component->setSize(axl::math::Vec2i((int)cell_size.x, (int)cell_size.y));
+						component->setSize(axl::math::Vec2f(cell_size.x, cell_size.y));
 					}
 					else
 					{
 						switch(grid_fill_mode)
 						{
 							case KEEP_PATTERN:
-								component->setSize(axl::math::Vec2i((int)cell_size.x, (int)cell_size.y));
+								component->setSize(axl::math::Vec2f(cell_size.x, cell_size.y));
 								break;
 							case STRECH_LAST:
 								{
-									component->setSize(axl::math::Vec2i(
-										(int)cell_size.x,
-										(int)((float)client_size.y - ((float)(cell_size.y + grid_spacing.y) * column_index))
+									component->setSize(axl::math::Vec2f(
+										cell_size.x,
+										((float)client_size.y - ((float)(cell_size.y + grid_spacing.y) * column_index))
 									));
 								}
 								break;
@@ -150,6 +151,13 @@ void Grid::setSpacing(const axl::math::Vec2f& spacing)
 {
 	this->grid_spacing = spacing;
 }
+bool Grid::setSize(const axl::math::Vec2i& size)
+{
+	if(size.x <= 0 || size.y <= 0)
+		return false;
+	this->grid_size = size;
+	return true;
+}
 // get methods
 Grid::Orientation Grid::getOrientation() const
 {
@@ -162,6 +170,10 @@ Grid::FillMode Grid::getFillMode() const
 const axl::math::Vec2f& Grid::getSpacing() const
 {
 	return this->grid_spacing;
+}
+const axl::math::Vec2i& Grid::getSize() const
+{
+	return this->grid_size;
 }
 
 } // axl.gl.gfx.ui.layouts

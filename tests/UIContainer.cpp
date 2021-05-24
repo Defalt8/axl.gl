@@ -20,7 +20,7 @@ class TestElement : public axl::gl::gfx::ui::Element
 		TestElement(axl::gl::Context* ptr_context = 0,
 			axl::gl::gfx::ui::Container* container = 0,
 			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
-			const axl::math::Vec2i& size = axl::math::Vec2i(60,30),
+			const axl::math::Vec2f& size = axl::math::Vec2f(60.f,30.f),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f)
 		) :
 			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::OTHER, ptr_context, container, position, size, padding)
@@ -85,7 +85,6 @@ class MainView : public Test::MainView
 			container.setComponentProgram(&component_program);
 			container.setBackgroundColor(axl::math::Vec4f(.8f,.8f,.78f,1.f));
 			container.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
-			container.setSize(axl::math::Vec2i(300, 260));
 			container.setLayout(&linear_layout);
 			Assert(container.create());
 			// container1
@@ -116,7 +115,6 @@ class MainView : public Test::MainView
 					elements1[i].setContainer(&container1);
 					elements1[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, -((float)i / element_count)));
 					elements1[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
-					elements1[i].setSize(axl::math::Vec2i(100,40));
 					elements1[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
 					elements1[i].setBackgroundColor(axl::math::Vec4f(.1f, 0.5f+0.5f*((float)i / element_count), .1f, 1.f));
 					Assert(elements1[i].create());
@@ -132,7 +130,6 @@ class MainView : public Test::MainView
 					elements2[i].setContainer(&container2);
 					elements2[i].transform.setPosition(axl::math::Vec3f(0.f,0.f, -((float)i / element_count)));
 					elements2[i].setLayoutWidth(axl::gl::gfx::ui::Layout::MATCH_PARENT);
-					elements2[i].setSize(axl::math::Vec2i(100,40));
 					elements2[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
 					elements2[i].setBackgroundColor(axl::math::Vec4f(.1f, .1f, 0.5f+0.5f*((float)i / element_count), 1.f));
 					Assert(elements2[i].create());
@@ -143,7 +140,7 @@ class MainView : public Test::MainView
 		void onSize(int w, int h)
 		{
 			Test::MainView::onSize(w, h);
-			container.setSize(this->size);
+			container.setSize(axl::math::Vec2f((float)w, (float)h));
 			container.organize();
 			this->update();
 			this->render();

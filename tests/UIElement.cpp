@@ -16,7 +16,7 @@ class TestElement : public axl::gl::gfx::ui::Element
 		TestElement(axl::gl::Context* ptr_context = 0,
 			axl::gl::gfx::ui::Container* container = 0,
 			const axl::math::Vec3f& position = axl::math::Vec3f(0.0f,0.0f,0.0f),
-			const axl::math::Vec2i& size = axl::math::Vec2i(60,30),
+			const axl::math::Vec2f& size = axl::math::Vec2f(60.f,30.f),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f)
 		) :
 			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::IMAGE_VIEW, ptr_context, container, position, size, padding)
@@ -72,7 +72,7 @@ class MainView : public Test::MainView
 			test_element.setComponentFrameBuffer(&component_framebuffer);
 			test_element.setComponentProgram(&component_program);
 			test_element.transform.setPosition(axl::math::Vec3f(100.f,80.f, 0.f));
-			test_element.setSize(axl::math::Vec2i(200,160));
+			test_element.setSize(axl::math::Vec2f(200.f,160.f));
 			Assert(test_element.create());
 			return true;
 		}

@@ -9,7 +9,7 @@ namespace elements {
 TextInput::TextInput(axl::gl::Context* ptr_context,
 			axl::gl::gfx::ui::Container* container,
 			const axl::math::Vec3f& position,
-			const axl::math::Vec2i& size,
+			const axl::math::Vec2f& size,
 			const axl::math::Vec4f& padding,
 			axl::gl::gfx::ui::Layout::Size layout_width,
 			axl::gl::gfx::ui::Layout::Size layout_height) :
@@ -57,7 +57,7 @@ bool TextInput::setTextProgram(const axl::gl::gfx::Text::Program* text_input_pro
 	return text_input_text.setTextProgram(text_input_program) &&
 		text_input_cursor.setTextProgram(text_input_program);
 }
-bool TextInput::setSize(const axl::math::Vec2i& size)
+bool TextInput::setSize(const axl::math::Vec2f& size)
 {
 	if(!axl::gl::gfx::ui::Element::setSize(size))
 		return false;
@@ -113,10 +113,10 @@ bool TextInput::iRender(axl::gl::camera::Camera3Df* camera)
 	}
 	return text_input_text.render(camera);
 }
-axl::math::Vec2i TextInput::getContentSize() const
+axl::math::Vec2f TextInput::getContentSize() const
 {
 	const axl::math::Vec2f& text_box = text_input_text.getBox();
-	return axl::math::Vec2i((int)text_box.x, (int)text_box.y);
+	return axl::math::Vec2f(text_box.x, text_box.y);
 }
 
 void TextInput::onAlignmentChange()
