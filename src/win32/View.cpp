@@ -1,3 +1,4 @@
+#include <climits>
 #include "common.hpp"
 #include <axl.gl/lib.hpp>
 #include <axl.math/vec/Vec2i.hpp>
@@ -143,6 +144,8 @@ View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, 
 	display(&m_display),
 	position(m_position),
 	size(m_size),
+	min_size(m_min_size),
+	max_size(m_max_size),
 	title(m_title),
 	config(m_config),
 	cursor(m_cursor),
@@ -153,6 +156,8 @@ View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, 
 	m_display(),
 	m_position(position_),
 	m_size(size_),
+	m_min_size(axl::math::Vec2i(0,0)),
+	m_max_size(axl::math::Vec2i(INT_MAX,INT_MAX)),
 	m_title(title_),
 	m_config(DefaultViewConfig),
 	m_cursor(cursor_),
@@ -444,6 +449,22 @@ bool View::setSize(const axl::math::Vec2i& size_)
 		return true;
 	}
 	return false;
+}
+
+bool View::setMinSize(const axl::math::Vec2i& min_size)
+{
+	if(min_size.x < 0 || min_size.y < 0)
+		return false;
+	this->m_min_size = min_size;
+	return true;
+}
+
+bool View::setMaxSize(const axl::math::Vec2i& max_size)
+{
+	if(max_size.x < 0 || max_size.y < 0)
+		return false;
+	this->m_max_size = max_size;
+	return true;
 }
 
 bool View::setTitle(const axl::util::WString& title_)
@@ -1191,6 +1212,22 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 						}
 						break;
 				}
+			}
+			break;
+		case WM_GETMINMAXINFO:
+			if(view)
+			{
+				LPMINMAXINFO lpMMI = (LPMINMAXINFO)lparam;
+				RECT rc_min = {0, 0, view->min_size.x, view->min_size.y};
+				RECT rc_max = {0, 0, view->max_size.x, view->max_size.y};
+				ViewData* view_data = (ViewData*)view->getReserved();
+				DWORD style = view_data->style;
+				AdjustWindowRect(&rc_min, style, FALSE);
+				AdjustWindowRect(&rc_max, style, FALSE);
+				lpMMI->ptMinTrackSize.x = (rc_min.right - rc_min.left);
+				lpMMI->ptMinTrackSize.y = (rc_min.bottom - rc_min.top);
+				lpMMI->ptMaxTrackSize.x = (rc_max.right - rc_max.left);
+				lpMMI->ptMaxTrackSize.y = (rc_max.bottom - rc_max.top);
 			}
 			break;
 		case WM_USER+1: // window created and configured

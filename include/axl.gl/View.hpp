@@ -80,6 +80,8 @@ class AXLGLCXXAPI View
 		static void cleanup();
 		virtual bool setPosition(const axl::math::Vec2i& position);
 		virtual bool setSize(const axl::math::Vec2i& size);
+		virtual bool setMinSize(const axl::math::Vec2i& min_size);
+		virtual bool setMaxSize(const axl::math::Vec2i& max_size);
 		virtual bool setTitle(const axl::util::WString& title);
 		virtual bool setCursor(const Cursor& cursor);
 		virtual bool setCursorFromResource(int res_id);
@@ -112,6 +114,8 @@ class AXLGLCXXAPI View
 		Display**const display;
 		const axl::math::Vec2i& position;
 		const axl::math::Vec2i& size;
+		const axl::math::Vec2i& min_size;
+		const axl::math::Vec2i& max_size;
 		const axl::util::WString& title;
 		const View::ViewConfig& config;
 		const View::Cursor& cursor;
@@ -123,6 +127,8 @@ class AXLGLCXXAPI View
 		Display* m_display;
 		axl::math::Vec2i m_position;
 		axl::math::Vec2i m_size;
+		axl::math::Vec2i m_min_size;
+		axl::math::Vec2i m_max_size;
 		axl::util::WString m_title;
 		View::ViewConfig m_config;
 		View::Cursor m_cursor;
