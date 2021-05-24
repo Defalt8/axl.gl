@@ -76,6 +76,13 @@ class MainView : public Test::MainView
 			Assert(test_element.create());
 			return true;
 		}
+		void onSize(int w, int h)
+		{
+			Test::MainView::onSize(w, h);
+			this->update();
+			this->render();
+			this->swap();
+		}
 		bool initialize()
 		{
 			if(!Test::MainView::initialize()) return false;
@@ -102,13 +109,13 @@ class MainView : public Test::MainView
 						1.f
 					)
 				);
-				// test_element.transform.setPosition(
-				// 	axl::math::Vec3f(
-				// 		200.f+axl::math::map(axl::math::cos(elapsed_time * axl::math::Constants::F_PI*4.f), -1.f, 1.f, -150.f, 150.f),
-				// 		200.f+axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI), -1.f, 1.f, -150.f, 100.f),
-				// 		0.f
-				// 	)
-				// );
+				test_element.transform.setPosition(
+					axl::math::Vec3f(
+						200.f+axl::math::map(axl::math::cos(elapsed_time * axl::math::Constants::F_PI*.4f), -1.f, 1.f, -150.f, 150.f),
+						200.f+axl::math::map(axl::math::sin(elapsed_time * axl::math::Constants::F_PI), -1.f, 1.f, -150.f, 100.f),
+						0.f
+					)
+				);
 			}
 			return true;
 		}
@@ -127,14 +134,7 @@ class MainView : public Test::MainView
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 			return true;
-		}
-		void onSize(int w, int h)
-		{
-			Test::MainView::onSize(w, h);
-		}
-		void onKey(axl::gl::input::KeyCode key_code, bool down)
-		{}
-	
+		}	
 };
 
 

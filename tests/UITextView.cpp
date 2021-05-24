@@ -142,6 +142,15 @@ class MainView : public Test::MainView
 			container.organize();
 			return true;
 		}
+		void onSize(int w, int h)
+		{
+			Test::MainView::onSize(w, h);
+			container.setSize(this->size);
+			container.organize();
+			this->update();
+			this->render();
+			this->swap();
+		}
 		bool initialize()
 		{
 			if(!Test::MainView::initialize()) return false;
@@ -177,14 +186,6 @@ class MainView : public Test::MainView
 			}
 			return true;
 		}
-		void onSize(int w, int h)
-		{
-			Test::MainView::onSize(w, h);
-			container.setSize(this->size);
-			container.organize();
-		}
-		void onKey(axl::gl::input::KeyCode key_code, bool down)
-		{}
 	
 };
 
