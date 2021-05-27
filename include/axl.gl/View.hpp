@@ -78,6 +78,7 @@ class AXLGLCXXAPI View
 		virtual void destroy();
 		const void* getReserved() const;
 		static void cleanup();
+		void setUIEventProcessing(bool enable);
 		virtual bool setPosition(const axl::math::Vec2i& position);
 		virtual bool setSize(const axl::math::Vec2i& size);
 		virtual bool setMinSize(const axl::math::Vec2i& min_size);
@@ -121,6 +122,7 @@ class AXLGLCXXAPI View
 		const View::Cursor& cursor;
 		const VisiblityState& visiblity;
 		const bool& is_paused;
+		const bool& is_ui_processing_enabled;
 		const bool*const pointers;
 		void *const& reserved;
 	private:
@@ -134,6 +136,7 @@ class AXLGLCXXAPI View
 		View::Cursor m_cursor;
 		VisiblityState m_visiblity;
 		bool m_is_paused;
+		bool m_is_ui_processing_enabled;
 		bool m_pointers[MAX_POINTERS];
 		axl::util::ds::UniList<axl::gl::Context*> m_contexts;
 		void *m_reserved;

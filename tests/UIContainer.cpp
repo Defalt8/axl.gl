@@ -201,6 +201,7 @@ int main(int argc, char* argv[])
 		Assertve(main_view.show(MainView::SM_SHOW), verbose);
 		main_view.context.setVSync(false);
 		main_view.initialize();
+		main_view.setUIEventProcessing(true);
 		while(!axl::gl::Application::IS_QUITTING)
 		{
 			axl::gl::Application::pollEvent(g_display);

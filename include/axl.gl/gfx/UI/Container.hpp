@@ -28,8 +28,6 @@ class AXLGLCXXAPI Container : public axl::gl::gfx::ui::Component
 		void organize() const;
 		Layout* getLayout() const;
 		void setLayout(Layout* layout);
-	public:
-		virtual void onViewSize(int w, int h);
 	protected:
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera);
 	private:

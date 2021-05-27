@@ -151,18 +151,20 @@ View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, 
 	cursor(m_cursor),
 	visiblity(m_visiblity),
 	is_paused(m_is_paused),
+	is_ui_processing_enabled(m_is_ui_processing_enabled),
 	pointers(m_pointers),
 	reserved(m_reserved),
 	m_display(),
 	m_position(position_),
 	m_size(size_),
 	m_min_size(axl::math::Vec2i(0,0)),
-	m_max_size(axl::math::Vec2i(INT_MAX,INT_MAX)),
+	m_max_size(axl::math::Vec2i::filled(INT_MAX/2)),
 	m_title(title_),
 	m_config(DefaultViewConfig),
 	m_cursor(cursor_),
 	m_visiblity(View::VS_HIDDEN),
 	m_is_paused(false),
+	m_is_ui_processing_enabled(false),
 	m_contexts(),
 	m_reserved((void*)new ViewData())
 {
@@ -428,7 +430,10 @@ void View::cleanup()
 		_hbrush_black = NULL;
 	}
 }
-
+void View::setUIEventProcessing(bool enable)
+{
+	this->m_is_ui_processing_enabled = enable;
+}
 bool View::setPosition(const axl::math::Vec2i& position_)
 {
 	if(!m_reserved) return false;
@@ -443,7 +448,7 @@ bool View::setPosition(const axl::math::Vec2i& position_)
 bool View::setSize(const axl::math::Vec2i& size_)
 {
 	if(!m_reserved) return false;
-	if(SetWindowPos(((ViewData*)m_reserved)->hwnd, NULL, 0, 0, size_.x, size_.y, SWP_NOMOVE|SWP_FRAMECHANGED|SWP_NOZORDER) != FALSE)
+	if(SetWindowPos(((ViewData*)m_reserved)->hwnd, NULL, 0, 0, size_.x, size_.y, SWP_NOMOVE|SWP_NOREDRAW|SWP_NOZORDER) != FALSE)
 	{
 		this->m_size = size_;
 		return true;
@@ -694,39 +699,39 @@ bool View::removeContext(Context* context)
 // local functions
 //
 
-    bool isInArea(axl::math::Vec2f point, axl::math::Vec2f size, axl::math::Mat4f transform, axl::gl::gfx::ui::Container* parent)
+bool isInArea(axl::math::Vec2f point, axl::math::Vec2f size, axl::math::Mat4f transform, axl::gl::gfx::ui::Container* parent)
+{
+    using namespace axl::math;
+    if(size.x == 0 || size.y == 0)
+        return false;
+    Mat4f final_transform = transform;
+    // calculate the final transform matrix
+    while(parent)
     {
-        using namespace axl::math;
-        if(size.x == 0 || size.y == 0)
-            return false;
-        Mat4f final_transform = transform;
-        // calculate the final transform matrix
-        while(parent)
-        {
-            final_transform = parent->transform.getMatrix() * final_transform;
-            parent = parent->getContainer();
-        }
-        Vec4f verteces[4];
-        verteces[0] = final_transform * Vec4f(0.f, 0.f, 0.f, 1.f);
-        verteces[1] = final_transform * Vec4f(size.x, 0.f, 0.f, 1.f);
-        verteces[2] = final_transform * Vec4f(size.x, size.y, 0.f, 1.f);
-        verteces[3] = final_transform * Vec4f(0.f, size.y, 0.f, 1.f);
-        // Calculate the internal angles check if any of them are greater than 180 degrees.
-        // If so, then the point is outside, or else it is inside.
-        axl::math::Vec2f vector_a, vector_b;
-        for(int i=0; i<4; ++i)
-        {
-            int next_i = (i+1)%4;
-            vector_a.set(point.x - verteces[i].x, point.y - verteces[i].y);
-            vector_b.set(point.x - verteces[next_i].x, point.y - verteces[next_i].y);
-            float angle = vector_b.fullAngle(vector_a);
-            if(angle < 0.f) // absolute value
-                angle = -angle;
-            if(angle > axl::math::Constants::F_PI)
-                return false;
-        }
-        return true;
+        final_transform = parent->transform.getMatrix() * final_transform;
+        parent = parent->getContainer();
     }
+    Vec4f verteces[4];
+    verteces[0] = final_transform * Vec4f(0.f, 0.f, 0.f, 1.f);
+    verteces[1] = final_transform * Vec4f(size.x, 0.f, 0.f, 1.f);
+    verteces[2] = final_transform * Vec4f(size.x, size.y, 0.f, 1.f);
+    verteces[3] = final_transform * Vec4f(0.f, size.y, 0.f, 1.f);
+    // Calculate the internal angles check if any of them are greater than 180 degrees.
+    // If so, then the point is outside, or else it is inside.
+    axl::math::Vec2f vector_a, vector_b;
+    for(int i=0; i<4; ++i)
+    {
+        int next_i = (i+1)%4;
+        vector_a.set(point.x - verteces[i].x, point.y - verteces[i].y);
+        vector_b.set(point.x - verteces[next_i].x, point.y - verteces[next_i].y);
+        float angle = vector_b.fullAngle(vector_a);
+        if(angle < 0.f) // absolute value
+            angle = -angle;
+        if(angle > axl::math::Constants::F_PI)
+            return false;
+    }
+    return true;
+}
 
 ///////////
 /// Events
@@ -762,27 +767,6 @@ void View::onMove(int x, int y)
 void View::onSize(int w,int h)
 {
 	this->m_size.set(w, h);
-	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
-	{
-		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
-		for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
-		{
-			axl::gl::gfx::ui::Component* component = *it;
-			if(!component->isVisible())
-				continue;
-			switch(component->component_type)
-			{
-				case axl::gl::gfx::ui::Component::CONTAINER:
-					{
-						axl::gl::gfx::ui::Container* container = (axl::gl::gfx::ui::Container*)component;
-						container->onViewSize(w, h);
-					}
-					break;
-				case axl::gl::gfx::ui::Component::ELEMENT:
-					break;
-			}
-		}
-	}
 }
 
 void View::onPause()
@@ -797,20 +781,30 @@ void View::onResume()
 
 void View::onKey(input::KeyCode key_code, bool is_down)
 {
-	static bool kAlt = false, kF4 = false, kLeft = false, kRight = false;
+	bool kLeft = false, kRight = false;
 	switch(key_code)
 	{
-		case input::KeyCode::KEY_ALT: kAlt = is_down; break;
-		case input::KeyCode::KEY_F4: kF4 = is_down; break;
-		case input::KeyCode::KEY_LEFT: kLeft = is_down; break;
-		case input::KeyCode::KEY_RIGHT: kRight = is_down; break;
+		case axl::gl::input::KeyCode::KEY_F4:
+			if(!is_down && axl::gl::input::Keyboard::isKeyDown(axl::gl::input::KeyCode::KEY_ALT))
+			{
+				this->destroy();
+				return;
+			}
+			break;
+		case axl::gl::input::KeyCode::KEY_RETURN:
+			if(!is_down && axl::gl::input::Keyboard::isKeyDown(axl::gl::input::KeyCode::KEY_ALT))
+			{
+				if(this->visiblity == VS_FULLSCREEN)
+					this->show(SM_SHOW);
+				else
+					this->show(SM_FULLSCREEN);
+				return;
+			}
+			break;
+		case axl::gl::input::KeyCode::KEY_LEFT: kLeft = is_down; break;
+		case axl::gl::input::KeyCode::KEY_RIGHT: kRight = is_down; break;
 	}
-	if(kAlt && kF4)
-	{
-		Application::quit(0);
-		return;
-	}
-	else if(kLeft || kRight)
+	if(this->m_is_ui_processing_enabled && (kLeft ^ kRight))
 	{
 		for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
 		{
@@ -872,45 +866,48 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 
 void View::onChar(wchar_t char_code)
 {
-	switch(char_code)
+	if(this->m_is_ui_processing_enabled)
 	{
-		case (axl::util::WString::char_t)127:
-			return;
-	}
-	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
-	{
-		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
-		for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
+		switch(char_code)
 		{
-			axl::gl::gfx::ui::Component* component = *it;
-			if(!component->isVisible()) continue;
-			switch(component->component_type)
+			case (axl::util::WString::char_t)127:
+				return;
+		}
+		for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
+		{
+			const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
+			for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
 			{
-				case axl::gl::gfx::ui::Component::CONTAINER:
-					break;
-				case axl::gl::gfx::ui::Component::ELEMENT:
-					{
-						axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
-						switch(element->element_type)
+				axl::gl::gfx::ui::Component* component = *it;
+				if(!component->isVisible()) continue;
+				switch(component->component_type)
+				{
+					case axl::gl::gfx::ui::Component::CONTAINER:
+						break;
+					case axl::gl::gfx::ui::Component::ELEMENT:
 						{
-							case axl::gl::gfx::ui::Element::OTHER:
-							case axl::gl::gfx::ui::Element::IMAGE_VIEW:
-							case axl::gl::gfx::ui::Element::TEXT_VIEW:
-							case axl::gl::gfx::ui::Element::TEXT_INPUT:
-								{
-									if(element->hasInputFocus())
+							axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
+							switch(element->element_type)
+							{
+								case axl::gl::gfx::ui::Element::OTHER:
+								case axl::gl::gfx::ui::Element::IMAGE_VIEW:
+								case axl::gl::gfx::ui::Element::TEXT_VIEW:
+								case axl::gl::gfx::ui::Element::TEXT_INPUT:
 									{
-										axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
-										text_input->onChar(char_code);
+										if(element->hasInputFocus())
+										{
+											axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
+											text_input->onChar(char_code);
+										}
 									}
-								}
-								break;
-							case axl::gl::gfx::ui::Element::LIST:
-							case axl::gl::gfx::ui::Element::BUTTON:
-								break;
+									break;
+								case axl::gl::gfx::ui::Element::LIST:
+								case axl::gl::gfx::ui::Element::BUTTON:
+									break;
+							}
 						}
-					}
-					break;
+						break;
+				}
 			}
 		}
 	}
@@ -920,56 +917,59 @@ void View::onPointer(int index, int x, int y, bool is_down)
 {
 	if(index >= 0 && index < MAX_POINTERS)
 		m_pointers[index] = is_down;
-	axl::math::Vec2f point((float)x, (float)(this->size.y - y));
-	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
+	if(this->m_is_ui_processing_enabled)
 	{
-		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
-		for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
+		axl::math::Vec2f point((float)x, (float)(this->size.y - y));
+		for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
 		{
-			axl::gl::gfx::ui::Component* component = *it;
-			if(!component->isVisible()) continue;
-			switch(component->component_type)
+			const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
+			for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
 			{
-				case axl::gl::gfx::ui::Component::CONTAINER:
-					break;
-				case axl::gl::gfx::ui::Component::ELEMENT:
-					{
-						axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
-						switch(element->element_type)
+				axl::gl::gfx::ui::Component* component = *it;
+				if(!component->isVisible()) continue;
+				switch(component->component_type)
+				{
+					case axl::gl::gfx::ui::Component::CONTAINER:
+						break;
+					case axl::gl::gfx::ui::Component::ELEMENT:
 						{
-							case axl::gl::gfx::ui::Element::OTHER:
-							case axl::gl::gfx::ui::Element::IMAGE_VIEW:
-							case axl::gl::gfx::ui::Element::TEXT_VIEW:
-							case axl::gl::gfx::ui::Element::LIST:
-								break;
-							case axl::gl::gfx::ui::Element::TEXT_INPUT:
-								{
-									axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
-									if(is_down)
+							axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
+							switch(element->element_type)
+							{
+								case axl::gl::gfx::ui::Element::OTHER:
+								case axl::gl::gfx::ui::Element::IMAGE_VIEW:
+								case axl::gl::gfx::ui::Element::TEXT_VIEW:
+								case axl::gl::gfx::ui::Element::LIST:
+									break;
+								case axl::gl::gfx::ui::Element::TEXT_INPUT:
 									{
-										if(isInArea(point, text_input->getSize(), text_input->transform.getMatrix(), text_input->getContainer()))
-											text_input->requestInputFocus();
+										axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
+										if(is_down)
+										{
+											if(isInArea(point, text_input->getSize(), text_input->transform.getMatrix(), text_input->getContainer()))
+												text_input->requestInputFocus();
+										}
 									}
-								}
-								break;
-							case axl::gl::gfx::ui::Element::BUTTON:
-								{
-									axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
-									if(is_down)
+									break;
+								case axl::gl::gfx::ui::Element::BUTTON:
 									{
-										if(isInArea(point, button->getSize(), button->transform.getMatrix(), button->getContainer()))
-											button->onPress(index);
+										axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
+										if(is_down)
+										{
+											if(isInArea(point, button->getSize(), button->transform.getMatrix(), button->getContainer()))
+												button->onPress(index);
+										}
+										else
+										{
+											if(button->getState() == axl::gl::gfx::ui::elements::Button::PRESSED)
+												button->onRelease(index);
+										}
 									}
-									else
-									{
-										if(button->getState() == axl::gl::gfx::ui::elements::Button::PRESSED)
-											button->onRelease(index);
-									}
-								}
-								break;
+									break;
+							}
 						}
-					}
-					break;
+						break;
+				}
 			}
 		}
 	}
@@ -982,46 +982,49 @@ void View::onPointerMove(int index, int x, int y)
 	{
 		SetCursor(hcursor);
 	}
-	axl::math::Vec2f point((float)x, (float)(this->size.y - y));
-	for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
+	if(this->m_is_ui_processing_enabled)
 	{
-		const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
-		for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
+		axl::math::Vec2f point((float)x, (float)(this->size.y - y));
+		for(axl::util::ds::UniList<axl::gl::Context*>::Iterator ctx_it = m_contexts.first(); ctx_it.isNotNull(); ++ctx_it)
 		{
-			axl::gl::gfx::ui::Component* component = *it;
-			if(!component->isVisible()) continue;
-			switch(component->component_type)
+			const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& components = (*ctx_it)->getComponents();
+			for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = components.first(); it.isNotNull(); ++it)
 			{
-				case axl::gl::gfx::ui::Component::CONTAINER:
-					break;
-				case axl::gl::gfx::ui::Component::ELEMENT:
-					{
-						axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
-						switch(element->element_type)
+				axl::gl::gfx::ui::Component* component = *it;
+				if(!component->isVisible()) continue;
+				switch(component->component_type)
+				{
+					case axl::gl::gfx::ui::Component::CONTAINER:
+						break;
+					case axl::gl::gfx::ui::Component::ELEMENT:
 						{
-							case axl::gl::gfx::ui::Element::OTHER:
-							case axl::gl::gfx::ui::Element::IMAGE_VIEW:
-							case axl::gl::gfx::ui::Element::TEXT_VIEW:
-							case axl::gl::gfx::ui::Element::TEXT_INPUT:
-							case axl::gl::gfx::ui::Element::LIST:
-								break;
-							case axl::gl::gfx::ui::Element::BUTTON:
-								{
-									axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
-									if(isInArea(point, button->getSize(), button->transform.getMatrix(), button->getContainer()))
+							axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
+							switch(element->element_type)
+							{
+								case axl::gl::gfx::ui::Element::OTHER:
+								case axl::gl::gfx::ui::Element::IMAGE_VIEW:
+								case axl::gl::gfx::ui::Element::TEXT_VIEW:
+								case axl::gl::gfx::ui::Element::TEXT_INPUT:
+								case axl::gl::gfx::ui::Element::LIST:
+									break;
+								case axl::gl::gfx::ui::Element::BUTTON:
 									{
-										if(!button->isHovered())
-											button->onHover();
+										axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
+										if(isInArea(point, button->getSize(), button->transform.getMatrix(), button->getContainer()))
+										{
+											if(!button->isHovered())
+												button->onHover();
+										}
+										else if(button->isHovered())
+										{
+											button->onDrift();
+										}
 									}
-									else if(button->isHovered())
-									{
-										button->onDrift();
-									}
-								}
-								break;
+									break;
+							}
 						}
-					}
-					break;
+						break;
+				}
 			}
 		}
 	}

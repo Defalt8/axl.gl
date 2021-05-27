@@ -80,9 +80,6 @@ void Container::setLayout(Layout* layout)
 	m_layout = layout;
 }
 
-void Container::onViewSize(int w, int h)
-{}
-
 bool Container::iRender(axl::gl::camera::Camera3Df* camera)
 {
 	for(axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = m_components.first(); it.isNotNull(); ++it)
