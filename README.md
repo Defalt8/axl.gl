@@ -5,7 +5,7 @@ A simple and multiplatform C++ game library.
 
 ## Version and supported platforms
 
-- **Latest version**: 0.42.125 alpha
+- **Latest version**: 0.54.169 alpha
 - **Supported platforms**: Windows
   - It is possible to implement this library for linux systems using the X11 library, and for android using the EGL library.
   - Other platforms will be implemented once the library is complete enough to be a game library.
@@ -147,6 +147,14 @@ A simple and multiplatform C++ game library.
 - [include/axl.gl/gfx/UI/Element.hpp](/include/axl.gl/gfx/UI/Element.hpp) - An abstract `Component` derived class to be used as a base for all UI elements like buttons, text views, etc...
 - [include/axl.gl/gfx/UI/Layout.hpp](/include/axl.gl/gfx/UI/Layout.hpp) - An abstarct class to be implemented by different UI components organizing layouts like `Linear layout`, `Grid layout`, etc...
 
+#### GFX/UI/elements
+
+- [include/axl.gl/gfx/UI/elements/Button.hpp](/include/axl.gl/gfx/UI/elements/Button.hpp) - A UI element for processing pointer clicks.
+- [include/axl.gl/gfx/UI/elements/TextView.hpp](/include/axl.gl/gfx/UI/elements/TextView.hpp) - A UI element for displaying static text.
+- [include/axl.gl/gfx/UI/elements/TextInput.hpp](/include/axl.gl/gfx/UI/elements/TextInput.hpp) - A UI element editing text. Accepts keyboard input from the user.
+
 #### GFX/UI/layouts
 
 - [include/axl.gl/gfx/UI/layouts/Linear.hpp](/include/axl.gl/gfx/UI/layouts/Linear.hpp) - A `Layout` derived class used to organize components in a linear fashion either horizontally or vertically.
+- [include/axl.gl/gfx/UI/layouts/Split.hpp](/include/axl.gl/gfx/UI/layouts/Split.hpp) - A `Layout` derived class used to organize two components by a specified proportion either horizontally or vertically.
+- [include/axl.gl/gfx/UI/layouts/Grid.hpp](/include/axl.gl/gfx/UI/layouts/Grid.hpp) - A `Layout` derived class used to organize components in a grid, by a specified grid size.
