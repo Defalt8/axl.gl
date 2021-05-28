@@ -13,7 +13,7 @@ TextInput::TextInput(axl::gl::Context* ptr_context,
 			const axl::math::Vec4f& padding,
 			axl::gl::gfx::ui::Layout::Size layout_width,
 			axl::gl::gfx::ui::Layout::Size layout_height) :
-	axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::TEXT_INPUT, ptr_context, container, position, size, padding, layout_width, layout_height),
+	axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::ET_TEXT_INPUT, ptr_context, container, position, size, padding, layout_width, layout_height),
 	text_input_horizontal_text_alignment(HAL_CENTER),
 	text_input_vertical_text_alignment(VAL_CENTER),
 	text_input_text(ptr_context),

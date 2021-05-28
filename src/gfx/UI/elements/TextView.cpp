@@ -13,7 +13,7 @@ TextView::TextView(axl::gl::Context* ptr_context,
 			const axl::math::Vec4f& padding,
 			axl::gl::gfx::ui::Layout::Size layout_width,
 			axl::gl::gfx::ui::Layout::Size layout_height) :
-	axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::TEXT_VIEW, ptr_context, container, position, size, padding, layout_width, layout_height),
+	axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::ET_TEXT_VIEW, ptr_context, container, position, size, padding, layout_width, layout_height),
 	text_view_horizontal_text_alignment(HAL_CENTER),
 	text_view_vertical_text_alignment(VAL_CENTER),
 	text_view_text(ptr_context)

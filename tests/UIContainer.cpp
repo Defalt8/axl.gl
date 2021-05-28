@@ -23,7 +23,7 @@ class TestElement : public axl::gl::gfx::ui::Element
 			const axl::math::Vec2f& size = axl::math::Vec2f(60.f,30.f),
 			const axl::math::Vec4f& padding = axl::math::Vec4f(0.0f,0.0f,0.0f,0.0f)
 		) :
-			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::OTHER, ptr_context, container, position, size, padding)
+			axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::ET_OTHER, ptr_context, container, position, size, padding)
 		{}
 		~TestElement()
 		{

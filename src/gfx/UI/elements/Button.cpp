@@ -13,7 +13,7 @@ Button::Button(axl::gl::Context* ptr_context,
 			const axl::math::Vec4f& padding,
 			axl::gl::gfx::ui::Layout::Size layout_width,
 			axl::gl::gfx::ui::Layout::Size layout_height) :
-	axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::BUTTON, ptr_context, container, position, size, padding, layout_width, layout_height),
+	axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::ET_BUTTON, ptr_context, container, position, size, padding, layout_width, layout_height),
 	button_state(Button::RELEASED),
 	button_hovered(false),
 	button_horizontal_text_alignment(HAL_CENTER),

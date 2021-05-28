@@ -822,10 +822,10 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 							axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
 							switch(element->element_type)
 							{
-								case axl::gl::gfx::ui::Element::OTHER:
-								case axl::gl::gfx::ui::Element::IMAGE_VIEW:
-								case axl::gl::gfx::ui::Element::TEXT_VIEW:
-								case axl::gl::gfx::ui::Element::TEXT_INPUT:
+								case axl::gl::gfx::ui::Element::ET_OTHER:
+								case axl::gl::gfx::ui::Element::ET_IMAGE_VIEW:
+								case axl::gl::gfx::ui::Element::ET_TEXT_VIEW:
+								case axl::gl::gfx::ui::Element::ET_TEXT_INPUT:
 									{
 										if(element->hasInputFocus())
 										{
@@ -852,8 +852,7 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 										}
 									}
 									break;
-								case axl::gl::gfx::ui::Element::LIST:
-								case axl::gl::gfx::ui::Element::BUTTON:
+								case axl::gl::gfx::ui::Element::ET_BUTTON:
 									break;
 							}
 						}
@@ -889,10 +888,10 @@ void View::onChar(wchar_t char_code)
 							axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
 							switch(element->element_type)
 							{
-								case axl::gl::gfx::ui::Element::OTHER:
-								case axl::gl::gfx::ui::Element::IMAGE_VIEW:
-								case axl::gl::gfx::ui::Element::TEXT_VIEW:
-								case axl::gl::gfx::ui::Element::TEXT_INPUT:
+								case axl::gl::gfx::ui::Element::ET_OTHER:
+								case axl::gl::gfx::ui::Element::ET_IMAGE_VIEW:
+								case axl::gl::gfx::ui::Element::ET_TEXT_VIEW:
+								case axl::gl::gfx::ui::Element::ET_TEXT_INPUT:
 									{
 										if(element->hasInputFocus())
 										{
@@ -901,8 +900,7 @@ void View::onChar(wchar_t char_code)
 										}
 									}
 									break;
-								case axl::gl::gfx::ui::Element::LIST:
-								case axl::gl::gfx::ui::Element::BUTTON:
+								case axl::gl::gfx::ui::Element::ET_BUTTON:
 									break;
 							}
 						}
@@ -936,12 +934,11 @@ void View::onPointer(int index, int x, int y, bool is_down)
 							axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
 							switch(element->element_type)
 							{
-								case axl::gl::gfx::ui::Element::OTHER:
-								case axl::gl::gfx::ui::Element::IMAGE_VIEW:
-								case axl::gl::gfx::ui::Element::TEXT_VIEW:
-								case axl::gl::gfx::ui::Element::LIST:
+								case axl::gl::gfx::ui::Element::ET_OTHER:
+								case axl::gl::gfx::ui::Element::ET_IMAGE_VIEW:
+								case axl::gl::gfx::ui::Element::ET_TEXT_VIEW:
 									break;
-								case axl::gl::gfx::ui::Element::TEXT_INPUT:
+								case axl::gl::gfx::ui::Element::ET_TEXT_INPUT:
 									{
 										axl::gl::gfx::ui::elements::TextInput* text_input = (axl::gl::gfx::ui::elements::TextInput*)element;
 										if(is_down)
@@ -951,7 +948,7 @@ void View::onPointer(int index, int x, int y, bool is_down)
 										}
 									}
 									break;
-								case axl::gl::gfx::ui::Element::BUTTON:
+								case axl::gl::gfx::ui::Element::ET_BUTTON:
 									{
 										axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
 										if(is_down)
@@ -1001,13 +998,12 @@ void View::onPointerMove(int index, int x, int y)
 							axl::gl::gfx::ui::Element* element = (axl::gl::gfx::ui::Element*)component;
 							switch(element->element_type)
 							{
-								case axl::gl::gfx::ui::Element::OTHER:
-								case axl::gl::gfx::ui::Element::IMAGE_VIEW:
-								case axl::gl::gfx::ui::Element::TEXT_VIEW:
-								case axl::gl::gfx::ui::Element::TEXT_INPUT:
-								case axl::gl::gfx::ui::Element::LIST:
+								case axl::gl::gfx::ui::Element::ET_OTHER:
+								case axl::gl::gfx::ui::Element::ET_IMAGE_VIEW:
+								case axl::gl::gfx::ui::Element::ET_TEXT_VIEW:
+								case axl::gl::gfx::ui::Element::ET_TEXT_INPUT:
 									break;
-								case axl::gl::gfx::ui::Element::BUTTON:
+								case axl::gl::gfx::ui::Element::ET_BUTTON:
 									{
 										axl::gl::gfx::ui::elements::Button* button = (axl::gl::gfx::ui::elements::Button*)element;
 										if(isInArea(point, button->getSize(), button->transform.getMatrix(), button->getContainer()))

@@ -20,12 +20,12 @@ class AXLGLCXXAPI Element : public axl::gl::gfx::ui::Component
 {
 	public:
 		enum Type {
-			OTHER,
-			IMAGE_VIEW,
-			TEXT_VIEW,
-			TEXT_INPUT,
-			BUTTON,
-			LIST
+			ET_OTHER,
+			ET_IMAGE_VIEW,
+			ET_TEXT_VIEW,
+			ET_TEXT_INPUT,
+			ET_BUTTON,
+			ET_SLIDER
 		};
 	public:
 		Element(Element::Type type,
