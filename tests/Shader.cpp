@@ -107,7 +107,7 @@ class GameView : public axl::gl::View
 				GL::glClear(GL::GL_COLOR_BUFFER_BIT|GL::GL_DEPTH_BUFFER_BIT);
 			}
 			program.setUniformMat4fv(uloc_projection, this->camera.projection->matrix.values);
-			program.setUniformMat4fv(uloc_view, this->camera.view_transform.values);
+			program.setUniformMat4fv(uloc_view, this->camera.view_matrix.values);
 			program.setUniformMat4fv(uloc_model, this->model_transform.values);
 			program.setUniform4fv(uloc_color, &this->color.x);
 			// Draw

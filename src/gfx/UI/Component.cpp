@@ -367,7 +367,7 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, axl::gl::gfx::Texture
 	{
 		component_program_ptr->setUniformMat4fv(component_program_ptr->uloc_projection, camera->projection->matrix.values);
 	}
-	component_program_ptr->setUniformMat4fv(component_program_ptr->uloc_view, camera->view_transform.values);
+	component_program_ptr->setUniformMat4fv(component_program_ptr->uloc_view, camera->view_matrix.values);
 	component_program_ptr->setUniformMat4fv(component_program_ptr->uloc_model, this->transform.getMatrix().values);
 	if(component_render_texture.bind(0))
 	{

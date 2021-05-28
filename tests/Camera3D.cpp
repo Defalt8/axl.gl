@@ -118,7 +118,7 @@ class GameView : public axl::gl::View
 			if(this->main_context.makeCurrent())
 			{
 				glMatrixMode(GL_MODELVIEW);
-				glLoadMatrixd(this->camera.view_transform.values);
+				glLoadMatrixd(this->camera.view_matrix.values);
 				if(p_clear)
 				{
 					glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

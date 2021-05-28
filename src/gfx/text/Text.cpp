@@ -110,7 +110,7 @@ bool Text::render(const axl::gl::camera::Camera3Df* camera)
 		{
 			if(camera->projection)
 				text_program_ptr->setUniformMat4fv(text_program_ptr->uloc_projection, camera->projection->matrix.values);
-			text_program_ptr->setUniformMat4fv(text_program_ptr->uloc_view, camera->view_transform.values);
+			text_program_ptr->setUniformMat4fv(text_program_ptr->uloc_view, camera->view_matrix.values);
 		}
 		text_program_ptr->setUniformMat4fv(text_program_ptr->uloc_model, this->text_transform.getMatrix().values);
 		text_program_ptr->setUniform2fv(text_program_ptr->uloc_text_offset, &this->text_offset.x);

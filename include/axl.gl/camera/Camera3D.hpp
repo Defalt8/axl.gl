@@ -43,7 +43,7 @@ class AXLGLCXXAPI Camera3D
 		axl::math::Vec2i viewport_position;
 		axl::math::Vec2i viewport_size;
 		axl::gl::projection::Projection* projection;
-		axl::math::Mat4d view_transform;
+		axl::math::Mat4d view_matrix;
 };
 
 AXLGLAPI axl::gl::projection::Projectionf DefaultCamera3DfProjection;
@@ -76,7 +76,7 @@ class AXLGLCXXAPI Camera3Df
 		axl::math::Vec2i viewport_position;
 		axl::math::Vec2i viewport_size;
 		axl::gl::projection::Projectionf* projection;
-		axl::math::Mat4f view_transform;
+		axl::math::Mat4f view_matrix;
 };
 
 
