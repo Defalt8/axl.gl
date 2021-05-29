@@ -29,7 +29,22 @@ struct AXLGLCXXAPI FrameBufferBinding
 	bool operator==(const FrameBufferBinding& binding) const;
 };
 
-template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::gfx::FrameBufferBinding>;
+} // axl.gl.gfx
+} // axl.gl
+
+namespace util {
+namespace ds {
+
+template class AXLGLCXXAPI UniList<axl::gl::gfx::FrameBufferBinding>;
+#ifndef __GNUC__
+template class AXLGLCXXAPI UniList<axl::gl::gfx::FrameBufferBinding>::Iterator;
+#endif
+
+} // axl.util.ds
+} // axl.util
+
+namespace gl {
+namespace gfx {
 
 class AXLGLCXXAPI FrameBuffer : public ContextObject
 {

@@ -25,7 +25,19 @@ struct AXLGLCXXAPI GlyphData {
 	axl::math::Vec4f UV;
 };
 
-template class AXLGLCXXAPI axl::util::ds::Array<axl::gl::gfx::GlyphData>;
+} // axl.gl.gfx
+} // axl.gl
+
+namespace util {
+namespace ds {
+
+template class AXLGLCXXAPI Array<axl::gl::gfx::GlyphData>;
+
+} // axl.util.ds
+} // axl.util
+
+namespace gl {
+namespace gfx {
 
 class AXLGLCXXAPI Font : public ContextObject
 {

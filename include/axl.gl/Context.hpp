@@ -1,26 +1,41 @@
 #pragma once
 #include "lib.hpp"
 #include <axl.util/ds/List.hpp>
-#include "ContextObject.hpp"
+// #include "ContextObject.hpp"
 
 namespace axl {
 namespace gl {
+	
+class AXLGLCXXAPI View;
+class AXLGLCXXAPI Context;
+class AXLGLCXXAPI ContextConfig;
+class AXLGLCXXAPI ContextObject;
+
 namespace gfx {
 namespace ui {
 
 class AXLGLCXXAPI Component;
 
-} // axl::gl::gfx::ui
-} // axl::gl::gfx
+} // axl.gl.gfx.ui
+} // axl.gl.gfx
+} // axl.gl
 
-class AXLGLCXXAPI View;
 
-template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::gfx::ui::Component*>;
-template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator;
-template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::ContextObject*>;
-template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::ContextObject*>::Iterator;
+namespace util {
+namespace ds {
 
-class AXLGLCXXAPI ContextConfig;
+template class AXLGLCXXAPI UniList<axl::gl::gfx::ui::Component*>;
+template class AXLGLCXXAPI UniList<axl::gl::ContextObject*>;
+#ifndef __GNUC__
+template class AXLGLCXXAPI UniList<axl::gl::gfx::ui::Component*>::Iterator;
+template class AXLGLCXXAPI UniList<axl::gl::ContextObject*>::Iterator;
+#endif
+
+} // axl.util.ds
+} // axl.util
+
+namespace gl {
+
 // The default OpenGL context configuration to be set at the creation of a new ContextConfig by default.
 // You can modify it to your liking before creating configurations. 
 AXLGLAPI axl::gl::ContextConfig DefaultContextConfig;
@@ -68,11 +83,11 @@ class AXLGLCXXAPI Context
 		bool containsComponent(const axl::gl::gfx::ui::Component* component) const;
 	public:
 		View*const& view;
-		const Context::ContextConfig& config;
+		const ContextConfig& config;
 		const void*const& reserved;
 	private:
 		View* m_view;
-		Context::ContextConfig m_config;
+		ContextConfig m_config;
 		axl::util::ds::UniList<ContextObject*> m_context_objects;
 		axl::util::ds::UniList<axl::gl::gfx::ui::Component*> m_components;
 		axl::gl::gfx::ui::Component* m_input_focus_component;
