@@ -54,7 +54,9 @@ bool Slider::setSize(const axl::math::Vec2f& size)
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		return false;
 	}
-	float width = component_size.x - (component_padding.x + component_padding.z), height = component_size.y - (component_padding.y + component_padding.w);
+	axl::math::Vec2f total_padding((component_padding.x + component_padding.z), (component_padding.y + component_padding.w));
+	float width = (component_size.x <= total_padding.x) ? 0.0f : (component_size.x - total_padding.x);
+	float height = (component_size.y <= total_padding.y) ? 0.0f : (component_size.y - total_padding.y);
 	verteces[0] = 0.0f; verteces[1] = 0.0f;
 	verteces[2] = width; verteces[3] = 0.0f;
 	verteces[4] = width; verteces[5] = height;
@@ -147,7 +149,9 @@ bool Slider::iCreate()
 		glDeleteVertexArrays(1, &vertex_array_id);
 		return false;
 	}
-	float width = component_size.x - (component_padding.x + component_padding.z), height = component_size.y - (component_padding.y + component_padding.w);
+	axl::math::Vec2f total_padding((component_padding.x + component_padding.z), (component_padding.y + component_padding.w));
+	float width = (component_size.x <= total_padding.x) ? 0.0f : (component_size.x - total_padding.x);
+	float height = (component_size.y <= total_padding.y) ? 0.0f : (component_size.y - total_padding.y);
 	verteces[0] = 0.0f; verteces[1] = 0.0f;
 	verteces[2] = width; verteces[3] = 0.0f;
 	verteces[4] = width; verteces[5] = height;
