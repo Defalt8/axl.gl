@@ -8,12 +8,24 @@
 namespace axl {
 namespace gl {
 
-class AXLGLCXXAPI Context;
+	class AXLGLCXXAPI Context;
+	class AXLGLCXXAPI ViewConfig;
 
-template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::Context*>;
-template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::Context*>::Iterator;
+} // axl.gl
 
-class AXLGLCXXAPI ViewConfig;
+namespace util {
+namespace ds {
+
+template class AXLGLCXXAPI UniList<axl::gl::Context*>;
+#ifndef __GNUC__
+template class AXLGLCXXAPI UniList<axl::gl::Context*>::Iterator;
+#endif
+
+} // axl.util.ds
+} // axl.util
+
+namespace gl {
+
 // The default View configuration to be set at the creation of a new ViewConfig by default.
 // You can modify it to your liking before creating configurations. 
 AXLGLAPI ViewConfig DefaultViewConfig;
@@ -118,8 +130,8 @@ class AXLGLCXXAPI View
 		const axl::math::Vec2i& min_size;
 		const axl::math::Vec2i& max_size;
 		const axl::util::WString& title;
-		const View::ViewConfig& config;
-		const View::Cursor& cursor;
+		const ViewConfig& config;
+		const Cursor& cursor;
 		const VisiblityState& visiblity;
 		const bool& is_paused;
 		const bool& is_ui_processing_enabled;
@@ -132,8 +144,8 @@ class AXLGLCXXAPI View
 		axl::math::Vec2i m_min_size;
 		axl::math::Vec2i m_max_size;
 		axl::util::WString m_title;
-		View::ViewConfig m_config;
-		View::Cursor m_cursor;
+		ViewConfig m_config;
+		Cursor m_cursor;
 		VisiblityState m_visiblity;
 		bool m_is_paused;
 		bool m_is_ui_processing_enabled;

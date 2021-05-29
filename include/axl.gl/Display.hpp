@@ -4,13 +4,27 @@
 #include <axl.math/vec/Vec2f.hpp>
 #include <axl.util/ds/List.hpp>
 
+
 namespace axl {
 namespace gl {
+	
+	class AXLGLCXXAPI View;
 
-class AXLGLCXXAPI View;
+} // axl.gl
 
-template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::View*>;
-template class AXLGLCXXAPI axl::util::ds::UniList<axl::gl::View*>::Iterator;
+namespace util {
+namespace ds {
+
+template class AXLGLCXXAPI UniList<axl::gl::View*>;
+#ifndef __GNUC__
+template class AXLGLCXXAPI UniList<axl::gl::View*>::Iterator;
+#endif
+
+} // axl.util.ds
+} // axl.util
+
+namespace gl {
+
 
 class AXLGLCXXAPI Display {
 	public:
