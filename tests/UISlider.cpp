@@ -35,9 +35,9 @@ class MainView : public Test::MainView
 		axl::gl::gfx::FrameBuffer component_framebuffer;
 		axl::gl::gfx::ui::Component::Program component_program;
 		axl::gl::gfx::ui::elements::Slider::Program slider_program;
-		axl::gl::gfx::ui::Container container;
-		axl::gl::gfx::ui::layouts::Linear linear_layout;
-		axl::gl::gfx::ui::elements::Slider sliders[12];
+		axl::gl::gfx::ui::Container container, container1, container2;
+		axl::gl::gfx::ui::layouts::Linear linear_layout, linear_layout1, linear_layout2;
+		axl::gl::gfx::ui::elements::Slider sliders[18];
 	public:
 		bool onCreate(bool recreating)
 		{
@@ -61,8 +61,14 @@ class MainView : public Test::MainView
 			component_framebuffer.setContext(&context);
 			Assert(component_framebuffer.create());
 			// linear_layout
-			linear_layout.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_VERTICAL);
-			linear_layout.setSpacing(axl::math::Vec2f(0.f,5.f));
+			linear_layout.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_HORIZONTAL);
+			linear_layout.setSpacing(axl::math::Vec2f(5.f,0.f));
+			// linear_layout1
+			linear_layout1.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_VERTICAL);
+			linear_layout1.setSpacing(axl::math::Vec2f(0.f,1.f));
+			// linear_layout2
+			linear_layout2.setOrientation(axl::gl::gfx::ui::layouts::Linear::OR_HORIZONTAL);
+			linear_layout2.setSpacing(axl::math::Vec2f(1.f,0.f));
 			// container
 			container.setContext(&context);
 			container.setComponentProgram(&component_program);
@@ -71,22 +77,48 @@ class MainView : public Test::MainView
 			container.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
 			container.setLayout(&linear_layout);
 			Assert(container.create());
+			// container1
+			container1.setContext(&context);
+			container1.setContainer(&container);
+			container1.setComponentProgram(&component_program);
+			container1.setComponentFrameBuffer(&component_framebuffer);
+			container1.setLayout(&linear_layout1);
+			Assert(container1.create());
+			// container2
+			container2.setContext(&context);
+			container2.setContainer(&container);
+			container2.setComponentProgram(&component_program);
+			container2.setComponentFrameBuffer(&component_framebuffer);
+			container2.setLayout(&linear_layout2);
+			Assert(container2.create());
 			// sliders
 			{
 				int slider_count = sizeof(sliders)/sizeof(axl::gl::gfx::ui::elements::Slider);
 				for(int i=0; i<slider_count; ++i)
 				{
 					sliders[i].setContext(&context);
-					sliders[i].setContainer(&container);
 					sliders[i].setComponentProgram(&component_program);
 					sliders[i].setComponentFrameBuffer(&component_framebuffer);
 					sliders[i].setSliderProgram(&slider_program);
 					sliders[i].setBackgroundColor(axl::math::Vec4f(0.99f, 0.99f, 0.99f, 1.f));
-					sliders[i].setForegroundColor(axl::math::Vec4f(1.f, .3f, 0.f, 1.f));
-					sliders[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
 					sliders[i].setMinValue(0.0f);
-					sliders[i].setMaxValue((float)50.f*(i+1));
-					sliders[i].setValue((float)50.f);
+					sliders[i].setMaxValue((float)10.f*(i+1));
+					if(i < slider_count/2)
+					{
+						sliders[i].setContainer(&container1);
+						sliders[i].setSliderOrientation(axl::gl::gfx::ui::elements::Slider::OR_HORIZONTAL);
+						sliders[i].setForegroundColor(axl::math::Vec4f(1.f, .3f, 0.f, 1.f));
+						sliders[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
+						sliders[i].setValue((float)20.f);
+					}
+					else
+					{
+						sliders[i].setContainer(&container2);
+						sliders[i].setSliderOrientation(axl::gl::gfx::ui::elements::Slider::OR_VERTICAL);
+						sliders[i].setForegroundColor(axl::math::Vec4f(.3f, 1.f, 0.f, 1.f));
+						sliders[i].setPadding(axl::math::Vec4f(0.f,0.f,0.f,0.f));
+						sliders[i].setValue((float)40.f);
+					}
 					Assert(sliders[i].create());
 				}
 			}

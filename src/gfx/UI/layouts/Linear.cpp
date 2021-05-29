@@ -40,8 +40,8 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 	}
 	axl::math::Vec2f current_position(container_padding.x, container_padding.y);
 	axl::math::Vec2f element_size(
-		(child_count == 0 ? 0.f : ((float)((client_size.x <= (child_count-1) * lin_spacing.x) ? 0.0f : (client_size.x - ((child_count-1) * lin_spacing.x))) / child_count)),
-		(child_count == 0 ? 0.f : ((float)((client_size.y <= (child_count-1) * lin_spacing.y) ? 0.0f : (client_size.y - ((child_count-1) * lin_spacing.y))) / child_count))
+		(child_count == 0 ? 0.f : ((float)((client_size.x <= (float)(child_count-1) * lin_spacing.x) ? 0.0f : (client_size.x - ((float)(child_count-1) * lin_spacing.x))) / (float)child_count)),
+		(child_count == 0 ? 0.f : ((float)((client_size.y <= (float)(child_count-1) * lin_spacing.y) ? 0.0f : (client_size.y - ((float)(child_count-1) * lin_spacing.y))) / (float)child_count))
 	);
 	float depth = 0.f;
 	axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = container_children.first();

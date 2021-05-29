@@ -14,6 +14,10 @@ namespace elements {
 class AXLGLCXXAPI Slider : public axl::gl::gfx::ui::Element
 {
 	public:
+		enum Orientation {
+			OR_HORIZONTAL,
+			OR_VERTICAL
+		};
 		class AXLGLCXXAPI Program : public axl::gl::gfx::Program
 		{
 			public:
@@ -42,12 +46,15 @@ class AXLGLCXXAPI Slider : public axl::gl::gfx::ui::Element
 		virtual bool isValid() const;
 		virtual bool setSize(const axl::math::Vec2f& size);
 		bool setSliderProgram(axl::gl::gfx::ui::elements::Slider::Program* slider_program_ptr);
+		bool setSliderOrientation(Orientation slider_orientation);
 		bool setValue(float value);
 		bool setMinValue(float min_value);
 		bool setMaxValue(float max_value);
+		Orientation getSliderOrientation() const;
 		float getValue() const;
 		float getMinValue() const;
 		float getMaxValue() const;
+		bool update();
 	public:
 		// When the knob is being moved.
 		virtual void onSlide(float value);
@@ -56,10 +63,12 @@ class AXLGLCXXAPI Slider : public axl::gl::gfx::ui::Element
 		virtual bool iDestroy();
 		virtual bool iRender(axl::gl::camera::Camera3Df* camera);
 		virtual axl::math::Vec2f getContentSize() const;
+		virtual bool onSliderOrientationChange(Orientation slider_orientation);
 	public:
 		bool slider_is_sliding; // Do NOT modify
 	protected:
 		axl::gl::gfx::ui::elements::Slider::Program* slider_program_ptr;
+		Orientation slider_orientation;
 		float slider_value;
 		float slider_min_value;
 		float slider_max_value;

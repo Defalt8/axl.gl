@@ -978,7 +978,9 @@ void View::onPointer(int index, int x, int y, bool is_down)
 												if(isInArea(point, client_size, slider->transform.getMatrix(), slider->getContainer()))
 												{
 													float min_value = slider->getMinValue(), max_value = slider->getMaxValue();
-													float slide_value = client_point.x / (client_size.x - (padding.x + padding.z));
+													float slide_value = slider->getSliderOrientation() == axl::gl::gfx::ui::elements::Slider::OR_HORIZONTAL ?
+														(client_point.x / (client_size.x - (padding.x + padding.z))) :
+														(client_point.y / (client_size.y - (padding.y + padding.w)));
 													if(axl::gl::input::Keyboard::isKeyDown(axl::gl::input::KeyCode::KEY_CONTROL))
 														slide_value = (slide_value >= 0.5f) ? max_value : min_value;
 													else
@@ -1060,7 +1062,9 @@ void View::onPointerMove(int index, int x, int y)
 												axl::math::Vec4f padding(slider->getPadding());
 												axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
 												float min_value = slider->getMinValue(), max_value = slider->getMaxValue();
-												float slide_value = client_point.x / (client_size.x - (padding.x + padding.z));
+												float slide_value = slider->getSliderOrientation() == axl::gl::gfx::ui::elements::Slider::OR_HORIZONTAL ?
+													(client_point.x / (client_size.x - (padding.x + padding.z))) :
+													(client_point.y / (client_size.y - (padding.y + padding.w)));
 												if(axl::gl::input::Keyboard::isKeyDown(axl::gl::input::KeyCode::KEY_CONTROL))
 													slide_value = (slide_value >= 0.5f) ? max_value : min_value;
 												else

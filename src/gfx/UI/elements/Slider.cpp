@@ -22,6 +22,7 @@ Slider::Slider(axl::gl::Context* ptr_context,
 			axl::gl::gfx::ui::Layout::Size layout_width,
 			axl::gl::gfx::ui::Layout::Size layout_height) :
 	axl::gl::gfx::ui::Element(axl::gl::gfx::ui::Element::ET_SLIDER, ptr_context, container, position, size, padding, layout_width, layout_height),
+	slider_orientation(Slider::OR_HORIZONTAL),
 	slider_value(0.0f),
 	slider_min_value(0.0f),
 	slider_max_value(1.0f),
@@ -43,34 +44,22 @@ bool Slider::isValid() const
 bool Slider::setSize(const axl::math::Vec2f& size)
 {
 	using namespace GL;
-	if(!axl::gl::gfx::ui::Element::setSize(size) ||
-		!this->isValid() ||
-		!this->ctx_context->makeCurrent()
-	) return false;
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer_id);
-	GLfloat* verteces = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-	if(!verteces)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		return false;
-	}
-	axl::math::Vec2f total_padding((component_padding.x + component_padding.z), (component_padding.y + component_padding.w));
-	float width = (component_size.x <= total_padding.x) ? 0.0f : (component_size.x - total_padding.x);
-	float height = (component_size.y <= total_padding.y) ? 0.0f : (component_size.y - total_padding.y);
-	verteces[0] = 0.0f; verteces[1] = 0.0f;
-	verteces[2] = width; verteces[3] = 0.0f;
-	verteces[4] = width; verteces[5] = height;
-	verteces[6] = width; verteces[7] = height;
-	verteces[8] = 0.0f; verteces[9] = height;
-	verteces[10] = 0.0f; verteces[11] = 0.0f;
-	glUnmapBuffer(GL_ARRAY_BUFFER);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	if(!axl::gl::gfx::ui::Element::setSize(size)) return false;
+	this->update();
 	return true;
 }
 bool Slider::setSliderProgram(axl::gl::gfx::ui::elements::Slider::Program* slider_program_ptr)
 {
 	if(slider_program_ptr && this->ctx_context != slider_program_ptr->getContext()) return false;
 	this->slider_program_ptr = slider_program_ptr;
+	this->onModify();
+	return true;
+}
+bool Slider::setSliderOrientation(Slider::Orientation slider_orientation)
+{
+	if(!this->onSliderOrientationChange(slider_orientation)) return false;
+	this->slider_orientation = slider_orientation;
+	this->onModify();
 	return true;
 }
 bool Slider::setValue(float value)
@@ -97,6 +86,10 @@ bool Slider::setMaxValue(float max_value)
 	this->onModify();
 	return true;
 }
+Slider::Orientation Slider::getSliderOrientation() const
+{
+	return this->slider_orientation;
+}
 float Slider::getValue() const
 {
 	return slider_value;
@@ -108,6 +101,31 @@ float Slider::getMinValue() const
 float Slider::getMaxValue() const
 {
 	return slider_max_value;
+}
+bool Slider::update()
+{
+	using namespace GL;
+	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer_id);
+	GLfloat* verteces = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	if(!verteces)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		return false;
+	}
+	axl::math::Vec2f total_padding((component_padding.x + component_padding.z), (component_padding.y + component_padding.w));
+	float width = (component_size.x <= total_padding.x) ? 0.0f : (component_size.x - total_padding.x);
+	float height = (component_size.y <= total_padding.y) ? 0.0f : (component_size.y - total_padding.y);
+	verteces[0] = 0.0f; verteces[1] = 0.0f;
+	verteces[2] = width; verteces[3] = 0.0f;
+	verteces[4] = width; verteces[5] = height;
+	verteces[6] = width; verteces[7] = height;
+	verteces[8] = 0.0f; verteces[9] = height;
+	verteces[10] = 0.0f; verteces[11] = 0.0f;
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	this->onModify();
+	return true;
 }
 
 void Slider::onSlide(float value)
@@ -140,8 +158,7 @@ bool Slider::iCreate()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLfloat)*12), 0, GL_STATIC_DRAW);
-	GLfloat* verteces = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-	if(!verteces)
+	if(glGetError() != GL_NO_ERROR)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
@@ -149,20 +166,11 @@ bool Slider::iCreate()
 		glDeleteVertexArrays(1, &vertex_array_id);
 		return false;
 	}
-	axl::math::Vec2f total_padding((component_padding.x + component_padding.z), (component_padding.y + component_padding.w));
-	float width = (component_size.x <= total_padding.x) ? 0.0f : (component_size.x - total_padding.x);
-	float height = (component_size.y <= total_padding.y) ? 0.0f : (component_size.y - total_padding.y);
-	verteces[0] = 0.0f; verteces[1] = 0.0f;
-	verteces[2] = width; verteces[3] = 0.0f;
-	verteces[4] = width; verteces[5] = height;
-	verteces[6] = width; verteces[7] = height;
-	verteces[8] = 0.0f; verteces[9] = height;
-	verteces[10] = 0.0f; verteces[11] = 0.0f;
-	glUnmapBuffer(GL_ARRAY_BUFFER);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	m_vertex_buffer_id = vertex_buffer_id;
 	m_vertex_array_id = vertex_array_id;
+	this->update();
 	this->onModify();
 	return true;
 }
@@ -174,8 +182,8 @@ bool Slider::iRender(axl::gl::camera::Camera3Df* camera)
 {
 	using namespace GL;
 	axl::math::Mat4f mvp(
-		(slider_value / (slider_max_value - slider_min_value)), 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
+		(slider_orientation == OR_HORIZONTAL ? (slider_value / (slider_max_value - slider_min_value)) : 1.0f), 0.0f, 0.0f, 0.0f,
+		0.0f, (slider_orientation == OR_VERTICAL ? (slider_value / (slider_max_value - slider_min_value)) : 1.0f), 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		component_padding.x, component_padding.y, 0.0f, 1.0f
 	);
@@ -206,6 +214,10 @@ bool Slider::iRender(axl::gl::camera::Camera3Df* camera)
 axl::math::Vec2f Slider::getContentSize() const
 {
 	return axl::math::Vec2f(0, 0);
+}
+bool Slider::onSliderOrientationChange(Orientation slider_orientation)
+{
+	return true;
 }
 
 //
