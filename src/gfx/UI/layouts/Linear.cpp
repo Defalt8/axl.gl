@@ -23,10 +23,11 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 	axl::math::Vec2f new_size(0,0), container_size = container.getSize();
 	const axl::util::ds::UniList<axl::gl::gfx::ui::Component*>& container_children = container.getComponents();
 	unsigned int child_count = container_children.count();
-	axl::math::Vec2f client_size = axl::math::Vec2f(
-			container_size.x - (container_padding.x + container_padding.z),
-			container_size.y - (container_padding.y + container_padding.w)
-			);
+	axl::math::Vec2f total_padding((container_padding.x + container_padding.z) , (container_padding.y + container_padding.w));
+	axl::math::Vec2f client_size(
+		(container_size.x <= total_padding.x ? 0.0f : (container_size.x - total_padding.x)),
+		(container_size.y <= total_padding.y ? 0.0f : (container_size.y - total_padding.y))
+	);
 	switch(this->lin_orientation)
 	{
 		default:
@@ -39,8 +40,8 @@ void Linear::organize(axl::gl::gfx::ui::Container& container)
 	}
 	axl::math::Vec2f current_position(container_padding.x, container_padding.y);
 	axl::math::Vec2f element_size(
-		(child_count == 0 ? 0.f : ((float)(client_size.x - ((child_count-1) * lin_spacing.x)) / child_count)),
-		(child_count == 0 ? 0.f : ((float)(client_size.y - ((child_count-1) * lin_spacing.y)) / child_count))
+		(child_count == 0 ? 0.f : ((float)((client_size.x <= (child_count-1) * lin_spacing.x) ? 0.0f : (client_size.x - ((child_count-1) * lin_spacing.x))) / child_count)),
+		(child_count == 0 ? 0.f : ((float)((client_size.y <= (child_count-1) * lin_spacing.y) ? 0.0f : (client_size.y - ((child_count-1) * lin_spacing.y))) / child_count))
 	);
 	float depth = 0.f;
 	axl::util::ds::UniList<axl::gl::gfx::ui::Component*>::Iterator it = container_children.first();
