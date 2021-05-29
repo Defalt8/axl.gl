@@ -966,24 +966,27 @@ void View::onPointer(int index, int x, int y, bool is_down)
 								case axl::gl::gfx::ui::Element::ET_SLIDER:
 									{
 										axl::gl::gfx::ui::elements::Slider* slider = (axl::gl::gfx::ui::elements::Slider*)element;
-										if(is_down)
+										if((index == PI_LEFT_BUTTON) || (index == PI_TOUCH))
 										{
-											axl::math::Vec3f position = slider->transform.getPosition();
-											axl::math::Vec2f client_size(slider->getSize());
-											axl::math::Vec4f padding(slider->getPadding());
-											axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
-											client_size.x -= padding.x + padding.z;
-											client_size.y -= padding.y + padding.w;
-											if(isInArea(point, client_size, slider->transform.getMatrix(), slider->getContainer()))
+											if(is_down)
 											{
-												float slide_value = client_point.x / client_size.x * (slider->getMaxValue() - slider->getMinValue());
-												slider->onSlide(slide_value);
-												slider->slider_is_sliding = true;
+												axl::math::Vec3f position = slider->transform.getPosition();
+												axl::math::Vec2f client_size(slider->getSize());
+												axl::math::Vec4f padding(slider->getPadding());
+												axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
+												client_size.x -= padding.x + padding.z;
+												client_size.y -= padding.y + padding.w;
+												if(isInArea(point, client_size, slider->transform.getMatrix(), slider->getContainer()))
+												{
+													float slide_value = client_point.x / client_size.x * (slider->getMaxValue() - slider->getMinValue());
+													slider->onSlide(slide_value);
+													slider->slider_is_sliding = true;
+												}
 											}
-										}
-										else
-										{
-											slider->slider_is_sliding = false;
+											else
+											{
+												slider->slider_is_sliding = false;
+											}
 										}
 									}
 									break;
@@ -1046,14 +1049,19 @@ void View::onPointerMove(int index, int x, int y)
 										axl::gl::gfx::ui::elements::Slider* slider = (axl::gl::gfx::ui::elements::Slider*)element;
 										if(slider->slider_is_sliding)
 										{
-											axl::math::Vec3f position = slider->transform.getPosition();
-											axl::math::Vec2f client_size(slider->getSize());
-											axl::math::Vec4f padding(slider->getPadding());
-											axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
-											client_size.x -= padding.x + padding.z;
-											client_size.y -= padding.y + padding.w;
-											float slide_value = client_point.x / client_size.x * (slider->getMaxValue() - slider->getMinValue());
-											slider->onSlide(slide_value);
+											if(axl::gl::input::Mouse::isButtonDown(axl::gl::input::MouseButton::MBTN_LEFT) || pointers[PI_TOUCH])
+											{
+												axl::math::Vec3f position = slider->transform.getPosition();
+												axl::math::Vec2f client_size(slider->getSize());
+												axl::math::Vec4f padding(slider->getPadding());
+												axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
+												client_size.x -= padding.x + padding.z;
+												client_size.y -= padding.y + padding.w;
+												float slide_value = client_point.x / client_size.x * (slider->getMaxValue() - slider->getMinValue());
+												slider->onSlide(slide_value);
+											}
+											else
+												slider->slider_is_sliding = false;
 										}
 									}
 									break;

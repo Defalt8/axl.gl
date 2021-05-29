@@ -114,6 +114,11 @@ class MainView : public Test::MainView
 			{
 				new_title.format(L"UISlider test | FPS: %.2f", FPS);
 				this->setTitle(new_title);
+				int slider_count = sizeof(sliders)/sizeof(axl::gl::gfx::ui::elements::Slider);
+				printf("Slider values: ");
+				for(int i=0; i<slider_count; ++i)
+					printf("%.2f ", sliders[i].getValue());
+				printf("                 \r");
 			}
 			if(update_clock.checkAndSet(true))
 			{

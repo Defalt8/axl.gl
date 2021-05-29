@@ -244,13 +244,7 @@ bool Slider::Program::iCreate()
 		!fragment_shader.attach(*this) ||
 		!this->link()
 	)
-	{
-		axl::util::String info_log;
-		info_log = vertex_shader.getInfoLog();
-		info_log = fragment_shader.getInfoLog();
-		info_log = this->getInfoLog();
 		return false;
-	}
 	vertex_shader.detach(*this);
 	fragment_shader.detach(*this);
 	uloc_mvp = this->getUniformLocation("u_MVP");
