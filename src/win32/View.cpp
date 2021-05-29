@@ -97,7 +97,7 @@ bool ViewConfig::operator!=(const ViewConfig& rhs) const
 		stereo != rhs.stereo
 		);
 }
-axl::gl::ViewConfig DefaultViewConfig = axl::gl::ViewConfig(
+ViewConfig DefaultViewConfig = ViewConfig(
 	0, // id
 	ViewConfig::PT_RGB, // pixel_type
 	24, // bits_color
@@ -111,7 +111,7 @@ axl::gl::ViewConfig DefaultViewConfig = axl::gl::ViewConfig(
 	false, // double_buffered
 	false // stereo
 );
-const axl::gl::ViewConfig NullViewConfig = axl::gl::ViewConfig(
+const ViewConfig NullViewConfig = ViewConfig(
 	-1, // id
 	ViewConfig::PT_RGB, // pixel_type
 	-1, // bits_color
