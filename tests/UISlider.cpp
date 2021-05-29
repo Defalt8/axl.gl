@@ -67,7 +67,7 @@ class MainView : public Test::MainView
 			container.setContext(&context);
 			container.setComponentProgram(&component_program);
 			container.setComponentFrameBuffer(&component_framebuffer);
-			container.setBackgroundColor(axl::math::Vec4f(.8f,.8f,.78f,1.f));
+			container.setBackgroundColor(axl::math::Vec4f(.1f,.6f,.9f,1.f));
 			container.setPadding(axl::math::Vec4f(10.f,10.f,10.f,10.f));
 			container.setLayout(&linear_layout);
 			Assert(container.create());
@@ -81,8 +81,8 @@ class MainView : public Test::MainView
 					sliders[i].setComponentProgram(&component_program);
 					sliders[i].setComponentFrameBuffer(&component_framebuffer);
 					sliders[i].setSliderProgram(&slider_program);
-					sliders[i].setBackgroundColor(axl::math::Vec4f(.1f,.3f,.6f,1.f));
-					sliders[i].setForegroundColor(axl::math::Vec4f(1.f,1.f,1.f,1.f));
+					sliders[i].setBackgroundColor(axl::math::Vec4f(0.99f, 0.99f, 0.99f, 1.f));
+					sliders[i].setForegroundColor(axl::math::Vec4f(1.f, .3f, 0.f, 1.f));
 					sliders[i].setPadding(axl::math::Vec4f(5.f,5.f,5.f,5.f));
 					sliders[i].setMinValue(0.0f);
 					sliders[i].setMaxValue((float)50.f*(i+1));

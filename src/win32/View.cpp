@@ -4,6 +4,7 @@
 #include <axl.math/vec/Vec2i.hpp>
 #include <axl.math/float.hpp>
 #include <axl.math/constants.hpp>
+#include <axl.math/util.hpp>
 #include <axl.util/WString.hpp>
 #include <axl.glfl/glCoreARB.hpp>
 #include <axl.glfl/win/wglext.hpp>
@@ -976,7 +977,7 @@ void View::onPointer(int index, int x, int y, bool is_down)
 												axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
 												client_size.x -= padding.x + padding.z;
 												client_size.y -= padding.y + padding.w;
-												if(isInArea(point, client_size, slider->transform.getMatrix(), slider->getContainer()))
+												if(isInArea(point-axl::math::Vec2f(padding.x, padding.y), client_size, slider->transform.getMatrix(), slider->getContainer()))
 												{
 													float slide_value = client_point.x / client_size.x * (slider->getMaxValue() - slider->getMinValue());
 													slider->onSlide(slide_value);
@@ -1057,7 +1058,9 @@ void View::onPointerMove(int index, int x, int y)
 												axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
 												client_size.x -= padding.x + padding.z;
 												client_size.y -= padding.y + padding.w;
-												float slide_value = client_point.x / client_size.x * (slider->getMaxValue() - slider->getMinValue());
+												float min_value = slider->getMinValue(), max_value = slider->getMaxValue();
+												float slide_value = client_point.x / client_size.x * (max_value - min_value);
+												slide_value = axl::math::clamp(slide_value, min_value, max_value);
 												slider->onSlide(slide_value);
 											}
 											else
