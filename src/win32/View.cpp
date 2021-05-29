@@ -971,11 +971,20 @@ void View::onPointer(int index, int x, int y, bool is_down)
 										{
 											if(is_down)
 											{
-												axl::math::Vec3f position = slider->transform.getPosition();
+												axl::math::Vec3f _position = slider->transform.getPosition();
 												axl::math::Vec2f client_size(slider->getSize());
 												axl::math::Vec4f padding(slider->getPadding());
+												axl::gl::gfx::ui::Container* parent = slider->getContainer();
+												axl::math::Mat4f final_transform = slider->transform.getMatrix();
+												// calculate the final transform matrix
+												while(parent)
+												{
+													final_transform = parent->transform.getMatrix() * final_transform;
+													parent = parent->getContainer();
+												}
+												axl::math::Vec4f position = final_transform * axl::math::Vec4f(_position, 1.0f);
 												axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
-												if(isInArea(point, client_size, slider->transform.getMatrix(), slider->getContainer()))
+												if(isInArea(point, client_size, final_transform, 0))
 												{
 													float min_value = slider->getMinValue(), max_value = slider->getMaxValue();
 													float slide_value = slider->getSliderOrientation() == axl::gl::gfx::ui::elements::Slider::OR_HORIZONTAL ?
@@ -1057,9 +1066,18 @@ void View::onPointerMove(int index, int x, int y)
 										{
 											if(axl::gl::input::Mouse::isButtonDown(axl::gl::input::MouseButton::MBTN_LEFT) || pointers[PI_TOUCH])
 											{
-												axl::math::Vec3f position = slider->transform.getPosition();
+												axl::math::Vec3f _position = slider->transform.getPosition();
 												axl::math::Vec2f client_size(slider->getSize());
 												axl::math::Vec4f padding(slider->getPadding());
+												axl::gl::gfx::ui::Container* parent = slider->getContainer();
+												axl::math::Mat4f final_transform = slider->transform.getMatrix();
+												// calculate the final transform matrix
+												while(parent)
+												{
+													final_transform = parent->transform.getMatrix() * final_transform;
+													parent = parent->getContainer();
+												}
+												axl::math::Vec4f position = final_transform * axl::math::Vec4f(_position, 1.0f);
 												axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
 												float min_value = slider->getMinValue(), max_value = slider->getMaxValue();
 												float slide_value = slider->getSliderOrientation() == axl::gl::gfx::ui::elements::Slider::OR_HORIZONTAL ?
