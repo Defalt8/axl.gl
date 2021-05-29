@@ -963,6 +963,30 @@ void View::onPointer(int index, int x, int y, bool is_down)
 										}
 									}
 									break;
+								case axl::gl::gfx::ui::Element::ET_SLIDER:
+									{
+										axl::gl::gfx::ui::elements::Slider* slider = (axl::gl::gfx::ui::elements::Slider*)element;
+										if(is_down)
+										{
+											axl::math::Vec3f position = slider->transform.getPosition();
+											axl::math::Vec2f client_size(slider->getSize());
+											axl::math::Vec4f padding(slider->getPadding());
+											axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
+											client_size.x -= padding.x + padding.z;
+											client_size.y -= padding.y + padding.w;
+											if(isInArea(point, client_size, slider->transform.getMatrix(), slider->getContainer()))
+											{
+												float slide_value = client_point.x / client_size.x * (slider->getMaxValue() - slider->getMinValue());
+												slider->onSlide(slide_value);
+												slider->slider_is_sliding = true;
+											}
+										}
+										else
+										{
+											slider->slider_is_sliding = false;
+										}
+									}
+									break;
 							}
 						}
 						break;
@@ -1014,6 +1038,22 @@ void View::onPointerMove(int index, int x, int y)
 										else if(button->isHovered())
 										{
 											button->onDrift();
+										}
+									}
+									break;
+								case axl::gl::gfx::ui::Element::ET_SLIDER:
+									{
+										axl::gl::gfx::ui::elements::Slider* slider = (axl::gl::gfx::ui::elements::Slider*)element;
+										if(slider->slider_is_sliding)
+										{
+											axl::math::Vec3f position = slider->transform.getPosition();
+											axl::math::Vec2f client_size(slider->getSize());
+											axl::math::Vec4f padding(slider->getPadding());
+											axl::math::Vec2f client_point(point.x - position.x - padding.x, point.y - position.y - padding.y);
+											client_size.x -= padding.x + padding.z;
+											client_size.y -= padding.y + padding.w;
+											float slide_value = client_point.x / client_size.x * (slider->getMaxValue() - slider->getMinValue());
+											slider->onSlide(slide_value);
 										}
 									}
 									break;

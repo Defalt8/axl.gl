@@ -19,6 +19,7 @@ add_executable( axl.gl.uicontainer "UIContainer.cpp" "common/GL.cpp" "common/Mai
 add_executable( axl.gl.uibutton "UIButton.cpp" "common/GL.cpp" "common/MainView.cpp" )
 add_executable( axl.gl.uitextview "UITextView.cpp" "common/GL.cpp" "common/MainView.cpp" )
 add_executable( axl.gl.uitextinput "UITextInput.cpp" "common/GL.cpp" "common/MainView.cpp" )
+add_executable( axl.gl.uislider "UISlider.cpp" "common/GL.cpp" "common/MainView.cpp" )
 add_executable( axl.gl.viewports "Viewports.cpp" "common/GL.cpp" "common/MainView.cpp" )
 
 set_target_properties( axl.gl.lib
@@ -38,6 +39,7 @@ set_target_properties( axl.gl.lib
 	axl.gl.uibutton
 	axl.gl.uitextview
 	axl.gl.uitextinput
+	axl.gl.uislider
 	axl.gl.viewports
 	PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${AXLGL_RUNTIME_DIR}"
 )

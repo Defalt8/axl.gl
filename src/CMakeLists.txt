@@ -48,6 +48,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"gfx/UI/elements/Button.cpp"
 	"gfx/UI/elements/TextView.cpp"
 	"gfx/UI/elements/TextInput.cpp"
+	"gfx/UI/elements/Slider.cpp"
 
 	"${AXLGL_INCLUDE_DIR}/axl.gl/everything.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/lib.hpp"
@@ -93,6 +94,7 @@ add_library( axl.gl ${AXLGL_TYPE}
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/Button.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextView.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextInput.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/Slider.hpp"
 )
 set( LIBFREETYPE "${THIRD_PARTY_LIB_DIR}/freetype.lib" )
 target_include_directories( axl.gl
@@ -185,6 +187,7 @@ if( AXLGL_INSTALL_HEADERS )
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/Button.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextView.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/TextInput.hpp"
+	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx/UI/elements/Slider.hpp"
 	"${AXLGL_INCLUDE_DIR}/axl.gl/gfx.hpp"
 		DESTINATION "include/axl.gl"
 	)

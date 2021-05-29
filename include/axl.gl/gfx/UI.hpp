@@ -13,3 +13,4 @@
 #include "UI/elements/Button.hpp"
 #include "UI/elements/TextView.hpp"
 #include "UI/elements/TextInput.hpp"
+#include "UI/elements/Slider.hpp"
