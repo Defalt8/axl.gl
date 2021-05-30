@@ -13,7 +13,11 @@ if( "${CMAKE_BUILD_TYPE}" MATCHES "^[Dd][Ee][Bb][Uu][Gg]$" )
 	set( DEBUG_SUFFIX d )
 endif()
 
-set( LIBFREETYPE "${THIRD_PARTY_LIB_DIR}/freetype${DEBUG_SUFFIX}.lib" )
+if( MSVC )
+	set( LIBFREETYPE "${THIRD_PARTY_LIB_DIR}/freetype${DEBUG_SUFFIX}.lib" )
+else()
+	set( LIBFREETYPE -lfreetype${DEBUG_SUFFIX} )
+endif()
 
 
 add_library( axl.gl ${AXLGL_TYPE}
@@ -102,6 +106,9 @@ add_library( axl.gl ${AXLGL_TYPE}
 target_include_directories( axl.gl
 	PUBLIC "${AXLGL_INCLUDE_DIR}"
 	PUBLIC "${THIRD_PARTY_INCLUDE_DIR}"
+)
+target_link_directories( axl.gl
+	PUBLIC "${THIRD_PARTY_LIB_DIR}"
 )
 target_link_libraries( axl.gl
 	PUBLIC axl.math
