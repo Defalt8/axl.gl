@@ -359,19 +359,19 @@ LRESULT CALLBACK HookKeyboardProc(int ncode, WPARAM wparam, LPARAM lparam)
 					{
 						case VK_LCONTROL:
 						case VK_RCONTROL:
-							Keyboard::Listener::onKey(axl::gl::input::KEY_CONTROL, is_down);
+							Keyboard::Listener::onKey(axl::gl::input::KeyCode::KEY_CONTROL, is_down);
 							break;
 						case VK_LSHIFT:
 						case VK_RSHIFT:
-							Keyboard::Listener::onKey(axl::gl::input::KEY_SHIFT, is_down);
+							Keyboard::Listener::onKey(axl::gl::input::KeyCode::KEY_SHIFT, is_down);
 							break;
 						case VK_LMENU:
 						case VK_RMENU:
-							Keyboard::Listener::onKey(axl::gl::input::KEY_ALT, is_down);
+							Keyboard::Listener::onKey(axl::gl::input::KeyCode::KEY_ALT, is_down);
 							break;
 						case VK_LWIN:
 						case VK_RWIN:
-							Keyboard::Listener::onKey(axl::gl::input::KEY_CMD, is_down);
+							Keyboard::Listener::onKey(axl::gl::input::KeyCode::KEY_CMD, is_down);
 							break;
 					}
 					Keyboard::Listener::onKey(input::Keyboard::mapPlatformKeyCode((int)data.vkCode), is_down);

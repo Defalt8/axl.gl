@@ -38,8 +38,8 @@ MainView::MainView(const axl::util::WString& _title, const axl::math::Vec2i& _po
 	m_rendered_frames(0),
 	m_frame_time(),
 	m_frame_clock(500),
-	m_key_Alt(axl::gl::input::KEY_ALT),
-	m_key_Enter(axl::gl::input::KEY_RETURN)
+	m_key_Alt(axl::gl::input::KeyCode::KEY_ALT),
+	m_key_Enter(axl::gl::input::KeyCode::KEY_RETURN)
 {}
 MainView::~MainView()
 {
