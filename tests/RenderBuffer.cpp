@@ -55,7 +55,7 @@ class GameView : public axl::gl::View
 			if(!this->isValid() || this->is_paused) return;
 			if(this->offscreen)
 			{
-				Assert(this->frame_buffer.bind(axl::gl::gfx::FrameBuffer::FBT_DRAW));
+				Assert(this->frame_buffer.bind(axl::gl::gfx::FrameBuffer::Target::FBT_DRAW));
 			}
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);

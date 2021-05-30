@@ -335,7 +335,7 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, axl::gl::gfx::Texture
 	if(component_is_modified)
 	{
 		if(!ptr_render_texture)
-			component_framebuffer_ptr->bind(FrameBuffer::FBT_DRAW);
+			component_framebuffer_ptr->bind(FrameBuffer::Target::FBT_DRAW);
 		if(!attachTexture2D(GL_COLOR_ATTACHMENT0, component_render_texture.getId(), GL_DRAW_FRAMEBUFFER) ||
 			!attachTexture2D(GL_DEPTH_ATTACHMENT, component_depth_texture.getId(), GL_DRAW_FRAMEBUFFER))
 			return false;
@@ -361,7 +361,7 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, axl::gl::gfx::Texture
 	}
 	else
 	{
-		component_framebuffer_ptr->unbind(FrameBuffer::FBT_DRAW);
+		component_framebuffer_ptr->unbind(FrameBuffer::Target::FBT_DRAW);
 	}
 	if(camera->projection)
 	{

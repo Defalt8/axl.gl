@@ -49,7 +49,7 @@ namespace gfx {
 class AXLGLCXXAPI FrameBuffer : public ContextObject
 {
 	public:
-		AXLGL_ENUM_CLASS Target { FBT_BOTH = 0, FBT_READ, FBT_DRAW };
+		enum class Target { FBT_BOTH = 0, FBT_READ, FBT_DRAW };
 	public:
 		FrameBuffer(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~FrameBuffer();
