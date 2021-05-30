@@ -1143,12 +1143,12 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 						view->onKey(input::Keyboard::mapPlatformKeyCode((int)(MapVirtualKeyW(scancode, MAPVK_VSC_TO_VK_EX))), (message == WM_KEYDOWN));
 						break;
 					case VK_MENU:
-						view->onKey(axl::gl::input::KEY_ALT, is_down);
+						view->onKey(axl::gl::input::KeyCode::KEY_ALT, is_down);
 						view->onKey(input::Keyboard::mapPlatformKeyCode((int)(extended ? VK_RMENU : VK_LMENU)), is_down);
 						break;
 					case VK_LWIN:
 					case VK_RWIN:
-						view->onKey(axl::gl::input::KEY_CMD, is_down);
+						view->onKey(axl::gl::input::KeyCode::KEY_CMD, is_down);
 						view->onKey(input::Keyboard::mapPlatformKeyCode((int)wparam), is_down);
 						break;
 					default:
