@@ -346,7 +346,7 @@ class GameView : public axl::gl::View
 					case KeyCode::KEY_CLOSEBRACE:
 						if(bk_control && (!bk_shift && !bk_alt)) 
 						{
-							size_delta += (key == KEY_CLOSEBRACE ? 1 : -1);
+							size_delta += (key == KeyCode::KEY_CLOSEBRACE ? 1 : -1);
 							size_delta = this->font.size.x + size_delta <= 5 ? 5 - this->font.size.x : size_delta;
 							printf("Font.size(%3d)\r", this->font.size.x + size_delta);
 						}
