@@ -130,7 +130,7 @@ bool Context::create(bool recreate, View* view_, const ContextConfig* configs_, 
 				if(cur_config->major_version <= 0)
 				{
 					int attribs[] = {
-						axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (cur_config->profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
+						(int)axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (int)(cur_config->profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
 						0
 					};
 					hglrc = axl::glfl::WGL::wglCreateContextAttribsARB(hdc, NULL, attribs);
@@ -138,9 +138,9 @@ bool Context::create(bool recreate, View* view_, const ContextConfig* configs_, 
 				else
 				{
 					int attribs[] = {
-						axl::glfl::WGL::WGL_CONTEXT_MAJOR_VERSION_ARB, cur_config->major_version,
-						axl::glfl::WGL::WGL_CONTEXT_MINOR_VERSION_ARB, cur_config->minor_version,
-						axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (cur_config->profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
+						(int)axl::glfl::WGL::WGL_CONTEXT_MAJOR_VERSION_ARB, (int)cur_config->major_version,
+						(int)axl::glfl::WGL::WGL_CONTEXT_MINOR_VERSION_ARB, (int)cur_config->minor_version,
+						(int)axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (int)(cur_config->profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
 						0
 					};
 					hglrc = axl::glfl::WGL::wglCreateContextAttribsARB(hdc, NULL, attribs);
@@ -157,7 +157,7 @@ bool Context::create(bool recreate, View* view_, const ContextConfig* configs_, 
 			if(config.major_version <= 0)
 			{
 				int attribs[] = {
-					axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (config.profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
+					(int)axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (int)(config.profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
 					0
 				};
 				hglrc = axl::glfl::WGL::wglCreateContextAttribsARB(hdc, NULL, attribs);
@@ -165,9 +165,9 @@ bool Context::create(bool recreate, View* view_, const ContextConfig* configs_, 
 			else
 			{
 				int attribs[] = {
-					axl::glfl::WGL::WGL_CONTEXT_MAJOR_VERSION_ARB, config.major_version,
-					axl::glfl::WGL::WGL_CONTEXT_MINOR_VERSION_ARB, config.minor_version,
-					axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (config.profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
+					(int)axl::glfl::WGL::WGL_CONTEXT_MAJOR_VERSION_ARB, (int)config.major_version,
+					(int)axl::glfl::WGL::WGL_CONTEXT_MINOR_VERSION_ARB, (int)config.minor_version,
+					(int)axl::glfl::WGL::WGL_CONTEXT_PROFILE_MASK_ARB, (int)(config.profile==ContextConfig::GLP_CORE ? axl::glfl::WGL::WGL_CONTEXT_CORE_PROFILE_BIT_ARB : axl::glfl::WGL::WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB),
 					0
 				};
 				hglrc = axl::glfl::WGL::wglCreateContextAttribsARB(hdc, NULL, attribs);
