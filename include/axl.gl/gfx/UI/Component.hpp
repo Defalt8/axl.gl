@@ -39,7 +39,7 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 				axl::glfl::GLint uloc_projection;
 				axl::glfl::GLint uloc_view;
 				axl::glfl::GLint uloc_model;
-				friend class AXLGLCXXAPI axl::gl::gfx::ui::Component;
+				friend class axl::gl::gfx::ui::Component;
 		};
 	public:
 		Component(Type type, axl::gl::Context* ptr_context,

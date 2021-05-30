@@ -7,9 +7,6 @@
 
 namespace axl {
 namespace gl {
-
-class AXLGLCXXAPI Context;
-
 namespace gfx {
 
 class AXLGLCXXAPI Program : public ContextObject

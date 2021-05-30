@@ -1,12 +1,11 @@
 #pragma once
 #include "lib.hpp"
 #include <axl.util/ds/List.hpp>
-// #include "ContextObject.hpp"
+#include "View.hpp"
 
 namespace axl {
 namespace gl {
 	
-class AXLGLCXXAPI View;
 class AXLGLCXXAPI Context;
 class AXLGLCXXAPI ContextConfig;
 class AXLGLCXXAPI ContextObject;
@@ -95,8 +94,8 @@ class AXLGLCXXAPI Context
 	private:
 		Context(const Context& context);
 		Context& operator=(const Context& context);
-		friend class AXLGLCXXAPI axl::gl::ContextObject;
-		friend class AXLGLCXXAPI axl::gl::gfx::ui::Component;
+		friend class axl::gl::ContextObject;
+		friend class axl::gl::gfx::ui::Component;
 };
 
 } // namespace axl.gl

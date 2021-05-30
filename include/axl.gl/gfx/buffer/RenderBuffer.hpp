@@ -6,12 +6,7 @@
 
 namespace axl {
 namespace gl {
-
-class AXLGLCXXAPI Context;
-
 namespace gfx {
-
-class AXLGLCXXAPI FrameBuffer;
 
 class AXLGLCXXAPI RenderBuffer : public ContextObject
 {

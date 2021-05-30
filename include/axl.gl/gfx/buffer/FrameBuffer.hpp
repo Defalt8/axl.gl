@@ -8,12 +8,7 @@
 
 namespace axl {
 namespace gl {
-
-class AXLGLCXXAPI Context;
-
 namespace gfx {
-
-class AXLGLCXXAPI RenderBuffer;
 
 struct AXLGLCXXAPI FrameBufferBinding
 {
@@ -68,7 +63,7 @@ class AXLGLCXXAPI FrameBuffer : public ContextObject
 	protected:
 		axl::glfl::GLuint fb_id;
 		axl::util::ds::UniList<FrameBufferBinding> fb_bindings;
-		friend class AXLGLCXXAPI RenderBuffer;
+		friend class RenderBuffer;
 };
 
 } // namespace axl.gl.gfx

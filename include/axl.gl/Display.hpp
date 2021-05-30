@@ -53,7 +53,7 @@ class AXLGLCXXAPI Display {
 	protected:
 		bool addView(View* view);
 		bool removeView(View* view);
-		friend class AXLGLCXXAPI axl::gl::View;
+		friend class axl::gl::View;
 	public:
 		static axl::math::Vec2i getDefaultSize();
 		// Enumerate and return the <i>th supported display setting.

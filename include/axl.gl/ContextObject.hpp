@@ -1,10 +1,9 @@
 #pragma once
 #include "lib.hpp"
+#include "Context.hpp"
 
 namespace axl {
 namespace gl {
-
-class AXLGLCXXAPI Context;
 
 class AXLGLCXXAPI ContextObject
 {

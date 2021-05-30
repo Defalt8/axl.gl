@@ -109,7 +109,7 @@ class AXLGLCXXAPI View
 	protected:
 		bool addContext(Context* view);
 		bool removeContext(Context* view);
-		friend class AXLGLCXXAPI axl::gl::Context;
+		friend class axl::gl::Context;
 	public: // Event callback methods
 		virtual void onDisplayConfig(const Display& display);
 		virtual bool onCreate(bool recreating = false);

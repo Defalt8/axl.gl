@@ -14,8 +14,6 @@ namespace gl {
 namespace gfx {
 namespace ui {
 
-class AXLGLCXXAPI Container;
-
 class AXLGLCXXAPI Element : public axl::gl::gfx::ui::Component
 {
 	public:

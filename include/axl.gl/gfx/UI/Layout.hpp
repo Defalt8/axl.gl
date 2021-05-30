@@ -9,8 +9,6 @@ namespace gl {
 namespace gfx {
 namespace ui {
 
-class AXLGLCXXAPI Container;
-
 class AXLGLCXXAPI Layout
 {
 	public:

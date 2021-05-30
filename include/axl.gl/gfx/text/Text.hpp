@@ -3,6 +3,7 @@
 #include "../../ContextObject.hpp"
 #include "../../camera/Camera3D.hpp"
 #include "../shader/Program.hpp"
+#include "Font.hpp"
 #include <axl.glfl/gl.hpp>
 #include <axl.util/String.hpp>
 #include <axl.util/WString.hpp>
@@ -13,12 +14,7 @@
 
 namespace axl {
 namespace gl {
-
-class AXLGLCXXAPI Context;
-
 namespace gfx {
-
-class AXLGLCXXAPI Font;
 
 class AXLGLCXXAPI Text : public ContextObject
 {
@@ -63,7 +59,7 @@ class AXLGLCXXAPI Text : public ContextObject
 				axl::glfl::GLint uloc_text_color;
 				axl::glfl::GLint aloc_vertex;
 				axl::glfl::GLint aloc_uv;
-				friend class AXLGLCXXAPI axl::gl::gfx::Text;
+				friend class axl::gl::gfx::Text;
 		};
 	public:
 		Text(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
