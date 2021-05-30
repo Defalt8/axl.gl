@@ -24,7 +24,7 @@ namespace gfx {
 
 Texture::Type Texture3D::type() const
 {
-	return Texture::TT_3D;
+	return Texture::Type::TT_3D;
 }
 
 Texture3D::Texture3D(axl::gl::Context* ptr_context) :

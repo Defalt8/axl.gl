@@ -14,7 +14,7 @@ namespace gfx {
 class AXLGLCXXAPI Texture : public ContextObject
 {
 	public:
-		AXLGL_ENUM_CLASS Type { TT_1D = 1, TT_2D = 2, TT_3D = 3 };
+		enum class Type { TT_1D = 1, TT_2D = 2, TT_3D = 3 };
 	public:
 		Texture(axl::gl::Context* ptr_context = (axl::gl::Context*)0);
 		virtual ~Texture();
