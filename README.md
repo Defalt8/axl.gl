@@ -5,7 +5,7 @@ A simple and multiplatform C++ game library.
 
 ## Version and supported platforms
 
-- **Latest version**: 0.54.169 alpha
+- **Latest version**: 0.58.189 alpha
 - **Supported platforms**: Windows
   - It is possible to implement this library for linux systems using the X11 library, and for android using the EGL library.
   - Other platforms will be implemented once the library is complete enough to be a game library.
@@ -150,8 +150,9 @@ A simple and multiplatform C++ game library.
 #### GFX/UI/elements
 
 - [include/axl.gl/gfx/UI/elements/Button.hpp](/include/axl.gl/gfx/UI/elements/Button.hpp) - A UI element for processing pointer clicks.
-- [include/axl.gl/gfx/UI/elements/TextView.hpp](/include/axl.gl/gfx/UI/elements/TextView.hpp) - A UI element for displaying static text.
-- [include/axl.gl/gfx/UI/elements/TextInput.hpp](/include/axl.gl/gfx/UI/elements/TextInput.hpp) - A UI element editing text. Accepts keyboard input from the user.
+- [include/axl.gl/gfx/UI/elements/TextView.hpp](/include/axl.gl/gfx/UI/elements/TextView.hpp) - A UI element for displaying text.
+- [include/axl.gl/gfx/UI/elements/TextInput.hpp](/include/axl.gl/gfx/UI/elements/TextInput.hpp) - A UI element for editing text. Accepts keyboard input from the user.
+- [include/axl.gl/gfx/UI/elements/Slider.hpp](/include/axl.gl/gfx/UI/elements/Slider.hpp) - A UI element for selecting a range of values by sliding.
 
 #### GFX/UI/layouts
 
