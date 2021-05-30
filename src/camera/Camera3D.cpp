@@ -103,22 +103,22 @@ axl::math::Vec3d Camera3D::screenToWorld(const axl::math::Vec2i& vec2) const
 	{
 		switch(this->projection->type)
 		{
-			case axl::gl::projection::Projection::PT_ORTHOGRAPHIC:
+			case axl::gl::projection::Projection::Type::PT_ORTHOGRAPHIC:
 				{
 					axl::gl::projection::Orthographic* op = (axl::gl::projection::Orthographic*)this->projection;
 					world_coord.x = op->left + world_coord.x * (op->right - op->left);
 					world_coord.y = op->bottom + world_coord.y * (op->top - op->bottom);
 				}
 				break;
-			case axl::gl::projection::Projection::PT_PERSPECTIVE:
+			case axl::gl::projection::Projection::Type::PT_PERSPECTIVE:
 				{
 					axl::gl::projection::Perspective* pp = (axl::gl::projection::Perspective*)this->projection;
 					world_coord.x = pp->left + world_coord.x * (pp->right - pp->left);
 					world_coord.y = pp->bottom + world_coord.y * (pp->top - pp->bottom);
 				}
 				break;
-			case axl::gl::projection::Projection::PT_IDENTITY:
-			case axl::gl::projection::Projection::PT_OTHER:
+			case axl::gl::projection::Projection::Type::PT_IDENTITY:
+			case axl::gl::projection::Projection::Type::PT_OTHER:
 			default:
 				break;
 		}
@@ -229,22 +229,22 @@ axl::math::Vec3f Camera3Df::screenToWorld(const axl::math::Vec2i& vec2) const
 	{
 		switch(this->projection->type)
 		{
-			case axl::gl::projection::Projection::PT_ORTHOGRAPHIC:
+			case axl::gl::projection::Projectionf::Type::PT_ORTHOGRAPHIC:
 				{
 					axl::gl::projection::Orthographicf* op = (axl::gl::projection::Orthographicf*)this->projection;
 					world_coord.x = op->left + world_coord.x * (op->right - op->left);
 					world_coord.y = op->bottom + world_coord.y * (op->top - op->bottom);
 				}
 				break;
-			case axl::gl::projection::Projection::PT_PERSPECTIVE:
+			case axl::gl::projection::Projectionf::Type::PT_PERSPECTIVE:
 				{
 					axl::gl::projection::Perspectivef* pp = (axl::gl::projection::Perspectivef*)this->projection;
 					world_coord.x = pp->left + world_coord.x * (pp->right - pp->left);
 					world_coord.y = pp->bottom + world_coord.y * (pp->top - pp->bottom);
 				}
 				break;
-			case axl::gl::projection::Projection::PT_IDENTITY:
-			case axl::gl::projection::Projection::PT_OTHER:
+			case axl::gl::projection::Projectionf::Type::PT_IDENTITY:
+			case axl::gl::projection::Projectionf::Type::PT_OTHER:
 			default:
 				break;
 		}

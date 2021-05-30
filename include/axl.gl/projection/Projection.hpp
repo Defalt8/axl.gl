@@ -11,7 +11,7 @@ namespace projection {
 class AXLGLCXXAPI Projection
 {
 	public:
-		AXLGL_ENUM_CLASS Type { PT_IDENTITY, PT_ORTHOGRAPHIC, PT_PERSPECTIVE, PT_OTHER };
+		enum class Type { PT_IDENTITY, PT_ORTHOGRAPHIC, PT_PERSPECTIVE, PT_OTHER };
 	public:
 		Projection(Projection::Type type = Projection::Type::PT_IDENTITY, axl::math::Mat4d matrix = axl::math::Mat4d::Identity);
 		virtual void updateTransform();
