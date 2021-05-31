@@ -369,12 +369,11 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, axl::gl::gfx::Texture
 	}
 	component_program_ptr->setUniformMat4fv(component_program_ptr->uloc_view, camera->view_matrix.values);
 	component_program_ptr->setUniformMat4fv(component_program_ptr->uloc_model, this->transform.getMatrix().values);
-	if(component_render_texture.bind(0))
+	if(component_render_texture.bind(0) && component_program_ptr->use())
 	{
 		GLCLEARERROR();
 		glBindVertexArray(this->m_vertex_array);
 		glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer);
-		component_program_ptr->use();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);

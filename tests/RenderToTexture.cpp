@@ -249,9 +249,6 @@ class GameView : public axl::gl::View
 			case KeyCode::KEY_ESCAPE:
 				axl::gl::Application::quit(0);
 				return true;
-			case KeyCode::KEY_C:
-				if(this->display && *this->display) (*this->display)->close();
-				return true;
 			}
 			if(this->m_key_M.isPressed())
 			{

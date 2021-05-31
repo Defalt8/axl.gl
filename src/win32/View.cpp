@@ -142,7 +142,7 @@ static HBRUSH _hbrush_black = NULL;
 LRESULT CALLBACK MWindowProc(HWND, UINT, WPARAM, LPARAM);
 
 View::View(const axl::util::WString& title_, const axl::math::Vec2i& position_, const axl::math::Vec2i& size_, const Cursor& cursor_) :
-	display(&m_display),
+	display(m_display),
 	position(m_position),
 	size(m_size),
 	min_size(m_min_size),
@@ -193,7 +193,7 @@ bool View::isValid() const
 	return (m_reserved && ((ViewData*)m_reserved)->hwnd && ((ViewData*)m_reserved)->hdc);
 }
 
-bool View::create(Display& display, bool recreate, const ViewConfig* configs_, int configs_count_, unsigned long view_flags)
+bool View::create(Display& _display, bool recreate, const ViewConfig* configs_, int configs_count_, unsigned long view_flags)
 {
 	if(!_cursors_loaded) // load cursors
 	{
@@ -214,7 +214,7 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 	if(m_reserved)
 	{
 		ViewData* view_data = (ViewData*)m_reserved;
-		m_display = &display;
+		m_display = &_display;
 		m_display->addView(this);
 		((ViewData*)m_reserved)->is_recreating = recreate;
 		if(!recreate)
@@ -777,7 +777,7 @@ bool isInArea(axl::math::Vec2f point, axl::math::Vec2f size, axl::math::Mat4f tr
 ///////////
 /// Events
 
-void View::onDisplayConfig(const Display& display)
+void View::onDisplayConfig(const Display& _display)
 {
 	if(this->m_visiblity == VS_FULLSCREEN)
 	{
@@ -825,23 +825,6 @@ bool View::onKey(input::KeyCode key_code, bool is_down)
 	bool kLeft = false, kRight = false;
 	switch(key_code)
 	{
-		case axl::gl::input::KeyCode::KEY_F4:
-			if(!is_down && axl::gl::input::Keyboard::isKeyDown(axl::gl::input::KeyCode::KEY_ALT))
-			{
-				this->destroy();
-				return true;
-			}
-			break;
-		case axl::gl::input::KeyCode::KEY_RETURN:
-			if(!is_down && axl::gl::input::Keyboard::isKeyDown(axl::gl::input::KeyCode::KEY_ALT))
-			{
-				if(this->visiblity == VS_FULLSCREEN)
-					this->show(SM_SHOW);
-				else
-					this->show(SM_FULLSCREEN);
-				return true;
-			}
-			break;
 		case axl::gl::input::KeyCode::KEY_LEFT: kLeft = is_down; break;
 		case axl::gl::input::KeyCode::KEY_RIGHT: kRight = is_down; break;
 	}

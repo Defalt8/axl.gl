@@ -260,9 +260,6 @@ class GameView : public axl::gl::View
 			case KeyCode::KEY_ESCAPE:
 				axl::gl::Application::quit(0);
 				return true;
-			case KeyCode::KEY_C:
-				if(this->display && *this->display) (*this->display)->close();
-				return true;
 			case KeyCode::KEY_E:
 				this->camera.roll_angle = 0.0;
 				return true;

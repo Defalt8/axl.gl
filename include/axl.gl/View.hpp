@@ -124,7 +124,7 @@ class AXLGLCXXAPI View
 		virtual void onPointerMove(int index, int x, int y);
 		virtual void onScroll(bool is_vertical, int delta, int x, int y);
 	public:
-		Display**const display;
+		Display*const& display;
 		const axl::math::Vec2i& position;
 		const axl::math::Vec2i& size;
 		const axl::math::Vec2i& min_size;
