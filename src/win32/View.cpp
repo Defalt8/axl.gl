@@ -193,7 +193,7 @@ bool View::isValid() const
 	return (m_reserved && ((ViewData*)m_reserved)->hwnd && ((ViewData*)m_reserved)->hdc);
 }
 
-bool View::create(Display& display, bool recreate, const ViewConfig* configs_, int configs_count_, Flags view_flags)
+bool View::create(Display& display, bool recreate, const ViewConfig* configs_, int configs_count_, unsigned long view_flags)
 {
 	if(!_cursors_loaded) // load cursors
 	{
@@ -209,6 +209,8 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 	if(!_hbrush_black)
 		_hbrush_black = CreateSolidBrush(RGB(0,0,0));
 	if(!m_reserved) m_reserved = (void*)new ViewData();
+	if((view_flags & VF_TRANSPARENT) && !IsWindowsVistaOrGreater())
+		return false;
 	if(m_reserved)
 	{
 		ViewData* view_data = (ViewData*)m_reserved;
@@ -236,7 +238,7 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 		}
 		axl::util::WString class_name(L"AXL.GL.VIEW.");
 		class_name += m_title.substring(12);
-		DWORD style = 0;
+		DWORD style = 0, ex_style = 0;
 		int view_type = view_flags & 0x3;
 		switch(view_type)
 		{
@@ -251,6 +253,12 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 				style = WS_POPUP;
 				break;
 		}
+		if(view_flags & VF_TOPMOST)
+			ex_style |= WS_EX_TOPMOST;
+		if(view_flags & VF_TRANSPARENT)
+			ex_style |= WS_EX_LAYERED;
+		if(view_flags & VF_PASSTHROUGH)
+			ex_style |= WS_EX_TRANSPARENT;
 		HINSTANCE hinst = (HINSTANCE)GetModuleHandleW(0);
 		HWND hwnd = NULL;
 		HDC hdc = NULL;
@@ -271,11 +279,42 @@ bool View::create(Display& display, bool recreate, const ViewConfig* configs_, i
 		{
 			RECT rc = {0, 0, m_size.x, m_size.y};
 			AdjustWindowRect(&rc, style, FALSE);
-			hwnd = CreateWindowExW(0, class_name.cwstr(), m_title.cwstr(), style, m_position.x+rc.left, m_position.y+rc.top,
+			hwnd = CreateWindowExW(ex_style, class_name.cwstr(), m_title.cwstr(), style,
+				m_position.x+rc.left, m_position.y+rc.top,
 				rc.right-rc.left, rc.bottom-rc.top, NULL, NULL, hinst, NULL);
 			if(hwnd)
 			{
 				SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)this);
+				if(GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_LAYERED)
+				{
+					BOOL composition, opaque;
+					DWORD color;
+					SetLayeredWindowAttributes(hwnd, 0, 255, LWA_ALPHA);
+					if (IsWindowsVistaOrGreater() &&
+						SUCCEEDED(DwmIsCompositionEnabled(&composition)) &&
+						composition)
+					{
+						if (IsWindows8OrGreater() ||
+							(SUCCEEDED(DwmGetColorizationColor(&color, &opaque)) &&
+							!opaque))
+						{
+							HRGN region = CreateRectRgn(0,0,-1,-1);
+							GetWindowRgn(hwnd, region);
+							DWM_BLURBEHIND bb = {0};
+							bb.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
+							bb.hRgnBlur = region;
+							bb.fEnable = TRUE;
+							DwmEnableBlurBehindWindow(hwnd, &bb);
+							DeleteObject(region);
+						}
+						else
+						{
+							DWM_BLURBEHIND bb = {0};
+							bb.dwFlags = DWM_BB_ENABLE;
+							DwmEnableBlurBehindWindow(hwnd, &bb);
+						}
+					}
+				}
 				hdc = GetDC(hwnd);
 			}
 		}
@@ -674,6 +713,45 @@ bool View::swap() const
 	if(!m_reserved) return false;
 	return SwapBuffers(((ViewData*)m_reserved)->hdc) != FALSE;
 }
+
+axl::util::String GetLastErrorAsString()
+{
+    //Get the error message ID, if any.
+    DWORD errorMessageID = ::GetLastError();
+    if(errorMessageID == 0) {
+        return axl::util::String(); //No error message has been recorded
+    }
+    LPSTR messageBuffer = nullptr;
+	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+    axl::util::String message(messageBuffer, size);
+    LocalFree(messageBuffer);
+    return message;
+}
+
+bool View::updateLayers() const
+{
+	if(!m_reserved) return false;
+	ViewData* view_data = (ViewData*)m_reserved;
+	bool no_error = false;
+	// HDC hdcScreen = GetDC(NULL);
+	// HDC hdc = GetDC(view_data->hwnd);
+	// HDC hdcMem = GetDC(view_data->hwnd);
+	// BLENDFUNCTION blend = { 0 };
+	// blend.BlendOp = AC_SRC_OVER;
+	// blend.SourceConstantAlpha = 255;
+	// blend.AlphaFormat = AC_SRC_ALPHA;
+	// no_error = UpdateLayeredWindow(view_data->hwnd, hdcScreen, 0, 0, 
+	// 	hdc, 0, 0, &blend, ULW_ALPHA) != FALSE;
+	// if(!no_error)
+	// {
+	// 	axl::util::String errmsg = GetLastErrorAsString();
+	// }
+	// ReleaseDC(view_data->hwnd, hdc);
+	// ReleaseDC(NULL, hdcScreen);
+	return no_error;
+}
+
 const axl::util::ds::UniList<axl::gl::Context*>& View::getContexts() const
 {
 	return this->m_contexts;

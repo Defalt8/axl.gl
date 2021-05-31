@@ -30,30 +30,33 @@ class TestView : public axl::gl::View
 		{
 			this->destroy();
 		}
-		void onDisplayConfig(const axl::gl::Display& display)
+		bool create(axl::gl::Display& display, bool recreate)
 		{
-			axl::gl::View::onDisplayConfig(display);
-			this->setSize(display.size / 2); // set half the display size
-			this->setPosition((display.size - this->size) / 2); // center to display
+			return axl::gl::View::create(display, recreate,
+				view_configs, sizeof(view_configs)/sizeof(axl::gl::ViewConfig),
+				TestView::VF_RESIZABLE);
 		}
 
 		bool onCreate(bool recreating)
 		{
 			return axl::gl::View::onCreate(recreating);
 		}
-
 		void onDestroy(bool recreating)
 		{
 			axl::gl::View::onDestroy(recreating);
 			if(!recreating)
 				axl::gl::Application::quit(0);
 		}
-
+		void onDisplayConfig(const axl::gl::Display& display)
+		{
+			axl::gl::View::onDisplayConfig(display);
+			this->setSize(display.size / 2); // set half the display size
+			this->setPosition((display.size - this->size) / 2); // center to display
+		}
 		void onSize(int width, int height)
 		{
 			axl::gl::View::onSize(width, height);
 		}
-
 		bool onKey(axl::gl::input::KeyCode key, bool down)
 		{
 			if(key == axl::gl::input::KeyCode::KEY_CMD)
@@ -92,7 +95,7 @@ int main(int argc, char* argv[])
 		Assertve(display.isOpen(), verbose);
 
 		TestView view;
-		Assertve(view.create(display, true, view_configs, sizeof(view_configs)/sizeof(axl::gl::ViewConfig), TestView::VF_RESIZABLE), verbose);
+		Assertve(view.create(display, true), verbose);
 		Assertve(view.isValid(), verbose);
 		printf(".. View.Config %d selected.\n", view.config.id);
 		

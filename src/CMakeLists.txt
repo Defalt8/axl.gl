@@ -116,6 +116,17 @@ target_link_libraries( axl.gl
 	PUBLIC axl.glfl
 	PUBLIC ${LIBFREETYPE}
 )
+if( WIN32 )
+	if( MSVC )
+		target_link_libraries( axl.gl
+			PUBLIC Kernel32.lib Dwmapi.lib
+		)
+	else()
+		target_link_libraries( axl.gl
+			PUBLIC -lKernel32 -lDwmapi
+		)
+	endif()
+endif()
 target_compile_definitions( axl.gl
 	PRIVATE AXLGL_BUILD
 	PRIVATE AXLGL_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}

@@ -75,7 +75,7 @@ class AXLGLCXXAPI View
 		const static int MAX_TOUCHES = 10;
 		const static int MAX_POINTERS = MAX_TOUCHES + 5; // don't change
 		// View creation flags
-		enum Flags { VF_FIXED, VF_RESIZABLE, VF_POPUP };
+		enum Flags { VF_FIXED = 0, VF_RESIZABLE = 1, VF_POPUP = 2, VF_TRANSPARENT = 4, VF_PASSTHROUGH = 8, VF_TOPMOST = 16 };
 		// A mouse or other pointer's buttons.
 		enum PointerIndex { PI_LEFT_BUTTON = 0, PI_MIDDLE_BUTTON = 1, PI_RIGHT_BUTTON = 2, PI_TOUCH = 3 };
 		// View visiblity states.
@@ -86,7 +86,7 @@ class AXLGLCXXAPI View
 		View(const axl::util::WString& title, const axl::math::Vec2i& position, const axl::math::Vec2i& size, const Cursor& cursor = DefaultCursor);
 		virtual ~View();
 		virtual bool isValid() const;
-		virtual bool create(Display& display, bool recreate = false, const ViewConfig* configs = (const ViewConfig*)0, int configs_count = 0, Flags flags = VF_FIXED);
+		virtual bool create(Display& display, bool recreate = false, const ViewConfig* configs = (const ViewConfig*)0, int configs_count = 0, unsigned long flags = VF_FIXED);
 		virtual void destroy();
 		const void* getReserved() const;
 		static void cleanup();
@@ -105,6 +105,7 @@ class AXLGLCXXAPI View
 		virtual bool show(ShowMode show_mode = SM_SHOW);
 		virtual bool setCursorPosition(const axl::math::Vec2i& cursor_position);
 		virtual bool swap() const;
+		virtual bool updateLayers() const;
 		const axl::util::ds::UniList<axl::gl::Context*>& getContexts() const;
 	protected:
 		bool addContext(Context* view);
