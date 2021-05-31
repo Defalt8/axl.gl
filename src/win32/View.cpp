@@ -714,44 +714,6 @@ bool View::swap() const
 	return SwapBuffers(((ViewData*)m_reserved)->hdc) != FALSE;
 }
 
-axl::util::String GetLastErrorAsString()
-{
-    //Get the error message ID, if any.
-    DWORD errorMessageID = ::GetLastError();
-    if(errorMessageID == 0) {
-        return axl::util::String(); //No error message has been recorded
-    }
-    LPSTR messageBuffer = nullptr;
-	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-    axl::util::String message(messageBuffer, size);
-    LocalFree(messageBuffer);
-    return message;
-}
-
-bool View::updateLayers() const
-{
-	if(!m_reserved) return false;
-	ViewData* view_data = (ViewData*)m_reserved;
-	bool no_error = false;
-	// HDC hdcScreen = GetDC(NULL);
-	// HDC hdc = GetDC(view_data->hwnd);
-	// HDC hdcMem = GetDC(view_data->hwnd);
-	// BLENDFUNCTION blend = { 0 };
-	// blend.BlendOp = AC_SRC_OVER;
-	// blend.SourceConstantAlpha = 255;
-	// blend.AlphaFormat = AC_SRC_ALPHA;
-	// no_error = UpdateLayeredWindow(view_data->hwnd, hdcScreen, 0, 0, 
-	// 	hdc, 0, 0, &blend, ULW_ALPHA) != FALSE;
-	// if(!no_error)
-	// {
-	// 	axl::util::String errmsg = GetLastErrorAsString();
-	// }
-	// ReleaseDC(view_data->hwnd, hdc);
-	// ReleaseDC(NULL, hdcScreen);
-	return no_error;
-}
-
 const axl::util::ds::UniList<axl::gl::Context*>& View::getContexts() const
 {
 	return this->m_contexts;

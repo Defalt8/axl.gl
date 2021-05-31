@@ -5,7 +5,7 @@ namespace axl {
 namespace gl {
 namespace input {
 
-AXLGL_ENUM_CLASS KeyCode {
+enum class KeyCode {
 	KEY_UNKNOWN = -1,
 	KEY_CANCEL,
 	KEY_BACK,

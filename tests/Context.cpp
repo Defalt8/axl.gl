@@ -79,7 +79,6 @@ class TestView : public axl::gl::View
 			this->update();
 			if(this->render() && this->config.double_buffered)
 				this->swap();
-			this->updateLayers();
 			return true;
 		}
 

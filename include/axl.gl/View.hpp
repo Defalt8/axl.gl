@@ -105,7 +105,6 @@ class AXLGLCXXAPI View
 		virtual bool show(ShowMode show_mode = SM_SHOW);
 		virtual bool setCursorPosition(const axl::math::Vec2i& cursor_position);
 		virtual bool swap() const;
-		virtual bool updateLayers() const;
 		const axl::util::ds::UniList<axl::gl::Context*>& getContexts() const;
 	protected:
 		bool addContext(Context* view);
