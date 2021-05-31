@@ -438,7 +438,7 @@ void View::destroy()
 	{
 		ViewData* view_data = (ViewData*)m_reserved;
 		view_data->destroying = true;
-		if(view_data->hdc) this->onDestroy(false);
+		if(view_data->hdc) this->onDestroy(view_data->is_recreating);
 		while(!this->m_contexts.isEmpty())
 		{
 			Context* contexts = this->m_contexts.removeFirst();
@@ -449,8 +449,8 @@ void View::destroy()
 		{
 			ReleaseDC(view_data->hwnd, view_data->hdc);
 			view_data->hdc = NULL;
-			if(!view_data->destroy_from_message)
-				DestroyWindow(view_data->hwnd);
+			// if(!view_data->destroy_from_message)
+			DestroyWindow(view_data->hwnd);
 			view_data->hwnd = NULL;
 		}
 		view_data->destroying = false;

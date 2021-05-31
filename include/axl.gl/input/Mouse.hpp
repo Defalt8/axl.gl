@@ -7,10 +7,11 @@ namespace gl {
 namespace input {
 
 enum MouseButton {
-	MBTN_LEFT,
+	MBTN_UNKNOWN = -1,
+	MBTN_LEFT = 0,
 	MBTN_RIGHT,
 	MBTN_MIDDLE,
-	MBTN_EXTRA
+	MBTN_EXTRA,
 }; // enum MouseButton
 
 class AXLGLCXXAPI Mouse 
