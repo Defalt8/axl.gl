@@ -780,7 +780,7 @@ void View::onResume()
 	this->m_is_paused = false;
 }
 
-void View::onKey(input::KeyCode key_code, bool is_down)
+bool View::onKey(input::KeyCode key_code, bool is_down)
 {
 	bool kLeft = false, kRight = false;
 	switch(key_code)
@@ -789,7 +789,7 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 			if(!is_down && axl::gl::input::Keyboard::isKeyDown(axl::gl::input::KeyCode::KEY_ALT))
 			{
 				this->destroy();
-				return;
+				return true;
 			}
 			break;
 		case axl::gl::input::KeyCode::KEY_RETURN:
@@ -799,7 +799,7 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 					this->show(SM_SHOW);
 				else
 					this->show(SM_FULLSCREEN);
-				return;
+				return true;
 			}
 			break;
 		case axl::gl::input::KeyCode::KEY_LEFT: kLeft = is_down; break;
@@ -861,7 +861,9 @@ void View::onKey(input::KeyCode key_code, bool is_down)
 				}
 			}
 		}
+		return true;
 	}
+	return false;
 }
 
 void View::onChar(wchar_t char_code)
@@ -1135,28 +1137,34 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 				switch(wparam)
 				{
 					case VK_CONTROL:
-						view->onKey(input::Keyboard::mapPlatformKeyCode((int)wparam), is_down);
-						view->onKey(input::Keyboard::mapPlatformKeyCode((int)(extended ? VK_RCONTROL : VK_LCONTROL)), is_down);
-						break;
+						if(!view->onKey(input::Keyboard::mapPlatformKeyCode((int)wparam), is_down) ||
+							!view->onKey(input::Keyboard::mapPlatformKeyCode((int)(extended ? VK_RCONTROL : VK_LCONTROL)), is_down)
+							) return DefWindowProcW(hwnd, message, wparam, lparam);
+						return 0;
 					case VK_SHIFT:
-						view->onKey(input::Keyboard::mapPlatformKeyCode((int)wparam), is_down);
-						view->onKey(input::Keyboard::mapPlatformKeyCode((int)(MapVirtualKeyW(scancode, MAPVK_VSC_TO_VK_EX))), (message == WM_KEYDOWN));
-						break;
+						if(!view->onKey(input::Keyboard::mapPlatformKeyCode((int)wparam), is_down) ||
+							!view->onKey(input::Keyboard::mapPlatformKeyCode((int)(MapVirtualKeyW(scancode, MAPVK_VSC_TO_VK_EX))), (message == WM_KEYDOWN))
+							) return DefWindowProcW(hwnd, message, wparam, lparam);
+						return 0;
 					case VK_MENU:
-						view->onKey(axl::gl::input::KeyCode::KEY_ALT, is_down);
-						view->onKey(input::Keyboard::mapPlatformKeyCode((int)(extended ? VK_RMENU : VK_LMENU)), is_down);
-						break;
+						if(!view->onKey(axl::gl::input::KeyCode::KEY_ALT, is_down) ||
+							!view->onKey(input::Keyboard::mapPlatformKeyCode((int)(extended ? VK_RMENU : VK_LMENU)), is_down)
+							) return DefWindowProcW(hwnd, message, wparam, lparam);
+						return 0;
 					case VK_LWIN:
 					case VK_RWIN:
-						view->onKey(axl::gl::input::KeyCode::KEY_CMD, is_down);
-						view->onKey(input::Keyboard::mapPlatformKeyCode((int)wparam), is_down);
-						break;
+						if(!view->onKey(axl::gl::input::KeyCode::KEY_CMD, is_down) ||
+							!view->onKey(input::Keyboard::mapPlatformKeyCode((int)wparam), is_down)
+							) return DefWindowProcW(hwnd, message, wparam, lparam);
+						return 0;
 					default:
-						view->onKey(input::Keyboard::mapPlatformKeyCode((int)wparam), is_down);
-						break;
+						if(!view->onKey(input::Keyboard::mapPlatformKeyCode((int)wparam), is_down))
+							return DefWindowProcW(hwnd, message, wparam, lparam);
+						else
+							return 0;
 				}
 			}
-			break;
+			return 0;
 		case WM_CHAR:
 			if(view)
 			{

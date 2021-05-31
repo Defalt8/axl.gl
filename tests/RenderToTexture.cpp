@@ -241,19 +241,17 @@ class GameView : public axl::gl::View
 			this->render();
 		}
 
-		void onKey(axl::gl::input::KeyCode key, bool down)
+		bool onKey(axl::gl::input::KeyCode key, bool down)
 		{
 			using namespace axl::gl::input;
 			switch (key)
 			{
 			case KeyCode::KEY_ESCAPE:
 				axl::gl::Application::quit(0);
-				break;
+				return true;
 			case KeyCode::KEY_C:
 				if(this->display && *this->display) (*this->display)->close();
-				break;
-			default:
-				axl::gl::View::onKey(key, down);
+				return true;
 			}
 			if(this->m_key_M.isPressed())
 			{
@@ -272,6 +270,7 @@ class GameView : public axl::gl::View
 			{
 				this->frame_buffer0.destroy();
 			}
+			return axl::gl::View::onKey(key, down);
 		}
 
 };

@@ -413,7 +413,7 @@ class GameView : public axl::gl::View
 			this->render();
 		}
 
-		void onKey(axl::gl::input::KeyCode key, bool down)
+		bool onKey(axl::gl::input::KeyCode key, bool down)
 		{
 			using namespace axl::gl::input;
 			bool bk_control = key_Control.isDown(), bk_shift = key_Shift.isDown(), bk_alt = key_Alt.isDown();
@@ -441,9 +441,7 @@ class GameView : public axl::gl::View
 						{
 							axl::gl::Application::quit(0);
 						}
-						break;
-					default:
-						axl::gl::View::onKey(key, down);
+						return true;
 				}
 			}
 			else // KEY_UP
@@ -458,13 +456,11 @@ class GameView : public axl::gl::View
 							else
 								fprintf(stderr, ":( Shaders loading failed!\n");
 						}
-						break;
-					default:
-						axl::gl::View::onKey(key, down);
+						return true;
 				}
 			}
+			return axl::gl::View::onKey(key, down);
 		}
-
 };
 
 

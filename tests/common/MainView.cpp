@@ -37,9 +37,7 @@ MainView::MainView(const axl::util::WString& _title, const axl::math::Vec2i& _po
 	FPS(0.0f),
 	m_rendered_frames(0),
 	m_frame_time(),
-	m_frame_clock(500),
-	m_key_Alt(axl::gl::input::KeyCode::KEY_ALT),
-	m_key_Enter(axl::gl::input::KeyCode::KEY_RETURN)
+	m_frame_clock(500)
 {}
 MainView::~MainView()
 {
@@ -168,13 +166,9 @@ void MainView::onResume()
 	m_frame_time.setFromReference(m_reference_time);
 }
 
-void MainView::onKey(axl::gl::input::KeyCode key_code, bool is_down)
+bool MainView::onKey(axl::gl::input::KeyCode key_code, bool is_down)
 {
-	axl::gl::View::onKey(key_code, is_down);
-	if(m_key_Enter.isPressed() && m_key_Alt.isDown())
-	{
-		this->show(this->visiblity == VS_FULLSCREEN ? SM_SHOW : SM_FULLSCREEN);
-	}
+	return axl::gl::View::onKey(key_code, is_down);
 }
 
 void MainView::onChar(wchar_t char_code)

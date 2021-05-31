@@ -118,7 +118,7 @@ class AXLGLCXXAPI View
 		virtual void onSize(int w, int h);
 		virtual void onPause();
 		virtual void onResume();
-		virtual void onKey(input::KeyCode key_code, bool is_down);
+		virtual bool onKey(input::KeyCode key_code, bool is_down);
 		virtual void onChar(wchar_t char_code);
 		virtual void onPointer(int index, int x, int y, bool is_down);
 		virtual void onPointerMove(int index, int x, int y);

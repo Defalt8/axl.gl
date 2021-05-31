@@ -238,7 +238,7 @@ class GameView : public axl::gl::View
 			this->render();
 		}
 
-		void onKey(axl::gl::input::KeyCode key, bool down)
+		bool onKey(axl::gl::input::KeyCode key, bool down)
 		{
 			using namespace axl::gl::input;
 			bool bk_control = key_Control.isDown(), bk_shift = key_Shift.isDown(), bk_alt = key_Alt.isDown();
@@ -341,7 +341,7 @@ class GameView : public axl::gl::View
 				{
 					case KeyCode::KEY_ESCAPE:
 						if(no_modifiers) axl::gl::Application::quit(0);
-						break;
+						return true;
 					case KeyCode::KEY_OPENBRACE:
 					case KeyCode::KEY_CLOSEBRACE:
 						if(bk_control && (!bk_shift && !bk_alt)) 
@@ -350,9 +350,7 @@ class GameView : public axl::gl::View
 							size_delta = this->font.size.x + size_delta <= 5 ? 5 - this->font.size.x : size_delta;
 							printf("Font.size(%3d)\r", this->font.size.x + size_delta);
 						}
-						break;
-					default:
-						axl::gl::View::onKey(key, down);
+						return true;
 				}
 			}
 			else
@@ -361,10 +359,10 @@ class GameView : public axl::gl::View
 				{
 					case KeyCode::KEY_1:
 						this->text.setFont(&this->font);
-						break;
+						return true;
 					case KeyCode::KEY_2:
 						this->text.setFont(&this->font1);
-						break;
+						return true;
 					case KeyCode::KEY_CONTROL:
 						if(size_delta != 0)
 						{
@@ -376,11 +374,10 @@ class GameView : public axl::gl::View
 							}
 							size_delta = 0;
 						}
-						break;
-					default:
-						axl::gl::View::onKey(key, down);
+						return true;
 				}
 			}
+			return axl::gl::View::onKey(key, down);
 		}
 
 		void onChar(wchar_t ch)

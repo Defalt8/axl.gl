@@ -289,7 +289,7 @@ class GameView : public axl::gl::View
 			this->render();
 		}
 
-		void onKey(axl::gl::input::KeyCode key, bool down)
+		bool onKey(axl::gl::input::KeyCode key, bool down)
 		{
 			using namespace axl::gl::input;
 			bool bk_control = key_Control.isDown(), bk_shift = key_Shift.isDown(), bk_alt = key_Alt.isDown();
@@ -342,7 +342,7 @@ class GameView : public axl::gl::View
 				{
 					case KeyCode::KEY_ESCAPE:
 						if(no_modifiers) axl::gl::Application::quit(0);
-						break;
+						return true;
 					case KeyCode::KEY_OPENBRACE:
 					case KeyCode::KEY_CLOSEBRACE:
 						if(bk_control && (!bk_shift && !bk_alt)) 
@@ -351,19 +351,17 @@ class GameView : public axl::gl::View
 							size_delta = this->font.size.x + size_delta <= 5 ? 5 - this->font.size.x : size_delta;
 							printf("Font.size(%3d)\r", this->font.size.x + size_delta);
 						}
-						break;
+						return true;
 					case KeyCode::KEY_LEFT:
 						if(current_glyph_index == -1) current_glyph_index = this->font.glyphs.count() - 1;
 						else if(bk_alt && (!bk_shift && !bk_control) && current_glyph_index > 0) current_glyph_index -= 1;
 						else current_glyph_index = 0;
-						break;
+						return true;
 					case KeyCode::KEY_RIGHT:
 						if(current_glyph_index == -1) current_glyph_index = 0;
 						else if(bk_alt && (!bk_shift && !bk_control) && current_glyph_index < this->font.glyphs.count() - 1) current_glyph_index += 1;
 						else current_glyph_index = this->font.glyphs.count() - 1;
-						break;
-					default:
-						axl::gl::View::onKey(key, down);
+						return true;
 				}
 				if((key == KeyCode::KEY_LEFT || key == KeyCode::KEY_RIGHT) && bk_alt && (!bk_shift && !bk_control))
 				{
@@ -415,11 +413,10 @@ class GameView : public axl::gl::View
 							this->font.setSize(axl::math::Vec2i::filled(this->font.size.x + size_delta));
 							size_delta = 0;
 						}
-						break;
-					default:
-						axl::gl::View::onKey(key, down);
+						return true;
 				}
 			}
+			return axl::gl::View::onKey(key, down);
 		}
 
 		void onChar(wchar_t ch)

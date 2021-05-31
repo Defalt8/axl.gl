@@ -25,7 +25,7 @@ class MainView : public axl::gl::View
 		virtual void onSize(int w, int h);
 		virtual void onPause();
 		virtual void onResume();
-		virtual void onKey(axl::gl::input::KeyCode key_code, bool is_down);
+		virtual bool onKey(axl::gl::input::KeyCode key_code, bool is_down);
 		virtual void onChar(wchar_t char_code);
 		virtual void onPointer(int index, int x, int y, bool is_down);
 		virtual void onPointerMove(int index, int x, int y);
@@ -39,7 +39,6 @@ class MainView : public axl::gl::View
 		int m_rendered_frames;
 		axl::util::uc::Time m_reference_time, m_frame_time;
 		axl::util::uc::Clock m_frame_clock;
-		axl::gl::input::Key m_key_Alt, m_key_Enter;
 };
 
 };

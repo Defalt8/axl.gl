@@ -231,7 +231,7 @@ class GameView : public axl::gl::View
 			this->ctime.set();
 		}
 
-		void onKey(axl::gl::input::KeyCode key, bool down)
+		bool onKey(axl::gl::input::KeyCode key, bool down)
 		{
 			using namespace axl::gl::input;
 			if(key_P.isPressed())
@@ -259,18 +259,16 @@ class GameView : public axl::gl::View
 			{
 			case KeyCode::KEY_ESCAPE:
 				axl::gl::Application::quit(0);
-				break;
+				return true;
 			case KeyCode::KEY_C:
 				if(this->display && *this->display) (*this->display)->close();
-				break;
+				return true;
 			case KeyCode::KEY_E:
 				this->camera.roll_angle = 0.0;
-				break;
-			default:
-				axl::gl::View::onKey(key, down);
+				return true;
 			}
+			return axl::gl::View::onKey(key, down);
 		}
-
 };
 
 
