@@ -1,7 +1,7 @@
 
 # axl.gl
 
-A simple and multiplatform C++ game library.
+A cross-platform C++ graphics library.
 
 ## Version and supported platforms
 
