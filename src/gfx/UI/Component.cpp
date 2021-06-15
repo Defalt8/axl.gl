@@ -29,8 +29,8 @@ Component::Component(Type type,
 	component_type(type),
 	component_is_visible(true),
 	component_is_modified(true),
-	m_vertex_array(-1),
-	m_vertex_buffer(-1),
+	m_vertex_array(0),
+	m_vertex_buffer(0),
 	component_render_texture(ptr_context),
 	component_depth_texture(ptr_context),
 	component_framebuffer_ptr(0),
@@ -66,7 +66,7 @@ bool Component::iCreate()
 	GLCLEARERROR();
 	glGenVertexArrays(1, &this->m_vertex_array);
 	glGenBuffers(1, &this->m_vertex_buffer);
-	if(this->m_vertex_array == -1 || this->m_vertex_buffer == -1) return false;
+	if(this->m_vertex_array == 0 || this->m_vertex_buffer == 0) return false;
 	glBindVertexArray(this->m_vertex_array);
 	glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffer);
 	if(GL::glGetError() != GL_NO_ERROR)
@@ -131,19 +131,20 @@ bool Component::iCreate()
 	return true;
 }
 bool Component::iDestroy()
-{using namespace GL;
+{
+	using namespace GL;
 	if(this->ctx_context && this->ctx_context->isValid() && this->ctx_context->makeCurrent())
 	{
 		GLCLEARERROR();
-		if(m_vertex_buffer != -1)
+		if(m_vertex_buffer != 0)
 		{
 			glDeleteBuffers(1, &m_vertex_buffer);
-			m_vertex_buffer = -1;
+			m_vertex_buffer = 0;
 		}
-		if(m_vertex_array != -1)
+		if(m_vertex_array != 0)
 		{
 			glDeleteVertexArrays(1, &m_vertex_array);
-			m_vertex_array = -1;
+			m_vertex_array = 0;
 		}
 	}
 	ctx_context->removeComponent((Component*)this);
@@ -160,15 +161,15 @@ bool Component::isValid() const
 		component_framebuffer_ptr && component_framebuffer_ptr->isValid() &&
 		component_render_texture.isValid() && component_depth_texture.isValid();
 }
-void Component::setContext(axl::gl::Context* ptr_context)
+bool Component::setContext(axl::gl::Context* ptr_context)
 {
-	axl::gl::ContextObject::setContext(ptr_context);
-	component_render_texture.setContext(ptr_context);
-	component_depth_texture.setContext(ptr_context);
+	if(!axl::gl::ContextObject::setContext(ptr_context)) return false;
 	if(component_program_ptr && component_program_ptr->getContext() != ptr_context)
 		component_program_ptr = 0;
 	if(component_framebuffer_ptr && component_framebuffer_ptr->getContext() != ptr_context)
 		component_framebuffer_ptr = 0;
+	return component_render_texture.setContext(ptr_context) &&
+		component_depth_texture.setContext(ptr_context);
 }
 bool Component::setComponentFrameBuffer(axl::gl::gfx::FrameBuffer* ptr_framebuffer)
 {
@@ -318,7 +319,8 @@ bool attachTexture2D(axl::glfl::GLenum attachment_target, axl::glfl::GLuint text
 	using namespace GL;
 	GLCLEARERROR();
 	glFramebufferTexture2D(framebuffer_target, attachment_target, GL_TEXTURE_2D, texture_id, 0);
-	return glGetError() == GL_NO_ERROR;
+	GLenum glerr = glGetError();
+	return glerr == GL_NO_ERROR;
 }
 
 bool Component::render(axl::gl::camera::Camera3Df* camera, axl::gl::gfx::Texture2D* ptr_render_texture, axl::gl::gfx::Texture2D* ptr_depth_texture)
@@ -335,7 +337,10 @@ bool Component::render(axl::gl::camera::Camera3Df* camera, axl::gl::gfx::Texture
 	if(component_is_modified)
 	{
 		if(!ptr_render_texture)
-			component_framebuffer_ptr->bind(FrameBuffer::Target::FBT_DRAW);
+		{
+			if(!component_framebuffer_ptr->bind(FrameBuffer::Target::FBT_DRAW))
+				return false;
+		}
 		if(!attachTexture2D(GL_COLOR_ATTACHMENT0, component_render_texture.getId(), GL_DRAW_FRAMEBUFFER) ||
 			!attachTexture2D(GL_DEPTH_ATTACHMENT, component_depth_texture.getId(), GL_DRAW_FRAMEBUFFER))
 			return false;

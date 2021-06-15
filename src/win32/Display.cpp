@@ -6,9 +6,6 @@
 namespace axl {
 namespace gl {
 
-int _display_enum_index = -1;
-int _display_enum_count = 0;
-
 BOOL CALLBACK _AXLGL_InfoEnumProc(HMONITOR hmon, HDC hdc, LPRECT lprc, LPARAM lparam)
 {
 	MONITORINFO moninfo;
@@ -21,10 +18,10 @@ BOOL CALLBACK _AXLGL_InfoEnumProc(HMONITOR hmon, HDC hdc, LPRECT lprc, LPARAM lp
 	if(!desktop) return TRUE;
 	hdc = GetDC(desktop);
 	DisplayData *display_data = (DisplayData*)lparam;
-	static int display_enum_counter = 0;
-	if(_display_enum_index < 0 || _display_enum_index >= _display_enum_count) return FALSE;
+	int display_enum_index = display_data->display_enum_index;
+	int display_enum_count = display_data->display_enum_count;
+	if(display_enum_index < 0 || display_enum_index >= display_enum_count) return FALSE;
 	{
-		if(display_enum_counter == _display_enum_index)
 		{
 			display_data->hmonitor = hmon;
 			display_data->hdc = hdc;
@@ -35,24 +32,20 @@ BOOL CALLBACK _AXLGL_InfoEnumProc(HMONITOR hmon, HDC hdc, LPRECT lprc, LPARAM lp
 			display_data->refresh_rate = GetDeviceCaps(hdc, VREFRESH);
 			display_data->device_name[0] = '\0';
 			display_data->set = true;
-			display_enum_counter = 0;
-			_display_enum_index = -1;
-			_display_enum_count = 0;
 			ReleaseDC(desktop, hdc);
 			DISPLAY_DEVICEA dev;
 			dev.cb = sizeof(DISPLAY_DEVICEA);
-			if (FALSE != EnumDisplayDevicesA(NULL, 0, &dev, 0))
+			if (FALSE != EnumDisplayDevicesA(NULL, display_enum_index, &dev, 0))
 			{
 #				if defined(_MSC_VER)
-					strncpy_s(display_data->device_name, 128, dev.DeviceString, 128);
+					strncpy_s(display_data->device_name, 129, dev.DeviceString, 129);
 #				else
-					strncpy(display_data->device_name, dev.DeviceString, 128);
+					strncpy(display_data->device_name, dev.DeviceString, 129);
 #				endif
 			}
 			return FALSE;
 		}
 	}
-	++display_enum_counter;
 	ReleaseDC(desktop, hdc);
 	return TRUE;
 }
@@ -113,10 +106,10 @@ bool Display::reopen(int p_index)
 	if(!m_reserved) return false;
 	int display_count = Display::count();
 	if(p_index < 0 || p_index >= display_count) return false;
-	_display_enum_index = p_index;
-	_display_enum_count = display_count;
-	EnumDisplayMonitors(NULL, NULL, _AXLGL_InfoEnumProc, (LPARAM)this->m_reserved);
 	DisplayData* display_data = (DisplayData*)this->m_reserved;
+	display_data->display_enum_index = p_index;
+	display_data->display_enum_count = display_count;
+	EnumDisplayMonitors(NULL, NULL, _AXLGL_InfoEnumProc, (LPARAM)this->m_reserved);
 	if(display_data->set)
 	{
 		m_index  = p_index;
@@ -282,7 +275,7 @@ bool Display::addView(View* view)
 	{
 		if(*it && *it == view) return true;
 	}
-	return this->m_views.insertLast(view);
+	return this->m_views.insertFirst(view);
 }
 
 bool Display::removeView(View* view)

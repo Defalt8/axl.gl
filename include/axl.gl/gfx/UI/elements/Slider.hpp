@@ -42,7 +42,7 @@ class AXLGLCXXAPI Slider : public axl::gl::gfx::ui::Element
 			axl::gl::gfx::ui::Layout::Size layout_height = axl::gl::gfx::ui::Layout::FIXED_SIZE);
 		virtual ~Slider();
 	public:
-		virtual void setContext(axl::gl::Context* ptr_context);
+		virtual bool setContext(axl::gl::Context* ptr_context);
 		virtual bool isValid() const;
 		virtual bool setSize(const axl::math::Vec2f& size);
 		bool setSliderProgram(axl::gl::gfx::ui::elements::Slider::Program* slider_program_ptr);

@@ -50,7 +50,7 @@ bool FrameBufferBinding::operator==(const FrameBufferBinding& binding) const
 
 FrameBuffer::FrameBuffer(axl::gl::Context* ptr_context) :
 	ContextObject(ptr_context),
-	fb_id(-1),
+	fb_id(0),
 	fb_bindings()
 {}
 FrameBuffer::~FrameBuffer()
@@ -64,7 +64,7 @@ bool FrameBuffer::iCreate()
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	glGenFramebuffers(1, &tmp_id);
-	if(tmp_id == -1) return false;
+	if(tmp_id == 0) return false;
 	if(glGetError() != GL_NO_ERROR)
 	{
 		glDeleteFramebuffers(1, &tmp_id);
@@ -87,14 +87,14 @@ bool FrameBuffer::iDestroy()
 		GLCLEARERROR();
 		glDeleteFramebuffers(1, &this->fb_id);
 		if(glGetError() != GL_NO_ERROR) return false;
-		this->fb_id = -1;
+		this->fb_id = 0;
 		return true;
 	}
 	return false;
 }
 bool FrameBuffer::isValid() const
 {
-	return this->ctx_context && this->ctx_context->isValid() && this->fb_id != -1;
+	return this->ctx_context && this->ctx_context->isValid() && this->fb_id != 0;
 }
 axl::glfl::GLuint FrameBuffer::getId() const
 {
@@ -148,7 +148,7 @@ bool FrameBuffer::attachRenderBuffer(axl::glfl::GLenum attachment_target, Render
 		glFramebufferRenderbuffer(fb_target, attachment_target, GL_RENDERBUFFER, render_buffer_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	if(glGetError() != GL_NO_ERROR) return false;
-	this->fb_bindings.insertLast(FrameBufferBinding(FrameBufferBinding::Type::BT_RENDER_BUFFER, attachment_target, render_buffer));
+	this->fb_bindings.insertFirst(FrameBufferBinding(FrameBufferBinding::Type::BT_RENDER_BUFFER, attachment_target, render_buffer));
 	return true;
 }
 bool FrameBuffer::attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D* texture, Target p_target)
@@ -170,7 +170,7 @@ bool FrameBuffer::attachTexture2D(axl::glfl::GLenum attachment_target, Texture2D
 	}
 	glBindFramebuffer(fb_target, 0);
 	if(glGetError() != GL_NO_ERROR) return false;
-	this->fb_bindings.insertLast(FrameBufferBinding(FrameBufferBinding::Type::BT_TEXTURE, attachment_target, texture));
+	this->fb_bindings.insertFirst(FrameBufferBinding(FrameBufferBinding::Type::BT_TEXTURE, attachment_target, texture));
 	return true;
 }
 bool FrameBuffer::blit(const FrameBuffer* draw_framebuffer, axl::glfl::GLint srcX0, axl::glfl::GLint srcY0, axl::glfl::GLint srcX1, axl::glfl::GLint srcY1, axl::glfl::GLint dstX0, axl::glfl::GLint dstY0, axl::glfl::GLint dstX1, axl::glfl::GLint dstY1, axl::glfl::GLbitfield mask, axl::glfl::GLenum filter) const

@@ -38,12 +38,12 @@ Texture3D::~Texture3D()
 bool Texture3D::iCreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_1_0 || this->txr_id != -1 || !this->ctx_context || !this->ctx_context->makeCurrent())
+	if(!GL_VERSION_1_0 || this->txr_id != 0 || !this->ctx_context || !this->ctx_context->makeCurrent())
 		return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	glGenTextures(1, &tmp_id);
-	if(tmp_id == -1) return false;
+	if(tmp_id == 0) return false;
 	if(glGetError() != GL_NO_ERROR)
 	{
 		glDeleteTextures(1, &tmp_id);
@@ -77,7 +77,7 @@ bool Texture3D::iDestroy()
 		glDeleteTextures(1, &this->txr_id);
 		if(glGetError() != GL_NO_ERROR) return false;
 	}
-	this->txr_id = -1;
+	this->txr_id = 0;
 	return true;
 }
 axl::glfl::GLuint Texture3D::getId() const
@@ -86,7 +86,7 @@ axl::glfl::GLuint Texture3D::getId() const
 }
 bool Texture3D::isValid() const
 {
-	return this->ctx_context && this->ctx_context->isValid() && this->txr_id != -1;
+	return this->ctx_context && this->ctx_context->isValid() && this->txr_id != 0;
 }
 bool Texture3D::bind() const
 {

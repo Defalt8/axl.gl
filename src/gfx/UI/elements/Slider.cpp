@@ -33,9 +33,9 @@ Slider::~Slider()
 	this->destroy();
 }
 
-void Slider::setContext(axl::gl::Context* ptr_context)
+bool Slider::setContext(axl::gl::Context* ptr_context)
 {
-	axl::gl::gfx::ui::Element::setContext(ptr_context);
+	return axl::gl::gfx::ui::Element::setContext(ptr_context);
 }
 bool Slider::isValid() const
 {

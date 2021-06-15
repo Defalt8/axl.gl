@@ -214,9 +214,10 @@ bool View::create(Display& _display, bool recreate, const ViewConfig* configs_, 
 	if(m_reserved)
 	{
 		ViewData* view_data = (ViewData*)m_reserved;
+		((ViewData*)m_reserved)->is_recreating = recreate;
+		if(recreate && axl::gl::View::isValid()) this->destroy();
 		m_display = &_display;
 		m_display->addView(this);
-		((ViewData*)m_reserved)->is_recreating = recreate;
 		if(!recreate)
 		{
 			if(((ViewData*)m_reserved)->hwnd && ((ViewData*)m_reserved)->hdc) return true;
@@ -225,16 +226,6 @@ bool View::create(Display& _display, bool recreate, const ViewConfig* configs_, 
 				((ViewData*)m_reserved)->hdc = GetDC(((ViewData*)m_reserved)->hwnd);
 				if(((ViewData*)m_reserved)->hdc) return true;
 			};
-		}
-		else
-		{
-			if(m_reserved && ((ViewData*)m_reserved)->hwnd)
-			{
-				ReleaseDC(((ViewData*)m_reserved)->hwnd, ((ViewData*)m_reserved)->hdc);
-				DestroyWindow(((ViewData*)m_reserved)->hwnd);
-				((ViewData*)m_reserved)->hwnd = NULL;
-				((ViewData*)m_reserved)->hdc = NULL;
-			}
 		}
 		axl::util::WString class_name(L"AXL.GL.VIEW.");
 		class_name += m_title.substring(12);
@@ -278,7 +269,7 @@ bool View::create(Display& _display, bool recreate, const ViewConfig* configs_, 
 		if(registered)
 		{
 			RECT rc = {0, 0, m_size.x, m_size.y};
-			AdjustWindowRect(&rc, style, FALSE);
+			AdjustWindowRectEx(&rc, style, FALSE, ex_style);
 			hwnd = CreateWindowExW(ex_style, class_name.cwstr(), m_title.cwstr(), style,
 				m_position.x+rc.left, m_position.y+rc.top,
 				rc.right-rc.left, rc.bottom-rc.top, NULL, NULL, hinst, NULL);
@@ -299,7 +290,6 @@ bool View::create(Display& _display, bool recreate, const ViewConfig* configs_, 
 							!opaque))
 						{
 							HRGN region = CreateRectRgn(0,0,-1,-1);
-							GetWindowRgn(hwnd, region);
 							DWM_BLURBEHIND bb = {0};
 							bb.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
 							bb.hRgnBlur = region;
@@ -336,7 +326,6 @@ bool View::create(Display& _display, bool recreate, const ViewConfig* configs_, 
 			{
 				SendMessageW(view_data->hwnd, WM_SETICON, (WPARAM)ICON_BIG, (LPARAM)view_data->hicon_big);
 			}
-			view_data->is_recreating = false;
 		}
 		if(axl::gl::View::isValid())
 		{
@@ -444,7 +433,6 @@ void View::destroy()
 			Context* contexts = this->m_contexts.removeFirst();
 			if(contexts) contexts->destroy();
 		}
-		view_data->is_recreating = false;
 		if(view_data->hwnd)
 		{
 			ReleaseDC(view_data->hwnd, view_data->hdc);
@@ -477,7 +465,11 @@ void View::setUIEventProcessing(bool enable)
 bool View::setPosition(const axl::math::Vec2i& position_)
 {
 	if(!m_reserved) return false;
-	if(SetWindowPos(((ViewData*)m_reserved)->hwnd, NULL, position_.x, position_.y, 0, 0, SWP_NOSIZE|SWP_NOREDRAW|SWP_NOZORDER) != FALSE)
+	ViewData* view_data = (ViewData*)m_reserved;
+	DWORD style = GetWindowLongW(view_data->hwnd, GWL_STYLE), ex_style = GetWindowLongW(view_data->hwnd, GWL_EXSTYLE);
+	RECT rc = {0, 0, m_size.x, m_size.y};
+	AdjustWindowRectEx(&rc, style, FALSE, ex_style);
+	if(SetWindowPos(((ViewData*)m_reserved)->hwnd, NULL, position_.x+rc.left, position_.y+rc.top, 0, 0, SWP_NOSIZE|SWP_NOREDRAW|SWP_NOZORDER) != FALSE)
 	{
 		this->m_position = position_;
 		return true;
@@ -488,7 +480,11 @@ bool View::setPosition(const axl::math::Vec2i& position_)
 bool View::setSize(const axl::math::Vec2i& size_)
 {
 	if(!m_reserved) return false;
-	if(SetWindowPos(((ViewData*)m_reserved)->hwnd, NULL, 0, 0, size_.x, size_.y, SWP_NOMOVE|SWP_NOREDRAW|SWP_NOZORDER) != FALSE)
+	ViewData* view_data = (ViewData*)m_reserved;
+	DWORD style = GetWindowLongW(view_data->hwnd, GWL_STYLE), ex_style = GetWindowLongW(view_data->hwnd, GWL_EXSTYLE);
+	RECT rc = {0, 0, size_.x, size_.y};
+	AdjustWindowRectEx(&rc, style, FALSE, ex_style);
+	if(SetWindowPos(((ViewData*)m_reserved)->hwnd, NULL, 0, 0, rc.right-rc.left, rc.bottom-rc.top, SWP_NOMOVE|SWP_NOREDRAW|SWP_NOZORDER) != FALSE)
 	{
 		this->m_size = size_;
 		return true;
@@ -728,7 +724,7 @@ bool View::addContext(Context* context)
 	{
 		if(*it && *it == context) return true;
 	}
-	return this->m_contexts.insertLast(context);
+	return this->m_contexts.insertFirst(context);
 }
 bool View::removeContext(Context* context)
 {
@@ -1344,7 +1340,12 @@ LRESULT CALLBACK MWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 			}
 			if(view)
 			{
-				if(!view->onCreate(((ViewData*)view->getReserved())->is_recreating)) DestroyWindow(hwnd);
+				if(!view->onCreate(((ViewData*)view->getReserved())->is_recreating))
+				{
+					((ViewData*)view->getReserved())->is_recreating = false;
+					DestroyWindow(hwnd);
+				}
+				((ViewData*)view->getReserved())->is_recreating = false;
 			}
 			break;
 		case WM_CLOSE:

@@ -26,11 +26,11 @@ TextInput::~TextInput()
 	this->destroy();
 }
 
-void TextInput::setContext(axl::gl::Context* ptr_context)
+bool TextInput::setContext(axl::gl::Context* ptr_context)
 {
-	axl::gl::gfx::ui::Element::setContext(ptr_context);
-	text_input_text.setContext(ptr_context);
-	text_input_cursor.setContext(ptr_context);
+	return axl::gl::gfx::ui::Element::setContext(ptr_context) &&
+		text_input_text.setContext(ptr_context) &&
+		text_input_cursor.setContext(ptr_context);
 }
 bool TextInput::isValid() const
 {

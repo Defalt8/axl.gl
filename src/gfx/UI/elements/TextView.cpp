@@ -23,10 +23,10 @@ TextView::~TextView()
 	this->destroy();
 }
 
-void TextView::setContext(axl::gl::Context* ptr_context)
+bool TextView::setContext(axl::gl::Context* ptr_context)
 {
-	axl::gl::gfx::ui::Element::setContext(ptr_context);
-	text_view_text.setContext(ptr_context);
+	return axl::gl::gfx::ui::Element::setContext(ptr_context) &&
+		text_view_text.setContext(ptr_context);
 }
 bool TextView::isValid() const
 {

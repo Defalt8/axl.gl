@@ -31,10 +31,10 @@ Button::~Button()
 	this->destroy();
 }
 
-void Button::setContext(axl::gl::Context* ptr_context)
+bool Button::setContext(axl::gl::Context* ptr_context)
 {
-	axl::gl::gfx::ui::Element::setContext(ptr_context);
-	button_text.setContext(ptr_context);
+	if(!axl::gl::gfx::ui::Element::setContext(ptr_context)) return false;
+	return button_text.setContext(ptr_context);
 }
 bool Button::isValid() const
 {

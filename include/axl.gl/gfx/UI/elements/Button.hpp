@@ -38,7 +38,7 @@ class AXLGLCXXAPI Button : public axl::gl::gfx::ui::Element
 			axl::gl::gfx::ui::Layout::Size layout_height = axl::gl::gfx::ui::Layout::WRAP_CONTENT);
 		virtual ~Button();
 	public:
-		virtual void setContext(axl::gl::Context* ptr_context);
+		virtual bool setContext(axl::gl::Context* ptr_context);
 		virtual bool isValid() const;
 		State getState() const;
 		bool isHovered() const;

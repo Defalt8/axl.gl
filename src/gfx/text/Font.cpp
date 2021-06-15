@@ -98,18 +98,20 @@ bool Font::loadFromFile(const axl::util::String& filepath, const axl::math::Vec2
 {
 	if(!this->font_reserved || font_size.x <= 0 || font_size.y <= 0 || !Font::init() || !this->isCreated() || !this->font_texture.isValid()) return false;
 	FontData* font_data = (FontData*)font_reserved;
-	FT_Face ftlib_face;
-	if(FT_New_Face(ftlib_library, filepath.cstr(), 0, &ftlib_face) != FT_Err_Ok || !ftlib_face) return false;
+	FT_Face ftlib_face = 0;
 	if(font_data->face)
 	{
 		FT_Done_Face(font_data->face);
+		font_data->face = 0;
 		font_data->glyph_count = 0;
 		font_data->x_count = 0;
 		font_data->y_count = 0;
 		font_data->atlas_width = 0;
 		font_data->atlas_height = 0;
 	}
+	if(FT_New_Face(ftlib_library, filepath.cstr(), 0, &ftlib_face) != FT_Err_Ok || !ftlib_face) return false;
 	font_data->face = ftlib_face;
+	bool success = false;
 	if(this->loadGlyphs(font_size, 0, -1))
 	{
 		GL::GLint max_level = (GL::GLint)axl::math::log2((float)font_size.x) - 1;
@@ -125,9 +127,9 @@ bool Font::loadFromFile(const axl::util::String& filepath, const axl::math::Vec2
 		}
 		this->font_texture.setParami(GL::GL_TEXTURE_MIN_FILTER, GL::GL_LINEAR_MIPMAP_NEAREST);
 		this->font_texture.setParami(GL::GL_TEXTURE_MAG_FILTER, GL::GL_LINEAR);
-		return true;
+		success = true;
 	}
-	return false;
+	return success;
 }
 
 bool Font::setSize(const axl::math::Vec2i& font_size)

@@ -14,7 +14,7 @@ namespace gfx {
 
 Texture::Texture(axl::gl::Context* ptr_context) :
 	ContextObject(ptr_context),
-	txr_id(-1)
+	txr_id(0)
 {}
 
 Texture::~Texture()

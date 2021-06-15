@@ -22,7 +22,7 @@ class AXLGLCXXAPI ContextObject
 	public:
 		axl::gl::Context* getContext();
 		const axl::gl::Context* getContext() const;
-		void setContext(axl::gl::Context* ptr_context);
+		bool setContext(axl::gl::Context* ptr_context);
 	protected:
 		axl::gl::Context* ctx_context;
 	private:

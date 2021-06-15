@@ -38,7 +38,7 @@ class AXLGLCXXAPI TextView : public axl::gl::gfx::ui::Element
 			axl::gl::gfx::ui::Layout::Size layout_height = axl::gl::gfx::ui::Layout::WRAP_CONTENT);
 		virtual ~TextView();
 	public:
-		virtual void setContext(axl::gl::Context* ptr_context);
+		virtual bool setContext(axl::gl::Context* ptr_context);
 		virtual bool isValid() const;
 		const axl::util::WString& getText() const;
 		bool setText(const axl::util::WString& label);

@@ -19,7 +19,7 @@ namespace gfx {
 
 RenderBuffer::RenderBuffer(axl::gl::Context* ptr_context) :
 	ContextObject(ptr_context),
-	rb_id(-1)
+	rb_id(0)
 {}
 RenderBuffer::~RenderBuffer()
 {
@@ -32,7 +32,7 @@ bool RenderBuffer::iCreate()
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	glGenRenderbuffers(1, &tmp_id);
-	if(tmp_id == -1) return false;
+	if(tmp_id == 0) return false;
 	if(glGetError() != GL_NO_ERROR)
 	{
 		glDeleteRenderbuffers(1, &tmp_id);
@@ -49,14 +49,14 @@ bool RenderBuffer::iDestroy()
 		GLCLEARERROR();
 		glDeleteRenderbuffers(1, &this->rb_id);
 		if(glGetError() != GL_NO_ERROR) return false;
-		this->rb_id = -1;
+		this->rb_id = 0;
 		return true;
 	}
 	return false;
 }
 bool RenderBuffer::isValid() const
 {
-	return this->ctx_context && this->ctx_context->isValid() && this->rb_id != -1;
+	return this->ctx_context && this->ctx_context->isValid() && this->rb_id != 0;
 }
 axl::glfl::GLuint RenderBuffer::getId() const
 {

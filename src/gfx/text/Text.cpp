@@ -29,9 +29,9 @@ Text::Text(axl::gl::Context* ptr_context) :
 	text_font(0),
 	text_program_ptr(0),
 	actual_text_length(0),
-	vertex_array_id(-1),
-	vertex_buffer_id(-1),
-	element_array_id(-1)
+	vertex_array_id(0),
+	vertex_buffer_id(0),
+	element_array_id(0)
 {
 	this->updateAlignment();
 }
@@ -42,24 +42,33 @@ Text::~Text()
 bool Text::iCreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_3_0 || !this->ctx_context || this->ctx_context->config.major_version < 3 || !this->text_font || !text_program_ptr || 
+	if(!GL_VERSION_3_0 || this->ctx_context->config.major_version < 3 || !this->text_font || !text_program_ptr || 
 	  !this->text_font->isValid() || !text_program_ptr->isValid() || !this->ctx_context->isValid() || !this->ctx_context->makeCurrent()
 	)
 		return false;
 	GLCLEARERROR();
 	glGenVertexArrays(1, &this->vertex_array_id);
-	if(this->vertex_array_id == -1 || glGetError() != GL_NO_ERROR) return false;
+	if(this->vertex_array_id == 0 || glGetError() != GL_NO_ERROR)
+	{
+		this->vertex_array_id = 0;
+		return false;
+	}
 	glGenBuffers(1, &this->vertex_buffer_id);
-	if(this->vertex_buffer_id == -1 || glGetError() != GL_NO_ERROR)
+	if(this->vertex_buffer_id == 0 || glGetError() != GL_NO_ERROR)
 	{
 		glDeleteVertexArrays(1, &this->vertex_array_id);
+		this->vertex_buffer_id = 0;
+		this->vertex_array_id = 0;
 		return false;
 	}
 	glGenBuffers(1, &this->element_array_id);
-	if(this->element_array_id == -1 || glGetError() != GL_NO_ERROR)
+	if(this->element_array_id == 0 || glGetError() != GL_NO_ERROR)
 	{
 		glDeleteBuffers(1, &this->vertex_buffer_id);
 		glDeleteVertexArrays(1, &this->vertex_array_id);
+		this->element_array_id = 0;
+		this->vertex_buffer_id = 0;
+		this->vertex_array_id = 0;
 		return false;
 	}
 	return glGetError() == GL_NO_ERROR;
@@ -67,36 +76,39 @@ bool Text::iCreate()
 bool Text::iDestroy()
 {
 	using namespace GL;
-	if(this->ctx_context && this->ctx_context->isValid() && this->ctx_context->makeCurrent())
+	if(this->ctx_context->makeCurrent())
 	{
 		GLCLEARERROR();
-		if(this->element_array_id != -1)
+		if(this->element_array_id != 0)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 			glDeleteBuffers(1, &this->element_array_id);
 		}
-		if(this->vertex_buffer_id != -1)
+		if(this->vertex_buffer_id != 0)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glDeleteBuffers(1, &this->vertex_buffer_id);
 		}
-		if(this->vertex_array_id != -1)
+		if(this->vertex_array_id != 0)
 		{
 			glBindVertexArray(0);
 			glDeleteVertexArrays(1, &this->vertex_array_id);
 		}
 		return glGetError() == GL_NO_ERROR;
 	}
-	this->element_array_id = -1;
-	this->vertex_buffer_id = -1;
-	this->vertex_array_id = -1;
+	this->element_array_id = 0;
+	this->vertex_buffer_id = 0;
+	this->vertex_array_id = 0;
+	this->actual_text_length = 0;
+	this->rec_font_size.set(0,0);
+	this->text_program_ptr = 0;
 	return true;
 }
 bool Text::isValid() const
 {
 	return this->ctx_context && this->text_font && text_program_ptr && 
 		   this->ctx_context->isValid() && this->text_font->isValid() && text_program_ptr->isValid() && 
-		   this->vertex_array_id != -1 && this->vertex_buffer_id != -1 && this->element_array_id != -1;
+		   this->vertex_array_id != 0 && this->vertex_buffer_id != 0 && this->element_array_id != 0;
 }
 bool Text::render(const axl::gl::camera::Camera3Df* camera)
 {
@@ -358,6 +370,7 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 					line_width_accum = 0.0f;
 					++line_count;
 				}
+				continue;
 			case L'\r':
 			case L'\t':
 				continue;
@@ -375,7 +388,7 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 				continue;
 		}
 	}
-	this->text_box.set(((float)max_line_width - this->text_spacing.x), ((float)((line_count - 1) * (this->text_font->size.y + this->text_spacing.y)) - this->text_spacing.y));
+	this->text_box.set(((float)max_line_width - this->text_spacing.x), ((float)((line_count-1)* (this->text_font->size.y + this->text_spacing.y)) - this->text_spacing.y));
 	this->updateAlignment();
 	this->actual_text_length = actual_length;
 	const unsigned int text_count = this->text_wstring.size() - 1;
@@ -386,7 +399,7 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->element_array_id);
 	if(text_size_changed)
 	{
-		glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLfloat) * vertex_count), 0, GL_DYNAMIC_DRAW);
+  		glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLfloat) * vertex_count), 0, GL_DYNAMIC_DRAW);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLuint) * indeces_count), 0, GL_DYNAMIC_DRAW);
 		if(glGetError() != GL_NO_ERROR)
 		{
@@ -403,8 +416,11 @@ bool Text::updateBuffers(const axl::util::WString& p_wstring, bool text_size_cha
 	}
 	if((text_changed && text_length > 0) || font_attribute_altered)
 	{
+		glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer_id);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->element_array_id);
 		GLfloat* buffer = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 		GLuint* indeces = (GLuint*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+		GLenum glerr = glGetError();
 		if(!buffer || !indeces)
 		{
 			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);

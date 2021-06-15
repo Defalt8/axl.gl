@@ -266,7 +266,7 @@ bool Context::setVSync(bool v_sync) const
 bool Context::addComponent(axl::gl::gfx::ui::Component* component)
 {
 	if(this->containsComponent(component)) return false;
-	return m_components.insertLast(component);
+	return m_components.insertFirst(component);
 }
 bool Context::removeComponent(axl::gl::gfx::ui::Component* component)
 {

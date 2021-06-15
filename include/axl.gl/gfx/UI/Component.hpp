@@ -32,8 +32,8 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 			public:
 				Program(axl::gl::Context* ptr_context = 0);
 				~Program();
-				bool iCreate();
-				bool iDestroy();
+				virtual bool iCreate();
+				virtual bool iDestroy();
 			protected:
 				axl::glfl::GLint uloc_texture0;
 				axl::glfl::GLint uloc_projection;
@@ -53,7 +53,7 @@ class AXLGLCXXAPI Component : public axl::gl::ContextObject
 		virtual bool iDestroy();
 	public:
 		virtual bool isValid() const;
-		virtual void setContext(axl::gl::Context* ptr_context);
+		virtual bool setContext(axl::gl::Context* ptr_context);
 		bool setComponentFrameBuffer(axl::gl::gfx::FrameBuffer* ptr_framebuffer);
 		bool setComponentProgram(const axl::gl::gfx::ui::Component::Program* ptr_program);
 		virtual bool setContainer(axl::gl::gfx::ui::Container* container);

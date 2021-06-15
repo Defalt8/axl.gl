@@ -77,7 +77,7 @@ class AXLGLCXXAPI Display {
 	private:
 		void* m_reserved;
 		int m_index;
-		char m_name[128];
+		char m_name[129];
 		Settings m_settings;
 		axl::math::Vec2i m_position;
 		axl::math::Vec2i m_size;
