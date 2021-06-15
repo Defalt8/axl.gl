@@ -21,9 +21,9 @@ set( AXLGL_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "axl.gl header
 set( THIRD_PARTY_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../include" )
 set( THIRD_PARTY_LIB_DIR "${CMAKE_SOURCE_DIR}/../lib" )
 
-set( AXLMATH_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.math" CACHE PATH "Path to axl.math library source." )
-set( AXLUTIL_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.util" CACHE PATH "Path to axl.util library source." )
-set( AXLGLFL_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../axl.glfl" CACHE PATH "Path to axl.glfl library source." )
+set( AXLMATH_SOURCE_DIR "${PROJECT_SOURCE_DIR}/dependencies/axl.math" CACHE PATH "Path to axl.math library source." )
+set( AXLUTIL_SOURCE_DIR "${PROJECT_SOURCE_DIR}/dependencies/axl.util" CACHE PATH "Path to axl.util library source." )
+set( AXLGLFL_SOURCE_DIR "${PROJECT_SOURCE_DIR}/dependencies/axl.glfl" CACHE PATH "Path to axl.glfl library source." )
 set( AXLMATH_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
 set( AXLMATH_RUNTIME_DIR "${AXLGL_RUNTIME_DIR}" )
 set( AXLUTIL_ARCHIVE_DIR "${AXLGL_ARCHIVE_DIR}" )
