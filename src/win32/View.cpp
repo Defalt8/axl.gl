@@ -786,6 +786,7 @@ bool View::onCreate(bool recreating)
 	if(this->isValid())
 	{
 		this->onDisplayConfig(*this->m_display);
+		m_is_paused = false;
 		return true;
 	}
 	return false;
@@ -793,7 +794,7 @@ bool View::onCreate(bool recreating)
 
 void View::onDestroy(bool recreating)
 {
-	m_is_paused = false;
+	m_is_paused = true;
 }
 
 void View::onMove(int x, int y)
