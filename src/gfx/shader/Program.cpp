@@ -28,7 +28,7 @@ Program::~Program()
 bool Program::iCreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_2_0 || axl::gl::gfx::Program::isValid() || !(this->ctx_context && this->ctx_context->config.major_version >= 2 && this->ctx_context->isCurrent())) return false;
+	if(!GL_VERSION_2_0 || !(this->ctx_context && this->ctx_context->config.major_version >= 2 && (this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))) return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	tmp_id = glCreateProgram();
@@ -45,7 +45,7 @@ bool Program::iCreate()
 bool Program::iDestroy()
 {
 	using namespace GL;
-	if(axl::gl::gfx::Program::isValid() && this->ctx_context->isCurrent())
+	if(axl::gl::gfx::Program::isValid() && (this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))
 	{
 		GLCLEARERROR();
 		glDeleteProgram(Program::program_id);
@@ -69,7 +69,7 @@ axl::glfl::GLuint Program::getId() const
 bool Program::link() const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->isCurrent()) return false;
+	if(!axl::gl::gfx::Program::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glLinkProgram(this->program_id);
 	GLint status;
@@ -80,7 +80,7 @@ bool Program::link() const
 bool Program::isLinked() const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->isCurrent()) return false;
+	if(!axl::gl::gfx::Program::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	GLint status;
 	glGetProgramiv(this->program_id, GL_LINK_STATUS, &status);
@@ -90,7 +90,7 @@ bool Program::isLinked() const
 axl::util::String Program::getInfoLog() const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->isCurrent()) return axl::util::String();
+	if(!axl::gl::gfx::Program::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return axl::util::String();
 	GLCLEARERROR();
 	GLint info_log_len;
 	glGetProgramiv(this->program_id, GL_INFO_LOG_LENGTH, &info_log_len);
@@ -106,7 +106,7 @@ axl::util::String Program::getInfoLog() const
 bool Program::use() const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->isCurrent()) return false;
+	if(!axl::gl::gfx::Program::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glUseProgram(this->program_id);
 	return glGetError() == GL_NO_ERROR;
@@ -115,7 +115,7 @@ bool Program::use() const
 bool Program::unuse() const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Program::isValid() || !this->ctx_context->isCurrent()) return false;
+	if(!axl::gl::gfx::Program::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glUseProgram(0);
 	return glGetError() == GL_NO_ERROR;
@@ -124,7 +124,7 @@ bool Program::unuse() const
 axl::glfl::GLint Program::getAttributeLocation(const axl::util::String& attribute_name) const
 {
 	using namespace GL;
-	if(attribute_name.length() == 0 || !this->isLinked() || !this->ctx_context->isCurrent()) return -1;
+	if(attribute_name.length() == 0 || !this->isLinked() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return -1;
 	GLCLEARERROR();
 	axl::glfl::GLint location = glGetAttribLocation(this->program_id, (const axl::glfl::GLchar*)attribute_name.cstr());
 	if(glGetError() != GL_NO_ERROR) return -1;
@@ -134,7 +134,7 @@ axl::glfl::GLint Program::getAttributeLocation(const axl::util::String& attribut
 axl::glfl::GLint Program::getUniformLocation(const axl::util::String& uniform_name) const
 {
 	using namespace GL;
-	if(uniform_name.length() == 0 || !this->isLinked() || !this->ctx_context->isCurrent()) return -1;
+	if(uniform_name.length() == 0 || !this->isLinked() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return -1;
 	GLCLEARERROR();
 	axl::glfl::GLint location = glGetUniformLocation(this->program_id, (const axl::glfl::GLchar*)uniform_name.cstr());
 	if(glGetError() != GL_NO_ERROR) return -1;
@@ -144,7 +144,7 @@ axl::glfl::GLint Program::getUniformLocation(const axl::util::String& uniform_na
 bool Program::getUniformfv(axl::glfl::GLint location, axl::glfl::GLfloat* out_ptr) const
 {
 	using namespace GL;
-	if(location == -1 || !this->isLinked() || !this->ctx_context->isCurrent()) return false;
+	if(location == -1 || !this->isLinked() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glGetUniformfv(this->program_id, location, out_ptr);
 	return glGetError() == GL_NO_ERROR;
@@ -153,7 +153,7 @@ bool Program::getUniformfv(axl::glfl::GLint location, axl::glfl::GLfloat* out_pt
 bool Program::getUniformiv(axl::glfl::GLint location, axl::glfl::GLint* out_ptr) const
 {
 	using namespace GL;
-	if(location == -1 || !this->isLinked() || !this->ctx_context->isCurrent()) return false;
+	if(location == -1 || !this->isLinked() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glGetUniformiv(this->program_id, location, out_ptr);
 	return glGetError() == GL_NO_ERROR;
@@ -162,7 +162,7 @@ bool Program::getUniformiv(axl::glfl::GLint location, axl::glfl::GLint* out_ptr)
 bool Program::getUniformuiv(axl::glfl::GLint location, axl::glfl::GLuint* out_ptr) const
 {
 	using namespace GL;
-	if(location == -1 || !this->isLinked() || !this->ctx_context->isCurrent()) return false;
+	if(location == -1 || !this->isLinked() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glGetUniformuiv(this->program_id, location, out_ptr);
 	return glGetError() == GL_NO_ERROR;
