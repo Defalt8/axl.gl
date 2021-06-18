@@ -7,3 +7,6 @@
 [submodule "dependencies/axl.glfl"]
 	path = dependencies/axl.glfl
 	url = https://github.com/Defalt8/axl.glfl.git
+[submodule "dependencies/axl.media"]
+	path = dependencies/axl.media
+	url = https://github.com/defalt8/axl.media.git
