@@ -11,7 +11,7 @@ namespace Assert {
 
 static int NUM_FAILED_ASSERTIONS = 0, NUM_TOTAL_ASSERTIONS = 0;
 
-void assertionFailed(bool exit_after, const char* e, const char* file, int line)
+inline void assertionFailed(bool exit_after, const char* e, const char* file, int line)
 {
 	fprintf(stderr, "* Fail - %s | %s:%d\n", e, file, line);
 	++NUM_FAILED_ASSERTIONS;
@@ -22,7 +22,7 @@ void assertionFailed(bool exit_after, const char* e, const char* file, int line)
 	}
 }
 
-void assertionSucceeded(const char* e)
+inline void assertionSucceeded(const char* e)
 {
 	printf("  Pass + %s\n", e);
 }

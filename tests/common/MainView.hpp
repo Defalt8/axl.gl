@@ -18,6 +18,7 @@ class MainView : public axl::gl::View
 		virtual bool update();
 		virtual bool render();
 	protected:
+		virtual void onRender();
 		virtual void onDisplayConfig(const axl::gl::Display& display);
 		virtual bool onCreate(bool recreating = false);
 		virtual void onDestroy(bool recreating = false);

@@ -2,6 +2,15 @@
 # set( CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib" )
 link_libraries( axl.gl gdi32.lib user32.lib )
 
+add_compile_definitions(
+	AXLGL_TEST_RES_DIR="${PROJECT_SOURCE_DIR}/tests/res"
+	AXLGL_TEST_RES_DIRW=L"${PROJECT_SOURCE_DIR}/tests/res"
+)
+
+# add_subdirectory( "${AXLMEDIA_SOURCE_DIR}" axl.media )
+add_subdirectory( "${PROJECT_SOURCE_DIR}/../axl.media" axl.media )
+link_libraries( axl.media )
+
 add_executable( axl.gl.lib "lib.cpp")
 add_executable( axl.gl.display "Display.cpp")
 add_executable( axl.gl.base "Base.cpp" "common/GL.cpp" "common/MainView.cpp" )
@@ -11,7 +20,6 @@ add_executable( axl.gl.texture3d "Texture3D.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.renderbuffer "RenderBuffer.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.rendertotexture "RenderToTexture.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.projection "Projection.cpp" "common/GLC.cpp" )
-add_executable( axl.gl.camera3d "Camera3D.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.shader "Shader.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.font "Font.cpp" "common/GLC.cpp" )
 add_executable( axl.gl.text "Text.cpp" "common/GL.cpp" )
@@ -22,6 +30,7 @@ add_executable( axl.gl.uitextview "UITextView.cpp" "common/GL.cpp" "common/MainV
 add_executable( axl.gl.uitextinput "UITextInput.cpp" "common/GL.cpp" "common/MainView.cpp" )
 add_executable( axl.gl.uislider "UISlider.cpp" "common/GL.cpp" "common/MainView.cpp" )
 add_executable( axl.gl.viewports "Viewports.cpp" "common/GL.cpp" "common/MainView.cpp" )
+add_executable( axl.gl.camera3d "Camera3D.cpp" "common/GL.cpp" "common/MainView.cpp" "common/Quad.cpp" )
 
 set_target_properties( axl.gl.lib
 	axl.gl.display

@@ -103,12 +103,17 @@ bool MainView::render()
 {
 	if(!this->isValid() || !this->main_camera.makeCurrent(&context, true))
 		return false;
-	++m_rendered_frames;
+	this->onRender();
 	return true;
 }
 
 ////////////
 //
+
+void MainView::onRender()
+{
+	++m_rendered_frames;
+}
 
 void MainView::onDisplayConfig(const axl::gl::Display& _display)
 {
