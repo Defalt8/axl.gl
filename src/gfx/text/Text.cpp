@@ -43,7 +43,7 @@ bool Text::iCreate()
 {
 	using namespace GL;
 	if(!GL_VERSION_3_0 || this->ctx_context->config.major_version < 3 || !this->text_font || !text_program_ptr || 
-	  !this->text_font->isValid() || !text_program_ptr->isValid() || !this->ctx_context->isValid() || !this->ctx_context->makeCurrent()
+	  !this->text_font->isValid() || !text_program_ptr->isValid() || !this->ctx_context->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())
 	)
 		return false;
 	GLCLEARERROR();
@@ -76,7 +76,7 @@ bool Text::iCreate()
 bool Text::iDestroy()
 {
 	using namespace GL;
-	if(this->ctx_context->makeCurrent())
+	if((this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))
 	{
 		GLCLEARERROR();
 		if(this->element_array_id != 0)
@@ -300,7 +300,7 @@ axl::math::Vec4f Text::getCharBox(axl::util::size_t char_index) const
 	using namespace GL;
 	axl::math::Vec4f char_box(0.f, 0.f, 0.f, 0.f);
 	axl::util::size_t text_length = text_wstring.length();
-	if(!this->isValid() || char_index >= text_length || !this->ctx_context->makeCurrent())
+	if(!this->isValid() || char_index >= text_length || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))
 		return char_box;
 	axl::util::size_t buffer_index = 0, space_count = 0, trailing_space_count = 0;
 	if(char_index != -1)

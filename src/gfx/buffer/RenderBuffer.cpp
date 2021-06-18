@@ -28,7 +28,7 @@ RenderBuffer::~RenderBuffer()
 bool RenderBuffer::iCreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_3_0 || this->isValid() || !(this->ctx_context && this->ctx_context->makeCurrent())) return false;
+	if(!GL_VERSION_3_0 || this->isValid() || !(this->ctx_context && (this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))) return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	glGenRenderbuffers(1, &tmp_id);
@@ -44,7 +44,7 @@ bool RenderBuffer::iCreate()
 bool RenderBuffer::iDestroy()
 {
 	using namespace GL;
-	if(this->unbind() || (this->ctx_context && this->ctx_context->makeCurrent()))
+	if(this->unbind() || (this->ctx_context && (this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())))
 	{
 		GLCLEARERROR();
 		glDeleteRenderbuffers(1, &this->rb_id);
@@ -65,7 +65,7 @@ axl::glfl::GLuint RenderBuffer::getId() const
 bool RenderBuffer::bind() const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glBindRenderbuffer(GL_RENDERBUFFER, this->rb_id);
 	return glGetError() == GL_NO_ERROR;
@@ -73,7 +73,7 @@ bool RenderBuffer::bind() const
 bool RenderBuffer::unbind() const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	return glGetError() == GL_NO_ERROR;

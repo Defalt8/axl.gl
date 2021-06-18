@@ -219,29 +219,54 @@ void Camera3Df::set(const axl::math::Vec3f& p_position, const axl::math::Vec3f& 
 	this->updateTransform();
 }
 
+axl::math::Vec3f Camera3Df::screenToViewport(const axl::math::Vec2i& vec2) const
+{
+	return axl::math::Vec3f(
+		(float)((float)vec2.x - viewport_position.x) / viewport_size.x,
+		((float)viewport_size.y + viewport_position.x - vec2.y) / viewport_size.y,
+		0.f
+	);
+}
+axl::math::Vec2i Camera3Df::viewportToScreen(const axl::math::Vec3f& vec3) const
+{
+	return axl::math::Vec2i();
+}
+axl::math::Vec3f Camera3Df::viewportToWorld(const axl::math::Vec3f& vec3) const
+{
+	return axl::math::Vec3f();
+}
+axl::math::Vec3f Camera3Df::worldToViewport(const axl::math::Vec3f& vec3) const
+{
+	axl::math::Vec4f world_coord(vec3.x, vec3.y, vec3.z, 1.0f);
+	if(this->projection)
+		return (this->projection->matrix * this->view_matrix * world_coord).toVec3(axl::math::Vec4f::XYZ);
+	else
+		return (this->view_matrix * world_coord).toVec3(axl::math::Vec4f::XYZ);
+}
+
 axl::math::Vec3f Camera3Df::screenToWorld(const axl::math::Vec2i& vec2) const
 {
-	axl::math::Vec3f world_coord(
+	axl::math::Vec4f viewport_coord(
 		((float)(vec2.x - this->viewport_position.x) / this->viewport_size.x),
-		((float)((float)this->viewport_size.y - (vec2.y - this->viewport_position.y)) / this->viewport_size.y),
-		0.0f);
-	axl::math::Mat4f vp_matrix = this->view_matrix;
+		((float)((float)this->viewport_size.y - this->viewport_position.y - vec2.y) / this->viewport_size.y),
+		0.f, 1.f);
 	if(this->projection)
-	{
-		vp_matrix = this->projection->matrix * vp_matrix;
-	}
-	world_coord = vp_matrix.affineInvert(world_coord);
-	return world_coord;
+		return ((this->projection->matrix * this->view_matrix).inverse() * viewport_coord).toVec3(axl::math::Vec4f::XYZ);
+	else
+		return (this->view_matrix.inverse() * viewport_coord).toVec3(axl::math::Vec4f::XYZ);
 }
 
 axl::math::Vec2i Camera3Df::worldToScreen(const axl::math::Vec3f& vec3) const
 {
-	axl::math::Vec4f world_coord;
+	axl::math::Vec4f viewport_coord(vec3.x, vec3.y, vec3.z, 1.f);
 	if(this->projection)
-		world_coord = this->view_matrix * this->projection->matrix * axl::math::Vec4f(vec3.x, vec3.y, vec3.z, 1.0f);
+		viewport_coord = this->view_matrix * this->projection->matrix * viewport_coord;
 	else
-		world_coord = this->view_matrix * axl::math::Vec4f(vec3.x, vec3.y, vec3.z, 1.0f);
-	return axl::math::Vec2i((int)world_coord.x, (int)world_coord.y);
+		viewport_coord = this->view_matrix * viewport_coord;
+	return axl::math::Vec2i(
+		(int)((float)viewport_coord.x * viewport_size.x + viewport_position.x),
+		(int)((float)viewport_coord.y * viewport_size.y + viewport_position.y)
+	);
 }
 
 

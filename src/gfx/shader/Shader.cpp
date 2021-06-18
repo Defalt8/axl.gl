@@ -30,7 +30,7 @@ Shader::~Shader()
 bool Shader::iCreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_3_0 || axl::gl::gfx::Shader::isValid() || !(this->ctx_context && this->ctx_context->makeCurrent())) return false;
+	if(!GL_VERSION_3_0 || axl::gl::gfx::Shader::isValid() || !(this->ctx_context && (this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))) return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	tmp_id = glCreateShader(Shader::shader_type);
@@ -47,7 +47,7 @@ bool Shader::iCreate()
 bool Shader::iDestroy()
 {
 	using namespace GL;
-	if(axl::gl::gfx::Shader::isValid() && this->ctx_context->makeCurrent())
+	if(axl::gl::gfx::Shader::isValid() && (this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))
 	{
 		GLCLEARERROR();
 		glDeleteShader(Shader::shader_id);
@@ -77,7 +77,7 @@ axl::glfl::GLenum Shader::type() const
 bool Shader::setSource(const axl::util::String& shader_code)
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Shader::isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!axl::gl::gfx::Shader::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	const GLchar* code = shader_code.cstr();
 	GLint length = shader_code.length();
@@ -88,7 +88,7 @@ bool Shader::setSource(const axl::util::String& shader_code)
 axl::util::String Shader::getSource() const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Shader::isValid() || !this->ctx_context->makeCurrent()) return axl::util::String();
+	if(!axl::gl::gfx::Shader::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return axl::util::String();
 	GLCLEARERROR();
 	GLint source_length;
 	glGetShaderiv(this->shader_id, GL_SHADER_SOURCE_LENGTH, &source_length);
@@ -104,7 +104,7 @@ axl::util::String Shader::getSource() const
 bool Shader::compile() const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Shader::isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!axl::gl::gfx::Shader::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glCompileShader(this->shader_id);
 	GLint status;
@@ -115,7 +115,7 @@ bool Shader::compile() const
 bool Shader::isCompiled() const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Shader::isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!axl::gl::gfx::Shader::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	GLint status;
 	glGetShaderiv(this->shader_id, GL_COMPILE_STATUS, &status);
@@ -125,7 +125,7 @@ bool Shader::isCompiled() const
 axl::util::String Shader::getInfoLog() const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Shader::isValid() || !this->ctx_context->makeCurrent()) return axl::util::String();
+	if(!axl::gl::gfx::Shader::isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return axl::util::String();
 	GLCLEARERROR();
 	GLint info_log_len;
 	glGetShaderiv(this->shader_id, GL_INFO_LOG_LENGTH, &info_log_len);
@@ -141,7 +141,7 @@ axl::util::String Shader::getInfoLog() const
 bool Shader::attach(const Program& program) const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Shader::isValid() || program.getId() == 0 || !this->ctx_context->makeCurrent()) return false;
+	if(!axl::gl::gfx::Shader::isValid() || program.getId() == 0 || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glAttachShader(program.getId(), this->shader_id);
 	return glGetError() == GL_NO_ERROR;
@@ -149,7 +149,7 @@ bool Shader::attach(const Program& program) const
 bool Shader::detach(const Program& program) const
 {
 	using namespace GL;
-	if(!axl::gl::gfx::Shader::isValid() || program.getId() == 0 || !this->ctx_context->makeCurrent()) return false;
+	if(!axl::gl::gfx::Shader::isValid() || program.getId() == 0 || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glDetachShader(program.getId(), this->shader_id);
 	return glGetError() == GL_NO_ERROR;

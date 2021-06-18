@@ -60,7 +60,7 @@ FrameBuffer::~FrameBuffer()
 bool FrameBuffer::iCreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_3_0 || this->isValid() || !(this->ctx_context && this->ctx_context->makeCurrent())) return false;
+	if(!GL_VERSION_3_0 || this->isValid() || !(this->ctx_context && (this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))) return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
 	glGenFramebuffers(1, &tmp_id);
@@ -103,7 +103,7 @@ axl::glfl::GLuint FrameBuffer::getId() const
 bool FrameBuffer::bind(Target p_target) const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	axl::glfl::GLenum fb_target = p_target == Target::FBT_READ ? GL_READ_FRAMEBUFFER : (p_target == Target::FBT_DRAW ? GL_DRAW_FRAMEBUFFER : GL_FRAMEBUFFER);
 	GLCLEARERROR();
 	glBindFramebuffer(fb_target, this->fb_id);
@@ -112,7 +112,7 @@ bool FrameBuffer::bind(Target p_target) const
 bool FrameBuffer::unbind(Target p_target) const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	axl::glfl::GLenum fb_target = p_target == Target::FBT_READ ? GL_READ_FRAMEBUFFER : (p_target == Target::FBT_DRAW ? GL_DRAW_FRAMEBUFFER : GL_FRAMEBUFFER);
 	GLCLEARERROR();
 	glBindFramebuffer(fb_target, 0);

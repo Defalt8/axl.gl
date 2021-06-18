@@ -38,7 +38,7 @@ Texture2D::~Texture2D()
 bool Texture2D::iCreate()
 {
 	using namespace GL;
-	if(!GL_VERSION_1_0 || this->txr_id != 0 || !this->ctx_context || !this->ctx_context->makeCurrent())
+	if(!GL_VERSION_1_0 || this->txr_id != 0 || !this->ctx_context || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))
 		return false;
 	axl::glfl::GLuint tmp_id;
 	GLCLEARERROR();
@@ -89,7 +89,7 @@ bool Texture2D::isValid() const
 bool Texture2D::bind() const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glBindTexture(GL_TEXTURE_2D, this->txr_id);
 	return glGetError() == GL_NO_ERROR;
@@ -97,7 +97,7 @@ bool Texture2D::bind() const
 bool Texture2D::bind(axl::glfl::GLuint texture_slot) const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	GLCLEARERROR();
 	glActiveTexture(GL_TEXTURE0 + texture_slot);
 	if(glGetError() != GL_NO_ERROR) return false;
@@ -107,14 +107,14 @@ bool Texture2D::bind(axl::glfl::GLuint texture_slot) const
 bool Texture2D::unbind() const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return true;
 }
 bool Texture2D::unbind(axl::glfl::GLuint texture_slot) const
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	glActiveTexture(GL_TEXTURE0 + texture_slot);
 	if(glGetError() != GL_NO_ERROR) return false;
 	glBindTexture(GL_TEXTURE_1D, 0);

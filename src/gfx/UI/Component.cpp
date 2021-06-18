@@ -58,7 +58,7 @@ bool Component::iCreate()
 	   !component_program_ptr || !component_program_ptr->isValid() ||
 	   !component_framebuffer_ptr || !component_framebuffer_ptr->isValid() ||
 	   this->ctx_context->config.major_version < 3 ||
-	   !this->ctx_context->makeCurrent() ||
+	   !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()) ||
 	   !component_render_texture.create() ||
 	   !component_depth_texture.create()
 	)
@@ -133,7 +133,7 @@ bool Component::iCreate()
 bool Component::iDestroy()
 {
 	using namespace GL;
-	if(this->ctx_context && this->ctx_context->isValid() && this->ctx_context->makeCurrent())
+	if(this->ctx_context && this->ctx_context->isValid() && (this->ctx_context->isCurrent() || this->ctx_context->makeCurrent()))
 	{
 		GLCLEARERROR();
 		if(m_vertex_buffer != 0)

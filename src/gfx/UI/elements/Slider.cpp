@@ -105,7 +105,7 @@ float Slider::getMaxValue() const
 bool Slider::update()
 {
 	using namespace GL;
-	if(!this->isValid() || !this->ctx_context->makeCurrent()) return false;
+	if(!this->isValid() || !(this->ctx_context->isCurrent() || this->ctx_context->makeCurrent())) return false;
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer_id);
 	GLfloat* verteces = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	if(!verteces)
