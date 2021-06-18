@@ -1,5 +1,4 @@
 
-# set( CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib" )
 link_libraries( axl.gl gdi32.lib user32.lib )
 
 add_compile_definitions(
@@ -7,8 +6,8 @@ add_compile_definitions(
 	AXLGL_TEST_RES_DIRW=L"${PROJECT_SOURCE_DIR}/tests/res"
 )
 
-# add_subdirectory( "${AXLMEDIA_SOURCE_DIR}" axl.media )
-add_subdirectory( "${PROJECT_SOURCE_DIR}/../axl.media" axl.media )
+add_subdirectory( "${AXLMEDIA_SOURCE_DIR}" axl.media )
+
 link_libraries( axl.media )
 
 add_executable( axl.gl.lib "lib.cpp")
