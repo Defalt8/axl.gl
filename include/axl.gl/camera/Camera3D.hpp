@@ -35,7 +35,9 @@ class AXLGLCXXAPI Camera3D
 		axl::math::Vec3d screenToViewport(const axl::math::Vec2i& vec2) const;
 		axl::math::Vec2i viewportToScreen(const axl::math::Vec3d& vec3) const;
 		axl::math::Vec3d viewportToWorld(const axl::math::Vec3d& vec3) const;
+		axl::math::Vec4d viewportToWorld(const axl::math::Vec4d& vec4) const;
 		axl::math::Vec3d worldToViewport(const axl::math::Vec3d& vec3) const;
+		axl::math::Vec4d worldToViewport(const axl::math::Vec4d& vec4) const;
 		axl::math::Vec3d screenToWorld(const axl::math::Vec2i& vec2) const;
 		axl::math::Vec2i worldToScreen(const axl::math::Vec3d& vec3) const;
 	public:
@@ -72,7 +74,9 @@ class AXLGLCXXAPI Camera3Df
 		axl::math::Vec3f screenToViewport(const axl::math::Vec2i& vec2) const;
 		axl::math::Vec2i viewportToScreen(const axl::math::Vec3f& vec3) const;
 		axl::math::Vec3f viewportToWorld(const axl::math::Vec3f& vec3) const;
+		axl::math::Vec4f viewportToWorld(const axl::math::Vec4f& vec4) const;
 		axl::math::Vec3f worldToViewport(const axl::math::Vec3f& vec3) const;
+		axl::math::Vec4f worldToViewport(const axl::math::Vec4f& vec4) const;
 		axl::math::Vec3f screenToWorld(const axl::math::Vec2i& vec2) const;
 		axl::math::Vec2i worldToScreen(const axl::math::Vec3f& vec3) const;
 	public:

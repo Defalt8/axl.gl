@@ -84,12 +84,16 @@ class MainView : public Test::MainView
 		{
 			if(!selected_camera) return;
 			axl::math::Vec2i screen_space(x, size.y-y);
-			axl::math::Vec3f viewport_space = selected_camera->screenToViewport(screen_space);
-			axl::math::Vec3f world_space = selected_camera->viewportToWorld(viewport_space);
-			printf("ScreenSpace[%3d, %3d] -> ViewportSpace[%6.2f, %6.2f, %6.2f] -> WorldSpace[%6.2f, %6.2f, %6.2f]  \r",
+			axl::math::Vec4f viewport_space(selected_camera->screenToViewport(screen_space), 1.f);
+			axl::math::Vec4f world_space = selected_camera->viewportToWorld(viewport_space);
+			axl::math::Vec4f viewport_space1 = selected_camera->worldToViewport(world_space);
+			axl::math::Vec2i screen_space1 = selected_camera->viewportToScreen(viewport_space1.toVec3(axl::math::Vec4f::XYZ));
+			printf("ScreenSpace[%3d, %3d] -> ViewportSpace[%6.2f, %6.2f, %6.2f] -> WorldSpace[%6.2f, %6.2f, %6.2f] | ScreenSpace[%3d, %3d] -> ViewportSpace[%6.2f, %6.2f, %6.2f] \r",
 				screen_space.x, screen_space.y,
 				viewport_space.x, viewport_space.y, viewport_space.z,
-				world_space.x, world_space.y, world_space.z
+				world_space.x, world_space.y, world_space.z,
+				screen_space1.x, screen_space1.y,
+				viewport_space1.x, viewport_space1.y, viewport_space1.z
 			);
 		}
 		bool onCreate(bool recreating)
