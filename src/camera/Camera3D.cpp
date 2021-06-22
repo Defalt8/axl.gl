@@ -70,7 +70,7 @@ void Camera3D::updateTransform()
 	}
 	angle.x = (axl::math::atan2(hyp, delta.y) - axl::math::Constants::D_HALF_PI);
 	angle.z = -this->roll_angle;
-	Camera3D::view_matrix = axl::math::Transform4::rotateZXY(angle, this->axis_rule) * axl::math::Transform4::translateScale(-this->position, this->scale);
+	Camera3D::view_matrix = axl::math::Transform4::rotateZX(angle, this->axis_rule) * axl::math::Transform4::translateScale(-this->position, this->scale);
 }
 
 void Camera3D::lookAt(const axl::math::Vec3d& p_position, const axl::math::Vec3d& p_target, double p_roll_angle)
@@ -216,7 +216,7 @@ void Camera3Df::updateTransform()
 	}
 	angle.x = (axl::math::atan2(hyp, delta.y) - axl::math::Constants::F_HALF_PI);
 	angle.z = -this->roll_angle;
-	this->view_matrix = axl::math::Transform4::rotateZXY(angle, this->axis_rule) * axl::math::Transform4::scaleTranslate(this->scale, -this->position);
+	this->view_matrix = axl::math::Transform4::rotateZX(angle, this->axis_rule) * axl::math::Transform4::translateScale(-this->position, this->scale);
 }
 
 void Camera3Df::lookAt(const axl::math::Vec3f& p_position, const axl::math::Vec3f& p_target, float p_roll_angle)
