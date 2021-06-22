@@ -114,6 +114,7 @@ target_link_libraries( axl.gl
 	PUBLIC axl.math
 	PUBLIC axl.util
 	PUBLIC axl.glfl
+	PUBLIC axl.media
 	PUBLIC ${LIBFREETYPE}
 )
 if( WIN32 )

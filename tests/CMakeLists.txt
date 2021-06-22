@@ -6,10 +6,6 @@ add_compile_definitions(
 	AXLGL_TEST_RES_DIRW=L"${PROJECT_SOURCE_DIR}/tests/res"
 )
 
-add_subdirectory( "${AXLMEDIA_SOURCE_DIR}" axl.media )
-
-link_libraries( axl.media )
-
 add_executable( axl.gl.lib "lib.cpp")
 add_executable( axl.gl.display "Display.cpp")
 add_executable( axl.gl.base "Base.cpp" "common/GL.cpp" "common/MainView.cpp" )

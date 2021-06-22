@@ -37,7 +37,7 @@ set( AXLMEDIA_RUNTIME_DIR "${AXLGL_RUNTIME_DIR}" )
 add_subdirectory( "${AXLMATH_SOURCE_DIR}" axl.math )
 add_subdirectory( "${AXLUTIL_SOURCE_DIR}" axl.util )
 add_subdirectory( "${AXLGLFL_SOURCE_DIR}" axl.glfl )
-# add_subdirectory( "${AXLMEDIA_SOURCE_DIR}" axl.media )
+add_subdirectory( "${AXLMEDIA_SOURCE_DIR}" axl.media )
 
 add_subdirectory( src axl.gl )
 

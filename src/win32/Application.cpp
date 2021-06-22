@@ -19,7 +19,7 @@ namespace axl {
 namespace gl {
 namespace Application {
 	
-bool APP_IS_QUITTING, ON_QUIT_CALLED = false, ON_EXIT_CALLED = false;
+bool APP_IS_QUITTING = false, ON_QUIT_CALLED = false, ON_EXIT_CALLED = false;
 const bool& IS_QUITTING = APP_IS_QUITTING;
 void (*onQuit) (int quit_code) = 0;
 void (*onExit) (int exit_code) = 0;
