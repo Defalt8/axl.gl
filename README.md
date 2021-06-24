@@ -5,7 +5,7 @@ A cross-platform C++ graphics library.
 
 ## Version and supported platforms
 
-- **Latest version**: 0.58.189 alpha
+- **Latest version**: 0.59.203 alpha
 - **Supported platforms**: Windows
   - It is possible to implement this library for linux systems using the X11 library, and for android using the EGL library.
   - Other platforms will be implemented once the library is complete enough to be a game library.
@@ -19,7 +19,7 @@ A cross-platform C++ graphics library.
   - *{ `axl.glfl` } -- A local C++ OpenGL function loader library.*
   - *{ `axl.util` } -- A local C++ data structures and utilities library.*
   - *{ `axl.math` } -- A local C++ maths library.*
-  - **These libraries { `axl.glfl`, `axl.util`, `axl.math` } need to be presented to this CMake project. By default in the same directory.**
+  - *{ `axl.media` } -- A local C++ media library.*
   - *[Freetype2](https://www.freetype.org/) library*.
   - *OpenGL library*: { `opengl32` } on windows and { `GL` } on linux.
   - *Platform specific libraries:* { `gdi32`, `user32` } on windows, { `X11` } on linux.
@@ -27,10 +27,7 @@ A cross-platform C++ graphics library.
 ## Building Guide
 
 - Clone this repositories in the same directory:
-  - `git clone https://github.com/defalt8/axl.gl.git`
-  - `git clone https://github.com/defalt8/axl.glfl.git`
-  - `git clone https://github.com/defalt8/axl.util.git`
-  - `git clone https://github.com/defalt8/axl.math.git`
+  - `git clone --recurse-submodule https://github.com/defalt8/axl.gl.git`
 - Place the [Freetype2](https://www.freetype.org/) **built** static library in the directory `lib`, and the headers in `include` directory under the same directory. **NOTE: The ft2build.h must be in `include` directory not `incude/freetype2` directory.**
 - Initialize CMake build directory.
   - `cd axl.gl`
